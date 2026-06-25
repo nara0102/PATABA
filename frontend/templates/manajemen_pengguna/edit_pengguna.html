@@ -1,0 +1,133 @@
+{% extends 'base/base_superadmin.html' %}
+{% block title %}{{ title }} - TRANSPARA{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1" style="color: var(--text-main);">Ubah Data Pengguna</h4>
+        <p class="text-muted small mb-0">Perbarui identitas, kontak, dan hak akses pengguna sistem.</p>
+    </div>
+    <a href="{% url 'auth:detail_pengguna' target_user.id %}" class="btn btn-light rounded-pill px-4 shadow-sm border">
+        <i class="bi bi-x-lg me-2"></i>Batal
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="glass-card p-4 p-md-5">
+            <form method="POST" action="{% url 'auth:edit_pengguna' target_user.id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="text-center mb-4 pb-3 border-bottom">
+                    <div class="position-relative d-inline-block">
+                        {% if profile.foto_profil %}
+                            <img src="{{ profile.foto_profil.url }}" alt="Foto Profil" class="rounded-circle shadow-sm profile-preview" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid var(--accent-pink);">
+                        {% else %}
+                            <div class="bg-light rounded-circle d-flex justify-content-center align-items-center shadow-sm profile-preview-container" style="width: 120px; height: 120px; border: 3px solid var(--accent-pink);">
+                                <i class="bi bi-person text-secondary" style="font-size: 3rem;"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <label for="upload_foto_admin" class="position-absolute bottom-0 end-0 rounded-circle d-flex justify-content-center align-items-center shadow text-white" style="width: 35px; height: 35px; cursor: pointer; background-color: var(--accent-pink); transition: all 0.2s;">
+                            <i class="bi bi-camera-fill"></i>
+                        </label>
+                        <input type="file" id="upload_foto_admin" name="foto_profil" class="d-none" accept="image/*">
+                    </div>
+                    <div class="small text-muted mt-2">Format: JPG, PNG. Maksimal 2MB.</div>
+                </div>
+
+                <h6 class="fw-bold mb-4" style="color: var(--accent-pink); border-bottom: 2px solid var(--border-glow); padding-bottom: 5px;">Informasi Dasar</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-12">
+                        <label class="small fw-bold text-muted mb-1">Nama Lengkap</label>
+                        <input type="text" class="form-control rounded-3 py-2" name="nama_lengkap" value="{{ nama_lengkap_awal }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted mb-1">Username Login</label>
+                        <input type="text" class="form-control rounded-3 py-2" name="username" value="{{ target_user.username }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted mb-1">Email</label>
+                        <input type="email" class="form-control rounded-3 py-2" name="email" value="{{ target_user.email }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted mb-1">Nomor Handphone</label>
+                        <input type="text" class="form-control rounded-3 py-2" name="nomor_hp" value="{{ profile.nomor_hp|default:'' }}">
+                    </div>
+                </div>
+
+                <h6 class="fw-bold mb-4 mt-5" style="color: var(--accent-pink); border-bottom: 2px solid var(--border-glow); padding-bottom: 5px;">Data Kepegawaian & Akses</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted mb-1">NIP (Nomor Induk Pegawai)</label>
+                        <input type="text" class="form-control rounded-3 py-2" name="nip" value="{{ profile.nip|default:'' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted mb-1">Jabatan Fungsional/Struktural</label>
+                        <input type="text" class="form-control rounded-3 py-2" name="jabatan" value="{{ profile.jabatan|default:'' }}">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted mb-1">Peran Akses (Role)</label>
+                        <select class="form-select rounded-3 py-2" name="role" required>
+                            <option value="ADMIN_BPKAD" {% if profile.role == 'ADMIN_BPKAD' %}selected{% endif %}>Admin BPKAD</option>
+                            <option value="OPERATOR_OPD" {% if profile.role == 'OPERATOR_OPD' %}selected{% endif %}>Operator OPD</option>
+                            <option value="STAF" {% if profile.role == 'STAF' %}selected{% endif %}>Staf / Atasan</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted mb-1">Instansi (OPD)</label>
+                        <select class="form-select rounded-3 py-2" name="opd_id">
+                            <option value="">-- Tidak Terikat OPD --</option>
+                            {% for opd in daftar_opd %}
+                                <option value="{{ opd.id }}" {% if profile.opd and profile.opd.id == opd.id %}selected{% endif %}>
+                                    {{ opd.nama_opd }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-secondary" style="font-size: 0.7rem;">*Wajib diisi jika perannya adalah Operator OPD.</small>
+                    </div>
+                </div>
+
+                <div class="mt-5 pt-3 border-top text-end">
+                    <button type="submit" class="btn btn-fem-primary rounded-pill px-5 shadow-sm fw-bold">
+                        <i class="bi bi-floppy me-2"></i>Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('upload_foto_admin').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Cek jika sudah ada tag img
+                let imgElement = document.querySelector('.profile-preview');
+                if (imgElement) {
+                    imgElement.src = e.target.result;
+                } else {
+                    // Jika sebelumnya pakai ikon, ganti jadi gambar
+                    const container = document.querySelector('.position-relative.d-inline-block');
+                    const iconDiv = document.querySelector('.profile-preview-container');
+                    if (iconDiv) {
+                        const newImg = document.createElement('img');
+                        newImg.src = e.target.result;
+                        newImg.className = 'rounded-circle shadow-sm profile-preview';
+                        newImg.style.width = '120px';
+                        newImg.style.height = '120px';
+                        newImg.style.objectFit = 'cover';
+                        newImg.style.border = '3px solid var(--accent-pink)';
+                        container.replaceChild(newImg, iconDiv);
+                    }
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}

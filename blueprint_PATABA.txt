@@ -1,0 +1,43 @@
+PATABA_PROJECT/
+│
+├── venv/                       # (Environment lokal)
+├── .env                        # (Kredensial Supabase & Secret Key Django)
+├── .gitignore                  # (Daftar file yang diabaikan Git)
+├── requirements.txt            # (Daftar library sistem)
+├── manage.py                   # (Entry point Django)
+│
+├── pataba_core/                # ⚙️ ROOT CONFIG
+│   ├── __init__.py
+│   ├── asgi.py
+│   ├── wsgi.py
+│   ├── settings.py             # (Pusat pengaturan aplikasi & database)
+│   └── urls.py                 # (Pusat routing utama)
+│
+├── apps/                       # 📦 KUMPULAN MODUL APLIKASI (Modular & Scalable)
+│   ├── __init__.py
+│   ├── manajemen_pengguna/     # (Autentikasi, Profil BPKAD/OPD, Role Control)
+│   ├── aset_tanah/             # (Logika khusus tanah & sertifikat)
+│   ├── aset_kendaraan/         # (Modul Baru: Logika khusus BPKB & kendaraan)
+│   └── portal_publik/          # (Sistem informasi & peta GIS masyarakat)
+│
+├── frontend/                   # 🎨 FRONTEND ASSETS (Pemisahan UI/UX yang rapi)
+│   ├── static/
+│   │   ├── css/
+│   │   │   └── transpara_style.css  # (Custom Glassmorphism & Apple UI)
+│   │   ├── js/
+│   │   │   ├── main.js
+│   │   │   └── map_handler.js       # (Skrip Leaflet terpisah agar bersih)
+│   │   ├── images/
+│   │   └── vendors/                 # (Library eksternal: Bootstrap, ApexCharts)
+│   │
+│   └── templates/                   # (Kumpulan HTML global & views)
+│       ├── base/
+│       │   ├── base_admin_BPKAD.html
+│       │   ├── base_publik.html
+│       │   └── components/          # (Reusable UI: Navbar, Sidebar, Footer)
+│       ├── aset_tanah/
+│       ├── aset_kendaraan/
+│       └── portal_publik/
+│
+└── media/                      # 📁 UPLOADS (Akan di-bypass ke Supabase)
+    └── publikasi_images/

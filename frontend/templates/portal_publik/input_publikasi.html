@@ -1,0 +1,172 @@
+{% extends 'base/base_admin_BPKAD.html' %}
+
+{% block title %}Buat Publikasi Baru - TRANSPARA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .glass-card { 
+        background: #FFFFFF; 
+        border-radius: 24px; 
+        padding: 40px; 
+        border: 1px solid rgba(0,0,0,0.06); 
+        box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+    }
+    .form-control, .form-select {
+        border-radius: 14px !important;
+        padding: 0.9rem 1rem !important;
+        background: #F8FAFC !important;
+        border: 1px solid #E2E8F0 !important;
+        font-size: 0.9rem !important;
+        color: #102A43 !important;
+    }
+    .form-control:focus, .form-select:focus {
+        background: #FFFFFF !important;
+        border-color: #0056B3 !important;
+        box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.1) !important;
+    }
+    /* Kotak Upload Gambar Modern */
+    .upload-area {
+        border: 2px dashed #CBD5E1;
+        border-radius: 16px;
+        background: #F8FAFC;
+        padding: 30px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .upload-area:hover {
+        border-color: #0056B3;
+        background: #F0F7FF;
+    }
+    /* Mengecilkan tulisan contoh di dalam kotak */
+        ::placeholder {
+            font-size: 0.75rem !important; 
+            color: #A0AEC0 !important; 
+            font-weigth: 400;            
+        }
+
+        textarea::placeholder {
+            font-size: 0.75rem !important;
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+    <div class="d-flex justify-content-between align-items-center mb-4 px-lg-4">
+        <div>
+            <h4 class="fw-bold text-dark mb-1">Tulis Publikasi Baru</h4>
+            <p class="small text-muted mb-0">Tambahkan berita, pengumuman, atau galeri kegiatan BPKAD.</p>
+        </div>
+        <a href="javascript:history.back()" class="btn btn-bpkad-outline bg-white">Kembali</a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- PENTING: enctype wajib ada agar file gambar bisa terkirim -->
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="glass-card p-4 p-lg-5 mb-4">
+                    <div class="row g-4">
+                        
+                        <div class="col-md-4">
+                            <label class="small fw-bold text-secondary mb-2">Kategori Publikasi</label>
+                            <select name="kategori" class="form-select fw-bold text-primary" required>
+                                <option value="" disabled {% if not publikasi %}selected{% endif %}>-- Pilih Jenis --</option>
+                                <option value="BERITA" {% if publikasi.kategori == 'BERITA' %}selected{% endif %}>Berita BPKAD</option>
+                                <option value="PENGUMUMAN" {% if publikasi.kategori == 'PENGUMUMAN' %}selected{% endif %}>Pengumuman Penting</option>
+                                <option value="KEGIATAN" {% if publikasi.kategori == 'KEGIATAN' %}selected{% endif %}>Galeri Kegiatan / Sorotan</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-8">
+                            <label class="small fw-bold text-secondary mb-2">Judul Konten</label>
+                            <input type="text" name="judul" class="form-control fw-bold" value="{{ publikasi.judul|default:'' }}" placeholder="Masukkan judul utama..." required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="small fw-bold text-secondary mb-2">Isi Konten / Keterangan</label>
+                            <textarea name="isi_konten" class="form-control" rows="6" placeholder="Tuliskan detail berita, isi pengumuman, atau deskripsi singkat untuk galeri kegiatan...">{{ publikasi.isi_konten|default:'' }}</textarea>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <label class="small fw-bold text-secondary mb-2">Unggah Gambar (Opsional)</label>
+            
+                            {% if publikasi.gambar_utama %}
+                            <div class="alert alert-primary py-2 px-3 small border-0 d-flex justify-content-between align-items-center">
+                                <div><i class="bi bi-image me-2"></i>Gambar saat ini: <b>Sudah Terpasang</b></div>
+                                <span class="badge bg-white text-primary">Biarkan kosong jika tidak ingin mengubah gambar</span>
+                            </div>
+                            {% endif %}
+
+                            <div class="upload-area text-center" id="kotakUpload" onclick="document.getElementById('fileInput').click()" style="cursor: pointer;">
+                                <div id="tampilanAwal">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-primary mb-2 d-block"></i>
+                                    <h6 class="fw-bold text-dark mb-1">Klik untuk {% if publikasi.gambar_utama %}mengganti{% else %}memilih{% endif %} gambar</h6>
+                                    <p class="small text-muted mb-0">Format yang didukung: JPG, PNG, WEBP (Maks. 5MB)</p>
+                                </div>
+                            </div>
+
+                            <input type="file" name="gambar_utama" id="fileInput" class="d-none" accept="image/png, image/jpeg, image/webp">
+                        </div>  
+                    
+                    <div class="text-end mb-2">
+                        <button type="submit" class="btn btn-bpkad-primary px-5 py-3 rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-send-fill me-2"></i> {% if publikasi %}Simpan Perubahan{% else %}Terbitkan Sekarang{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const fileInput = document.getElementById('fileInput');
+    const kotakUpload = document.getElementById('kotakUpload');
+    
+    // Simpan tampilan asli biar bisa balik kalau user cancel
+    const tampilanAwal = document.getElementById('tampilanAwal').outerHTML;
+
+    fileInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+
+        if (file) {
+            // Validasi Ukuran (5MB)
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert('Maaf, ukuran gambar terlalu besar! Maksimal 5MB.');
+                this.value = ''; // Batalkan file yang kebesaran
+                kotakUpload.innerHTML = tampilanAwal; // Balik ke tampilan awal
+                return;
+            }
+
+            // Tampilkan Preview dan Menu Ganti Gambar
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                kotakUpload.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview" class="img-fluid rounded-3 mb-3 shadow-sm" style="max-height: 250px; object-fit: contain;">
+                    <div class="d-block mb-2">
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                            <i class="bi bi-check-circle-fill me-1"></i> File Siap Diunggah
+                        </span>
+                    </div>
+                    <p class="small fw-bold text-dark mb-3">${file.name}</p>
+                    
+                    <div class="btn btn-sm btn-outline-primary rounded-pill px-4">
+                        <i class="bi bi-arrow-repeat me-1"></i> Ganti Gambar
+                    </div>
+                `;
+            }
+            reader.readAsDataURL(file);
+        } else {
+            // Balik ke tampilan awal kalau user klik cancel di Finder
+            kotakUpload.innerHTML = tampilanAwal;
+        }
+    });
+});
+</script>
+
+{% endblock %}

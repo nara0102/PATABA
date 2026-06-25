@@ -1,0 +1,66 @@
+{% extends 'base/base_superadmin.html' %}
+{% block title %}Tambah OPD Baru - TRANSPARA{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h3 class="fw-bold m-0" style="color: var(--text-main);">Registrasi Instansi Baru</h3>
+    <p class="text-secondary small">Tambahkan data Organisasi Perangkat Daerah langsung ke dalam sistem secara aktif.</p>
+</div>
+
+<div class="glass-card p-5 mb-5">
+    <form action="" method="POST">
+        {% csrf_token %}
+        
+        <div class="row g-4">
+            <div class="col-md-8">
+                <label class="form-label fw-bold text-secondary small">Nama Lengkap OPD <span class="text-danger">*</span></label>
+                <input type="text" name="nama_opd" class="form-control rounded-3 py-2" placeholder="Contoh: Dinas Pendidikan Kota Palu" value="{{ opd.nama_opd|default:'' }}" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold text-secondary small">Singkatan <span class="text-danger">*</span></label>
+                <input type="text" name="singkatan" class="form-control rounded-3 py-2" placeholder="Contoh: Disdik" value="{{ opd.singkatan|default:'' }}" required>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold text-secondary small">Kode OPD <span class="text-danger">*</span></label>
+                <input type="text" name="kode_opd" class="form-control rounded-3 py-2" placeholder="Contoh: OPD-001" value="{{ opd.kode_opd|default:'' }}" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold text-secondary small">Kode Lokasi</label>
+                <input type="text" name="kode_lokasi" class="form-control rounded-3 py-2" placeholder="Contoh: 72.71.1.05.03" value="{{ opd.kode_lokasi|default:'' }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold text-secondary small">Kategori <span class="text-danger">*</span></label>
+                <select name="kategori_opd" class="form-select rounded-3 py-2" required>
+                    <option value="" disabled selected>Pilih Kategori...</option>
+                    <option value="Dinas" {% if opd.kategori_opd == 'Dinas' %}selected{% endif %}>Dinas</option>
+                    <option value="Badan" {% if opd.kategori_opd == 'Badan' %}selected{% endif %}>Badan</option>
+                    <option value="Sekretariat" {% if opd.kategori_opd == 'Sekretariat' %}selected{% endif %}>Sekretariat</option>
+                    <option value="Kecamatan" {% if opd.kategori_opd == 'Kecamatan' %}selected{% endif %}>Kecamatan</option>
+                    <option value="RSU" {% if opd.kategori_opd == 'RSU' %}selected{% endif %}>Rumah Sakit Umum</option>
+                    <option value="Inspektorat" {% if opd.kategori_opd == 'Inspektorat' %}selected{% endif %}>Inspektorat</option>
+                </select>
+            </div>
+
+            <div class="col-md-12">
+                <label class="form-label fw-bold text-secondary small">Nama Kepala OPD</label>
+                <input type="text" name="kepala_opd" class="form-control rounded-3 py-2 bg-light border-0" placeholder="Nama Kepala Dinas/Badan" value="{{ opd.kepala_opd|default:'' }}">
+            </div>
+            
+            <div class="col-md-12">
+                <label class="form-label fw-bold text-secondary small">Alamat Lengkap Kantor</label>
+                <textarea name="alamat_kantor" class="form-control rounded-3 py-2 bg-light border-0" rows="3" placeholder="Alamat lengkap...">{{ opd.alamat_kantor|default:'' }}</textarea>
+            </div>
+        </div>
+        
+        <hr class="my-5" style="border-color: var(--border-glow);">
+        
+        <div class="d-flex justify-content-end gap-3">
+            <a href="{% url 'auth:daftar_opd' %}" class="btn btn-fem-outline px-4 py-2">Batal</a>
+            <button type="submit" class="btn btn-fem-primary px-4 py-2">
+                <i class="bi bi-cloud-arrow-up-fill me-2"></i> Simpan Data Permanen
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

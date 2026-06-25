@@ -1,0 +1,243 @@
+{% extends 'base/base_admin_BPKAD.html' %}
+{% block title %}Formulir Sertifikat Tanah - TRANSPARA{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media (min-width: 992px) {
+        body { overflow: hidden !important; }
+        .locked-container { height: calc(100vh - 110px); display: flex; flex-direction: column; padding-bottom: 0 !important; }
+        .locked-row { flex-grow: 1; overflow: hidden; margin-bottom: 20px; }
+        .scrollable-pane { height: 100%; overflow-y: auto; padding-right: 15px; padding-bottom: 50px; }
+        .scrollable-pane::-webkit-scrollbar { width: 6px; }
+        .scrollable-pane::-webkit-scrollbar-track { background: transparent; }
+        .scrollable-pane::-webkit-scrollbar-thumb { background-color: rgba(0, 86, 179, 0.15); border-radius: 10px; }
+        .scrollable-pane:hover::-webkit-scrollbar-thumb { background-color: rgba(0, 86, 179, 0.3); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 locked-container">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom flex-shrink-0 px-lg-3">
+        <div>
+            <h4 class="fw-bold mb-1">{% if sertifikat %}Edit Dokumen Sertifikat{% else %}Registrasi Sertifikat Baru{% endif %}</h4>
+            <p class="text-muted small mb-0">Lengkapi data autentik sertifikat tanah milik daerah.</p>
+        </div>
+        <a href="javascript:history.back()" class="btn btn-bpkad-outline px-4 fw-bold shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Kembali
+        </a>
+    </div>
+
+    <div class="row justify-content-center locked-row">
+        <div class="col-lg-10 scrollable-pane">
+            
+            <div class="asset-highlight shadow-sm">
+                <p class="small text-muted fw-bold mb-1 text-uppercase">Terkait Dengan Aset Tanah:</p>
+                <h5 class="fw-bold text-dark mb-1">{{ aset.nama_barang }}</h5>
+                <p class="mb-0 small text-secondary">
+                    <i class="bi bi-upc-scan me-1"></i> Kode: <b class="text-primary">{{ aset.kode_barang|default:"-" }}</b> | 
+                    <i class="bi bi-geo-alt-fill mx-1"></i> Lokasi: <b>{{ aset.alamat_lokasi|default:"-" }}</b>
+                </p>
+            </div>
+
+            <form method="POST" id="formSertifikat">
+                {% csrf_token %}
+
+                <!-- A. Identitas -->
+                <div class="glass-card p-4 mb-4">
+                    <div class="form-section-title">A. Identitas Hukum (BPN)</div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="small fw-bold">Status Hak Sertifikat <span class="text-danger">*</span></label>
+                            <div class="position-relative">
+                                <select name="status_hak" id="status_hak" class="form-select pe-5 bg-light border-0" required>
+                                    <option value="" disabled {% if not sertifikat.status_hak %}selected{% endif %}>-- Pilih Hak --</option>
+                                    <option value="HAK_PAKAI" {% if sertifikat.status_hak == 'HAK_PAKAI' %}selected{% endif %}>Hak Pakai</option>
+                                    <option value="HAK_MILIK" {% if sertifikat.status_hak == 'HAK_MILIK' %}selected{% endif %}>Hak Milik</option>
+                                </select>
+                                <i class="bi bi-chevron-down position-absolute" style="right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #86868B;"></i>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 dynamic-panel" id="kotak_nomor_hak">
+                            <label class="small fw-bold">Nomor Sertifikat / Hak <span class="text-danger">*</span></label>
+                            <input type="text" name="nomor_sertifikat" id="nomor_sertifikat" class="form-control fw-bold" value="{{ sertifikat.nomor_sertifikat|default:aset.nomor_sertifikat }}" placeholder="Ketik nomor di sini...">
+                        </div>
+
+                        <div class="col-md-12 mt-4 pt-3 border-top">
+                            <label class="small fw-bold">Nama Pemegang Hak Kepemilikan <span class="text-danger">*</span></label>
+                            <div class="position-relative mb-2">
+                                <select id="ui_pemegang_hak" class="form-select pe-5 bg-light border-0" required>
+                                    <option value="PEMKOT" selected>Pemerintah Kota Palu (Pemkot)</option>
+                                    <option value="LAINNYA">Lainnya (Provinsi / Kementerian / Pribadi)</option>
+                                </select>
+                                <i class="bi bi-chevron-down position-absolute" style="right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #86868B;"></i>
+                            </div>
+                            
+                            <div id="kotak_pemegang_lainnya" class="dynamic-panel mt-2">
+                                <label class="small fw-bold">Ketikkan Atas Nama Pemegang HAK <span class="text-danger">*</span></label>
+                                <input type="text" id="ui_pemegang_lainnya" class="form-control auto-title-case" placeholder="Contoh: Noval, SH">
+                            </div>
+
+                            <input type="hidden" name="nama_pemegang_hak" id="db_pemegang_hak" value="{{ sertifikat.nama_pemegang_hak|default:'Pemerintah Kota Palu' }}">
+                        </div>
+
+                        <div class="col-md-6 mt-4">
+                            <label class="small fw-bold">Pemetaan BPN</label>
+                            <input type="text" name="pemetaan_bpn" class="form-control" value="{{ sertifikat.pemetaan_bpn|default:'' }}" placeholder="Keterangan Pemetaan">
+                        </div>
+                        <div class="col-md-6 mt-4">
+                            <label class="small fw-bold">Instansi Pengguna (OPD)</label>
+                            <div class="position-relative">
+                                <select name="opd" class="form-select pe-5 sort-az bg-light border-0">
+                                    <option value="">-- Tidak Terikat OPD Khusus --</option>
+                                    {% for o in opd_list %}
+                                    <option value="{{ o.id }}" {% if sertifikat.opd.id == o.id or aset.opd.id == o.id and not sertifikat %}selected{% endif %}>{{ o.nama_opd }}</option>
+                                    {% endfor %}
+                                </select>
+                                <i class="bi bi-chevron-down position-absolute" style="right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #86868B;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- B. Detail Fisik -->
+                <div class="glass-card p-4 mb-4">
+                    <div class="form-section-title">B. Detail Fisik & Keuangan</div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="small fw-bold">Luas Tercantum <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="text" name="luas" class="form-control format-ribuan fw-bold bg-light border-0" style="border-radius: 0 !important;" value="{{ sertifikat.luas|floatformat:0|default:aset.luas_m2|floatformat:0 }}" required placeholder="0">
+                                <span class="input-group-text border-0 shadow-sm" style="background: #E2E8F0; border-radius: 0 12px 12px 0;">m²</span>
+                            </div>
+                            <small class="text-muted ms-3 d-block" style="font-size: 0.75rem; font-style: italic;">tanpa titik</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small fw-bold">Nilai Aset Terkini <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text fw-bold border-0 shadow-sm" style="background: #E2E8F0; border-radius: 12px 0 0 12px;">Rp.</span>
+                                <input type="text" name="nilai" class="form-control format-ribuan fw-bold bg-light border-0" style="border-radius: 0 !important;" value="{{ sertifikat.nilai|floatformat:0|default:aset.nilai_aset|floatformat:0 }}" required placeholder="Kosongkan jika belum dinilai">
+                                <span class="input-group-text fw-bold border-0 shadow-sm" style="background: #E2E8F0; border-radius: 0 12px 12px 0;">,00</span>
+                            </div>
+                            <small class="text-muted ms-3 d-block" style="font-size: 0.75rem; font-style: italic;">tanpa titik</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small fw-bold text-secondary mb-2">Tanggal Pembuatan</label>
+                            <input type="date" name="tanggal_pembuatan" class="form-control" value="{{ sertifikat.tanggal_pembuatan|date:'Y-m-d'|default:'' }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="small fw-bold text-secondary mb-2">Tahun Terbit</label>
+                            <input type="number" name="tahun_terbit" class="form-control" value="{{ sertifikat.tahun_terbit|default:'' }}" placeholder="Contoh: 2022" min="1900" max="2099">
+                            <small class="text-muted mt-2 ms-3 d-block fst-italic" style="font-size: 0.75rem;">Digunakan untuk rekapitulasi tahunan</small>
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <label class="small fw-bold text-secondary mb-2">Peruntukan Lahan</label>
+                            <input type="text" name="peruntukan" class="form-control auto-title-case" value="{{ sertifikat.peruntukan|default:'' }}" placeholder="Contoh: Kantor Badan Penanggulangan Bencana Daerah (BPBD)">
+                        </div>
+                        <div class="col-12">
+                            <label class="small fw-bold">Alamat / Letak Tanah</label>
+                            <textarea name="alamat" class="form-control auto-title-case bg-light border-0" rows="2" placeholder="Letak spesifik tanah sesuai sertifikat...">{{ sertifikat.alamat|default:aset.alamat_lokasi }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- C. Status Fisik-->
+                <div class="glass-card p-4 mb-4">
+                    <div class="form-section-title">C. Status Arsip Dokumen</div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="small fw-bold">Bukti Fisik Sertifikat <span class="text-danger">*</span></label>
+                            <div class="position-relative">
+                                <select name="keterangan" class="form-select bg-light border-0 fw-bold pe-5" required>
+                                    <option value="" disabled {% if not sertifikat.keterangan %}selected{% endif %}>-- Pilih Ketersediaan Dokumen --</option>
+                                    <option value="ASLI" {% if sertifikat.keterangan == 'ASLI' %}selected{% endif %}>Memiliki Dokumen Asli</option>
+                                    <option value="FOTO_KOPI" {% if sertifikat.keterangan == 'FOTO_KOPI' %}selected{% endif %}>Hanya Salinan (Foto Kopi)</option>
+                                </select>
+                                <i class="bi bi-chevron-down position-absolute" style="right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #86868B;"></i>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-4">
+                            <label class="small fw-bold">Catatan Internal</label>
+                            <textarea name="catatan" id="input_catatan" class="form-control auto-title-case bg-light border-0" rows="3" placeholder="Opsional...">{{ sertifikat.catatan|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end mb-5">
+                    <button type="submit" class="btn btn-bpkad-primary px-5 py-3 rounded-pill fw-bold shadow-lg w-100 fs-6">
+                        <i class="bi bi-floppy me-2"></i> {% if sertifikat %}Simpan Perubahan Dokumen{% else %}Registrasi & Terbitkan Sertifikat Baru{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // --- 3. LOGIKA DINAMIS STATUS HAK -> NOMOR SERTIFIKAT ---
+    const selectStatusHak = document.getElementById('status_hak');
+    const kotakNomorHak = document.getElementById('kotak_nomor_hak');
+    const inputNomorSertifikat = document.getElementById('nomor_sertifikat');
+
+    function toggleStatusHak() {
+        if (selectStatusHak.value) {
+            kotakNomorHak.style.display = 'block';
+            inputNomorSertifikat.required = true;
+        } else {
+            kotakNomorHak.style.display = 'none';
+            inputNomorSertifikat.required = false;
+        }
+    }
+    selectStatusHak.addEventListener('change', toggleStatusHak);
+    toggleStatusHak(); 
+
+    // --- 4. LOGIKA DINAMIS PEMEGANG HAK ---
+    const uiPemegangHak = document.getElementById('ui_pemegang_hak');
+    const kotakPemegangLainnya = document.getElementById('kotak_pemegang_lainnya');
+    const uiPemegangLainnya = document.getElementById('ui_pemegang_lainnya');
+    const dbPemegangHak = document.getElementById('db_pemegang_hak');
+
+    if (dbPemegangHak.value && dbPemegangHak.value !== 'Pemerintah Kota Palu') {
+        uiPemegangHak.value = 'LAINNYA';
+        uiPemegangLainnya.value = dbPemegangHak.value;
+    }
+
+    function togglePemegangHak() {
+        if (uiPemegangHak.value === 'LAINNYA') {
+            kotakPemegangLainnya.style.display = 'block';
+            uiPemegangLainnya.required = true;
+        } else {
+            kotakPemegangLainnya.style.display = 'none';
+            uiPemegangLainnya.required = false;
+        }
+    }
+    uiPemegangHak.addEventListener('change', togglePemegangHak);
+    togglePemegangHak(); 
+
+    // --- 5. SUBMIT HANDLING ---
+    formSertifikat.addEventListener('submit', function() {
+        numberInputs.forEach(function(input) {
+            input.value = input.value.replace(/\./g, '');
+        });
+
+        if (uiPemegangHak.value === 'PEMKOT') {
+            dbPemegangHak.value = 'Pemerintah Kota Palu';
+        } else {
+            dbPemegangHak.value = uiPemegangLainnya.value;
+        }
+
+        const inputCatatan = document.getElementById('input_catatan');
+        if (inputCatatan.value.trim() === '') {
+            inputCatatan.value = '-';
+        }
+    });
+
+});
+</script>
+{% endblock %}

@@ -1,0 +1,53 @@
+/* ==========================================================================
+   CSS GLOBAL PORTAL PUBLIK - TRANSPARA BPKAD
+   ========================================================================== */
+
+body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* --- NAVBAR GLOBAL --- */
+.navbar-floating-box {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    width: 100%;
+    z-index: 1050;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.nav-link { color: #1d1d1f; font-weight: 500; }
+.nav-link:hover, .nav-link.active { color: #003F87; font-weight: 700; }
+.btn-login-hover:hover { background-color: #002855 !important; }
+
+/* --- FOOTER MINIMALIS --- */
+.footer-minimalis {
+    background-color: #ffffff;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding: 20px 0 15px 0;
+    margin-top: auto; /* Memaksa footer selalu di bawah */
+    flex-shrink: 0;
+    z-index: 1000;
+}
+.footer-minimalis h4, .footer-minimalis h5 { color: #1d1d1f; margin-bottom: 8px !important; }
+.footer-minimalis h6 { color: #1d1d1f; margin-bottom: 10px !important; letter-spacing: 0.5px; }
+.footer-minimalis p, .footer-minimalis ul li, .footer-minimalis a { color: #86868b; font-size: 0.8rem; text-decoration: none; }
+.footer-minimalis a:hover { color: #003F87; }
+.footer-minimalis hr { border-color: #E5E5EA; margin: 15px 0; }
+
+/* --- MODAL APPLE STYLE (Global) --- */
+.apple-modal { border-radius: 20px; border: none; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.15); }
+.apple-modal-header { background: #f8f9fa; padding: 24px 32px; border-bottom: 1px solid #e9ecef; }
+.apple-modal-body { padding: 32px; background: #ffffff; }
+.detail-box { border: 1px solid #e9ecef; border-radius: 16px; padding: 24px; background: #fafbfc; height: 100%; }
+.detail-label { font-size: 0.8rem; font-weight: 600; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.detail-value { font-size: 1rem; font-weight: 600; color: #212529; }
+.bg-primary-blue { background-color: #0056B3; }
+.btn-bpkad-outline { border: 1px solid #0056B3; color: #0056B3; background: transparent; }
+.btn-bpkad-outline:hover { background: #0056B3; color: white; }

@@ -1,0 +1,123 @@
+{% extends 'base/base_admin_BPKAD.html' %}
+
+{% block title %}Manajemen Publikasi - TRANSPARA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .glass-card { background: #FFFFFF; border-radius: 20px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow: hidden; }
+    
+    /* Styling Apple Tabs */
+    .nav-pills .nav-link {
+        border-radius: 50rem;
+        padding: 10px 24px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #486581;
+        transition: all 0.3s ease;
+        margin-right: 8px;
+        background: #F5F7FA;
+    }
+    .nav-pills .nav-link:hover { background: #E2E8F0; }
+    .nav-pills .nav-link.active {
+        background: var(--accent-blue);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(0, 86, 179, 0.2);
+    }
+    
+    /* Thumbnail Gambar */
+    .thumb-publikasi {
+        width: 45px;
+        height: 45px;
+        object-fit: cover;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .thumb-placeholder {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+        background: #F5F7FA;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #A0AEC0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 px-lg-2">
+        <div>
+            <h4 class="fw-bold text-dark mb-1">Manajemen Publikasi Konten</h4>
+            <p class="small text-muted mb-0">Kelola semua berita, pengumuman, dan galeri kegiatan yang tampil di portal publik.</p>
+        </div>
+        <a href="{% url 'tanah:tambah_publikasi' %}" class="btn btn-bpkad-primary rounded-pill px-4 shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i> Tulis Baru
+        </a>
+    </div>
+
+    <!-- Navigasi Tab -->
+    <ul class="nav nav-pills mb-4 px-lg-2" id="publikasiTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="semua-tab" data-bs-toggle="pill" data-bs-target="#semua" type="button" role="tab">Semua Konten</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="berita-tab" data-bs-toggle="pill" data-bs-target="#berita" type="button" role="tab"> Berita</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pengumuman-tab" data-bs-toggle="pill" data-bs-target="#pengumuman" type="button" role="tab"> Pengumuman</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="kegiatan-tab" data-bs-toggle="pill" data-bs-target="#kegiatan" type="button" role="tab"> Galeri Kegiatan</button>
+        </li>
+    </ul>
+
+    <!-- Konten Tab -->
+    <div class="glass-card">
+        <div class="tab-content" id="publikasiTabsContent">
+            
+            <!-- TAB SEMUA -->
+            <div class="tab-pane fade show active" id="semua" role="tabpanel">
+                {% include 'includes/_tabel_publikasi.html' with dataset=semua_publikasi %}
+            </div>
+
+            <!-- TAB BERITA -->
+            <div class="tab-pane fade" id="berita" role="tabpanel">
+                {% include 'includes/_tabel_publikasi.html' with dataset=berita %}
+            </div>
+
+            <!-- TAB PENGUMUMAN -->
+            <div class="tab-pane fade" id="pengumuman" role="tabpanel">
+                {% include 'includes/_tabel_publikasi.html' with dataset=pengumuman %}
+            </div>
+
+            <!-- TAB KEGIATAN -->
+            <div class="tab-pane fade" id="kegiatan" role="tabpanel">
+                {% include 'includes/_tabel_publikasi.html' with dataset=kegiatan %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Ambil hash dari URL (misalnya: #kegiatan)
+        let hash = window.location.hash;
+        
+        if (hash) {
+            // Cari tombol tab yang data-bs-target-nya sesuai dengan hash
+            let targetTab = document.querySelector('button[data-bs-target="' + hash + '"]');
+            
+            if (targetTab) {
+                // Gunakan fitur Bootstrap untuk mengaktifkan tab tersebut
+                let tab = new bootstrap.Tab(targetTab);
+                tab.show();
+            }
+        }
+    });
+</script>
+
+{% endblock %}

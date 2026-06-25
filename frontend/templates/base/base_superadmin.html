@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Superadmin Workspace - TRANSPARA{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root { 
+            --bg-light: #FFF5F8; 
+            --card-light: #FFFFFF; 
+            --text-main: #4A154B; 
+            --text-muted: #885A75; 
+            --accent-pink: #D81B60; 
+            --accent-dark: #880E4F; 
+            --border-glow: rgba(216, 27, 96, 0.15); 
+        }
+
+        body { 
+            background-color: var(--bg-light); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            color: var(--text-main); overflow-x: hidden; 
+        }
+
+        {% comment %} @keyframes smoothPageLoad { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+         {% endcomment %}
+
+        .glass-nav { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: 96%; max-width: 1400px; z-index: 1050; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--border-glow); border-radius: 40px; padding: 12px 30px; box-shadow: 0 15px 40px rgba(216, 27, 96, 0.08); transition: all 0.3s ease; }
+        .main-wrapper { padding-top: 110px; animation: smoothPageLoad 0.8s ease-out forwards; }
+        
+        /* SIDEBAR */
+        .sidebar-menu { border-right: 1px solid var(--border-glow); height: calc(100vh - 130px); position: sticky; top: 110px; padding-right: 15px; overflow-y: auto; }
+        .menu-label { font-size: 0.7rem; font-weight: 700; color: var(--accent-pink); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; padding-left: 12px; margin-top: 20px; }
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; color: var(--text-main); text-decoration: none; font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; transition: all 0.3s ease; border: 1px solid transparent; }
+        .menu-item:hover { background-color: #FFF0F5; color: var(--accent-dark); border-color: var(--border-glow); }
+        .menu-item.active { background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-dark) 100%); color: #ffffff !important; box-shadow: 0 4px 15px rgba(216, 27, 96, 0.3); border: none; }
+        
+        /* CARD & TABLE (Global Superadmin) */
+        .stat-card-outline { background: var(--card-light); border-radius: 16px; padding: 24px; border: 1px solid var(--border-glow); box-shadow: 0 12px 35px rgba(0,0,0,0.04); position: relative; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .stat-card-outline:hover { transform: translateY(-4px); box-shadow: 0 15px 40px rgba(0,0,0,0.08); }
+        .stat-card { background: var(--card-light); border-radius: 18px; padding: 24px; border: 1px solid var(--border-glow); box-shadow: 0 8px 30px rgba(216, 27, 96, 0.04); height: 100%; position: relative; overflow: hidden; }
+        .glass-card { background: var(--card-light); border-radius: 20px; border: 1px solid var(--border-glow); box-shadow: 0 10px 40px rgba(216, 27, 96, 0.06); overflow: hidden; }
+
+        /* -- TAMBAHAN: Freeze bagian Header Pencarian & Wadah Scroll Tabel -- */
+        .sticky-header-section { position: sticky; top: 0; z-index: 10; background-color: var(--card-light); border-top-left-radius: 20px; border-top-right-radius: 20px; }
+        .table-scroll-container { max-height: 65vh; overflow-y: auto; }
+
+        .table { color: var(--text-main); margin-bottom: 0; }
+
+        /* -- PERUBAHAN DI SINI: Tambah position sticky, top: 0, dan z-index agar kepala tabel beku -- */
+        .glass-card .table thead tr th { 
+            position: sticky; 
+            top: 0; 
+            z-index: 5; 
+            background-color: #FFF0F5 !important; 
+            color: var(--accent-dark) !important; 
+            border-bottom: 1px solid var(--border-glow) !important; 
+            font-weight: 700; 
+            letter-spacing: 0.5px; 
+            padding: 15px; 
+            box-shadow: 0 1px 2px rgba(216, 27, 96, 0.1); 
+        }
+
+        .glass-card .table tbody tr td { border-bottom: 1px solid rgba(216, 27, 96, 0.10); border-right: 1px solid rgba(216, 27, 96, 0.10) !important; padding: 15px; background: transparent; color: var(--text-main); font-weight: 500; }
+        .glass-card .table tbody tr:hover td { background-color: #FFF0F5; }
+        .glass-card .table thead tr th:last-child,
+        .glass-card .table tbody tr td:last-child { border-right: none !important; }
+        
+        /* TOMBOL & BADGE (Pinkys & Glow) */
+        .btn-fem-primary { background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-dark) 100%); color: #ffffff; border: none; box-shadow: 0 4px 15px rgba(216, 27, 96, 0.3); border-radius: 12px; font-weight: 600; }
+        .btn-fem-outline { background: transparent; color: var(--accent-pink); border: 2px solid var(--accent-pink); transition: all 0.3s ease; font-weight: 600; }
+        .btn-fem-outline:hover { background: rgba(216, 27, 96, 0.05); color: var(--accent-pink); box-shadow: 0 0 15px rgba(216, 27, 96, 0.4); border-color: var(--accent-pink); }
+        .btn-action-pink { background: transparent; color: var(--text-muted); border: 1px solid var(--border-glow); transition: all 0.3s ease; }
+        .btn-action-pink:hover { background: #FFF0F5; color: var(--accent-pink); border-color: var(--accent-pink); box-shadow: 0 4px 10px rgba(216, 27, 96, 0.15); }
+        .search-pink:focus { border-color: var(--accent-pink) !important; box-shadow: 0 0 0 0.25rem rgba(216, 27, 96, 0.25) !important; outline: none; }
+        
+        .badge-glow-pending { background: #FFF3E0; color: #E65100; border: 1px solid #FFE0B2; padding: 6px 12px; border-radius: 8px; font-weight: 600; }
+        .badge-glow-active { background: #E8F5E9; color: #2E7D32; border: 1px solid #C8E6C9; padding: 6px 12px; border-radius: 8px; font-weight: 600; }
+        .badge-glow-inactive { background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; padding: 6px 12px; border-radius: 8px; font-weight: 600; }
+        ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: var(--bg-light); } ::-webkit-scrollbar-thumb { background: #F48FB1; border-radius: 10px; }
+        
+        /* Border Tipis Default */
+        .form-control, .form-select, textarea {
+            border: 1px solid #e0e0e0 !important; /* Border abu-abu tipis */
+            background-color: #fcfcfc !important;  /* Sedikit lebih terang dari bg-light */
+            transition: all 0.3s ease;
+        }
+
+        /* Border Pink Saat diklik (Fokus) */
+        .form-control:focus, .form-select:focus, textarea:focus {
+            background-color: #FFFFFF !important;
+            border-color: var(--accent-pink) !important;
+            box-shadow: 0 0 0 0.25rem rgba(216, 27, 96, 0.15) !important;
+            outline: none;
+        }
+        /* Mengecilkan tulisan contoh di dalam kotak */
+        ::placeholder {
+            font-size: 0.75rem !important; /* Ukuran lebih kecil dari teks normal */
+            color: #A0AEC0 !important;      /* Warna abu-abu agar terlihat jelas sebagai contoh */
+            font-style: italic;             /* Opsional: memberi kesan 'contoh' */
+        }
+
+        /* Jika ingin spesifik untuk textarea (seperti alamat lokasi) */
+        textarea::placeholder {
+            font-size: 0.75rem !important;
+        }
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+
+<body>
+
+    <div aria-live="polite" aria-atomic="true" class="position-fixed p-3" style="top: 20px; right: 20px; z-index: 9999;">
+        {% include 'includes/_toast_messages.html' %}
+    </div>
+
+    <!-- HEADER MELAYANG -->
+    <div class="glass-nav d-flex justify-content-between align-items-center">
+        <!-- JAM -->
+        <div class="position-absolute start-50 translate-middle-x text-center d-none d-md-block" style="z-index: 10;">
+            <div class="badge rounded-pill px-4 py-2 shadow-sm" style="background: #FFF0F5; color: var(--accent-dark); border: 1px solid var(--border-glow); font-family: monospace; font-size: 0.95rem; letter-spacing: 1.5px;">
+                <i class="bi bi-clock-history me-2" style="color: var(--accent-pink);"></i> 
+                <span id="realtime-clock">00:00:00 | 00/00/00</span>
+            </div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-white rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 45px; height: 45px; border: 2px solid var(--accent-pink);">
+                <i class="bi bi-suit-heart-fill" style="color: var(--accent-pink);"></i>
+            </div>
+            <div>
+                <h4 class="fw-bold mb-0" style="color: var(--text-main); letter-spacing: 0.5px;">Ruang Eksekutif ♔</h4>
+                <p class="small mb-0 fw-bold" style="color: var(--accent-pink);">Otoritas Sistem Tertinggi</p>
+            </div>
+        </div>
+        <div class="d-flex gap-3 align-items-center">
+            <div class="text-end me-2">
+                <div class="fw-bold small" style="color: var(--text-main);">{{ request.user.username|default:"Sang Arsitek" }}</div>
+                <div class="small fw-bold" style="color: var(--text-muted); font-size: 0.75rem;">Superadmin Access</div>
+            </div>
+            <button class="btn btn-fem-outline rounded-pill px-4 py-2 small" data-bs-toggle="modal" data-bs-target="#logoutModal">Keluar ☞</button>
+        </div>
+    </div>
+
+    <!-- BUNGKUSAN UTAMA -->
+    <div class="main-wrapper container-fluid px-4">
+        <div class="row">
+            
+            <!-- SIDEBAR CERDAS DENGAN LOGIKA ACTIVE -->
+            <div class="col-lg-2 col-md-3 d-none d-md-block"> 
+                <div class="sidebar-menu">
+                    <div class="menu-label">Pusat Kendali</div>
+                    
+                    <a href="{% url 'auth:dashboard_superadmin' %}" class="menu-item {% if request.resolver_match.url_name == 'dashboard_superadmin' %}active{% endif %}">
+                        <i class="bi bi-grid-1x2-fill"></i> Tinjauan Utama
+                    </a>
+                    
+                    <a href="{% url 'auth:dashboard_superadmin' %}#antrean-section" class="menu-item">
+                        <i class="bi bi-shield-lock-fill"></i> Persetujuan Akses
+                    </a>
+                    
+                    <div class="menu-label">Master Data</div>
+                    <!-- Menu Dropdown Manajemen OPD akan terbuka jika URL saat ini adalah input_opd atau daftar_opd -->
+                    <a data-bs-toggle="collapse" href="#collapseOPD" role="button" class="menu-item d-flex justify-content-between align-items-center" aria-expanded="{% if request.resolver_match.url_name == 'input_opd' or request.resolver_match.url_name == 'daftar_opd' %}true{% else %}false{% endif %}">
+                        <div><i class="bi bi-building-gear me-1"></i> Manajemen OPD</div>
+                        <i class="bi bi-chevron-down" style="font-size: 0.8rem; color: var(--text-muted);"></i>
+                    </a>
+                    
+                    <div class="collapse {% if request.resolver_match.url_name == 'input_opd' or request.resolver_match.url_name == 'daftar_opd' %}show{% endif %}" id="collapseOPD">
+                        <div class="mb-2 ms-4 ps-2 border-start border-2" style="border-color: var(--border-glow) !important;">
+                            <a href="{% url 'auth:input_opd_sadmin' %}" class="menu-item py-1 my-1 {% if request.resolver_match.url_name == 'input_opd_sadmin' %}active{% endif %}" style="font-size: 0.85rem;">
+                                <i class="bi bi-plus-circle me-2"></i> Tambah OPD Baru
+                            </a>
+                            <a href="{% url 'auth:daftar_opd' %}" class="menu-item py-1 my-1 {% if request.resolver_match.url_name == 'daftar_opd' %}active{% endif %}" style="font-size: 0.85rem;">
+                                <i class="bi bi-card-list me-2"></i> Daftar OPD
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <a data-bs-toggle="collapse" href="#collapseUsers" role="button" class="menu-item d-flex justify-content-between align-items-center" aria-expanded="{% if request.resolver_match.url_name == 'daftar_operator_opd' or request.resolver_match.url_name == 'daftar_admin_bpkad' %}true{% else %}false{% endif %}">
+                        <div><i class="bi bi-people-fill me-1"></i> Manajemen Pengguna</div>
+                        <i class="bi bi-chevron-down" style="font-size: 0.8rem; color: var(--text-muted);"></i>
+                    </a>
+
+                    <div class="collapse {% if request.resolver_match.url_name == 'daftar_operator_opd' or request.resolver_match.url_name == 'daftar_admin_bpkad' %}show{% endif %}" id="collapseUsers">
+                        <div class="mb-2 ms-4 ps-2 border-start border-2" style="border-color: var(--border-glow) !important;">
+                            <a href="{% url 'auth:daftar_operator_opd' %}" class="menu-item py-1 my-1 {% if request.resolver_match.url_name == 'daftar_operator_opd' %}active{% endif %}" style="font-size: 0.85rem;">
+                                <i class="bi bi-person-badge me-2"></i> Operator OPD
+                            </a>
+                            <a href="{% url 'auth:daftar_admin_bpkad' %}" class="menu-item py-1 my-1 {% if request.resolver_match.url_name == 'daftar_admin_bpkad' %}active{% endif %}" style="font-size: 0.85rem;">
+                                <i class="bi bi-shield-lock me-2"></i> Admin BPKAD
+                            </a>
+                        </div>
+                    </div>
+                    <a href="#" class="menu-item"><i class="bi bi-map-fill"></i> Registry Aset Tanah</a>
+                    <a href="#" class="menu-item"><i class="bi bi-file-earmark-medical-fill"></i> Master Sertifikat</a>
+                    
+                    <div class="menu-label">Sistem & Keamanan</div>
+                    <a href="#" class="menu-item"><i class="bi bi-journal-code"></i> Audit Log System</a>
+                    <a href="#" class="menu-item"><i class="bi bi-cloud-arrow-down-fill"></i> Import Data Excel</a>
+                    <a href="#" class="menu-item"><i class="bi bi-file-earmark-spreadsheet-fill"></i> Export Laporan</a>
+                </div>
+            </div>
+                
+            <!-- KONTEN SPESIFIK HALAMAN AKAN MASUK DI SINI -->
+            <div class="col-lg-10 col-md-9">
+                <!-- BLOCK CONTENT -->
+                {% block content %}
+                <!-- Semua isi panel kanan dari Dasbor atau Daftar OPD akan menimpa tag ini -->
+                {% endblock %}
+            </div>
+
+        </div> 
+    </div> 
+
+    <!-- MODAL KELUAR -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 15px 35px rgba(216, 27, 96, 0.15);">
+                <div class="modal-body text-center p-5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="var(--accent-pink)" class="bi bi-box-arrow-right mb-3" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/>
+                        <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
+                    </svg>
+                    <h5 class="fw-bold mb-3" style="color: var(--text-main);">Konfirmasi Keluar</h5>
+                    <p class="mb-4" style="color: var(--text-muted);">Apakah Anda yakin ingin keluar dari Ruang Eksekutif Superadmin?</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="button" class="btn btn-light rounded-pill px-4" style="border: 1px solid var(--border-glow); color: var(--text-main);" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-fem-primary rounded-pill px-4" onclick="triggerLogout('{% url 'publik:home' %}')">Ya, Keluar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function triggerLogout(url) {
+        sessionStorage.setItem("baruLogout", "true"); 
+        sessionStorage.removeItem("sudahDisapa");     
+        document.body.style.transition = 'opacity 0.4s ease';
+        document.body.style.opacity = '0';
+        setTimeout(() => { window.location.href = url; }, 400);
+    }
+    function updateClock() {
+        const now = new Date();
+        const time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const date = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' });
+        const clockElement = document.getElementById('realtime-clock');
+        if (clockElement) { clockElement.innerHTML = `${time} &nbsp;|&nbsp; ${date}`; }
+    }
+    setInterval(updateClock, 1000); updateClock(); 
+</script>
+
+<script>
+    // Script khusus untuk mendeteksi hash (#antrean-section) di URL
+    // agar menu Persetujuan Akses menyala (active) saat diklik
+    document.addEventListener("DOMContentLoaded", function() {
+        const hash = window.location.hash;
+        const menuUtama = document.querySelector('a[href="{% url 'auth:dashboard_superadmin' %}"]');
+        const menuPersetujuan = document.querySelector('a[href="{% url 'auth:dashboard_superadmin' %}#antrean-section"]');
+
+        // Fungsi untuk mengatur menu mana yang menyala
+        function setActiveMenu() {
+            if (window.location.hash === '#antrean-section') {
+                if(menuUtama) menuUtama.classList.remove('active');
+                if(menuPersetujuan) menuPersetujuan.classList.add('active');
+            } else if (window.location.pathname === '{% url 'auth:dashboard_superadmin' %}') {
+                if(menuPersetujuan) menuPersetujuan.classList.remove('active');
+                if(menuUtama) menuUtama.classList.add('active');
+            }
+        }
+        setActiveMenu();
+        window.addEventListener('hashchange', setActiveMenu);
+    });
+</script>
+
+<script>
+    // alret
+    document.addEventListener('DOMContentLoaded', function () {
+        var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+        var toastList = toastElList.map(function (toastEl) {
+            var toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
+            toast.show();
+            return toast;
+        });
+</script>
+
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

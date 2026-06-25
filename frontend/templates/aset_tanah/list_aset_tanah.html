@@ -1,0 +1,467 @@
+{% extends 'base/base_admin_BPKAD.html' %}
+{% block title %}Master Data Aset Tanah - TRANSPARA{% endblock %}
+{% block extra_css %}
+<style>
+    @media (min-width: 992px) {
+        body { overflow: hidden !important; }
+        .locked-container { height: calc(100vh - 15px); display: flex; flex-direction: column; padding-bottom: 0 !important; }
+        
+        /* PERBAIKAN: Kurangi padding-bottom agar tidak ada space kosong mengambang di bawah */
+        .scrollable-pane { flex-grow: 1; overflow-y: auto; padding-right: 15px; padding-bottom: 15px; }
+        .scrollable-pane .glass-card { height: max-content !important; flex: 0 0 auto !important; }
+        .table-master-container { 
+            max-height: 625px !important; 
+            overflow-y: auto !important; 
+            border: none !important; 
+        }
+        .table-master-container table { height: auto !important; }
+        .table-master-container tbody tr { height: 60px !important; }
+
+        .scrollable-pane::-webkit-scrollbar { width: 6px; }
+        .scrollable-pane::-webkit-scrollbar-track { background: transparent; }
+        .scrollable-pane::-webkit-scrollbar-thumb { background-color: rgba(0, 86, 179, 0.15); border-radius: 10px; }
+        .scrollable-pane:hover::-webkit-scrollbar-thumb { background-color: rgba(0, 86, 179, 0.3); }
+    }
+
+    /* PAGINATION */
+    .pagination .page-link { color: var(--accent-blue); font-weight: 600; border-color: #E2E8F0; }
+    .pagination .page-link:hover { background-color: #EBF5FF; color: var(--accent-dark); }
+    .pagination .page-item.active .page-link { background-color: var(--accent-blue); border-color: var(--accent-blue); color: #FFFFFF; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 locked-container">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-shrink-0">
+        <div>
+            <h4 class="fw-bold mb-1" style="color: var(--text-main);"><i class="bi bi-database-fill me-2 text-primary"></i>Master Data Aset Tanah</h4>
+            <p class="text-muted small mb-0">Pusat kendali seluruh inventaris pertanahan Kota Palu.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-bpkad-outline rounded-pill px-3 shadow-sm"><i class="bi bi-activity me-1"></i> Log Aktivitas</button>
+            <a href="{% url 'tanah:input_aset_tanah' %}" class="btn btn-bpkad-primary rounded-pill px-4 shadow-sm"><i class="bi bi-plus-lg me-1"></i> Tambah Aset</a>
+        </div>
+    </div>
+
+    <!-- Summary -->
+        <div class="scrollable-pane">
+            <div class="row g-3 mb-4">
+                <div class="col-xl-3 col-md-6">
+                    <div class="summary-card" style="border-top: 4px solid var(--accent-blue);">
+                        <div class="summary-title d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-briefcase-fill me-2"></i>Portofolio Aset</span>
+                            <button type="button" class="btn btn-sm btn-light border p-1 d-flex align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#portofolioModal" title="Perbesar Detail Angka" style="width: 28px; height: 28px; border-radius: 8px;">
+                                <i class="bi bi-arrows-angle-expand text-primary" style="font-size: 0.8rem;"></i>
+                            </button>
+                        </div>
+                        <div class="data-point">
+                            <span class="data-label">Total Bidang</span>
+                            <span class="data-value fs-5 text-primary text-end">{{ total_aset|default:"0" }}</span>
+                        </div>
+                        <div class="data-point">
+                            <span class="data-label">Total Luas</span>
+                            <span class="data-value text-end tampil-luas">{{ total_luas|floatformat:"0"|default:"0" }}</span>
+                        </div>
+                        <div class="data-point mt-3 border-top pt-2"><span class="data-label">Estimasi Nilai Aset</span></div>
+                        <div class="data-value text-success fs-5 text-truncate tampil-rupiah" title="Klik tombol perbesar di atas untuk melihat angka penuh">{{ total_nilai|default:"0" }}</div>
+                    </div>
+                </div>
+                
+                <div class="col-xl-3 col-md-6">
+                    <div class="summary-card" style="border-top: 4px solid #10B981;">
+                        <div class="summary-title"><i class="bi bi-shield-check me-2"></i>Status Legalitas</div>
+                        <div class="data-point">
+                            <span class="data-label">Bersertifikat</span>
+                            <span class="data-value text-success text-truncate text-end" style="max-width: 50%;">{{ aset_bersertifikat|default:"0" }}</span>
+                        </div>
+                        <div class="data-point">
+                            <span class="data-label">Belum Sertifikat</span>
+                            <span class="data-value text-secondary text-truncate text-end" style="max-width: 50%;">{{ aset_belum_sertifikat|default:"0" }}</span>
+                        </div>
+                        <div class="data-point">
+                            <span class="data-label">Sertifikat Lainnya</span>
+                            <span class="data-value text-info text-truncate text-end" style="max-width: 50%;">{{ aset_sertifikat_lainnya|default:"0" }}</span>
+                        </div>
+                        <div class="progress mt-2" style="height: 6px;">
+                            <div class="progress-bar bg-success" style="width: {{ persen_bersertifikat|default:'0' }}%;"></div>
+                        </div>
+                        <div class="text-end small text-muted mt-1 fw-bold">{{ persen_bersertifikat|default:"0"|floatformat:1 }}% Tersertifikasi</div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6">
+                    <div class="summary-card" style="border-top: 4px solid #6366F1;">
+                        <div class="summary-title"><i class="bi bi-geo-alt-fill me-2"></i>Status Geospasial</div>
+                        <div class="data-point">
+                            <span class="data-label">Ada Koordinat</span>
+                            <span class="data-value text-primary text-truncate text-end" style="max-width: 50%;">{{ aset_ada_koordinat|default:"0" }}</span>
+                        </div>
+                        <div class="data-point">
+                            <span class="data-label">Tanpa Koordinat</span>
+                            <span class="data-value text-danger text-truncate text-end" style="max-width: 50%;">{{ aset_tanpa_koordinat|default:"0" }}</span>
+                        </div>
+                        <div class="mt-3 text-center">
+                            <button class="btn btn-sm btn-light border rounded-pill text-muted w-100 fw-bold" style="font-size: 0.75rem;">Lihat Rekap Geografis</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6">
+                    <div class="summary-card" style="border-top: 4px solid #EF4444; background-color: #FEF2F2;">
+                        <div class="summary-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Perhatian Khusus</div>
+                        <div class="data-point">
+                            <span class="data-label text-danger">Belum Verifikasi</span>
+                            <span class="data-value text-danger fs-5 text-truncate text-end" style="max-width: 50%;">{{ aset_belum_verif|default:"0" }}</span>
+                        </div>
+                        <div class="data-point">
+                            <span class="data-label text-danger">Sengketa/Rusak</span>
+                            <span class="data-value text-danger fs-5 text-truncate text-end" style="max-width: 50%;">{{ aset_bermasalah|default:"0" }}</span>
+                        </div>
+                        <div class="mt-2 text-center">
+                            <a href="#table-master" class="small text-danger fw-bold text-decoration-none border-bottom border-danger">Tindak Lanjuti &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- filter -->
+            <div class="glass-card py-2 px-4 mb-3 d-flex justify-content-between align-items-center">
+                <form method="GET" class="position-relative w-50">
+                    {% if request.GET.opd %}<input type="hidden" name="opd" value="{{ request.GET.opd }}">{% endif %}
+                    {% if request.GET.status_verifikasi %}<input type="hidden" name="status_verifikasi" value="{{ request.GET.status_verifikasi }}">{% endif %}
+                    
+                    <input type="text" name="q" value="{{ request.GET.q|default:'' }}" class="form-control bg-light shadow-none border-0" style="padding-left: 2.5rem !important; border-radius: 50rem !important;" 
+                    placeholder="{% if request.user.profile.role|upper != 'OPERATOR_OPD' %}Cari NIBAR, No. Sertifikat, Kode Barang, OPD, Lokasi...{% else %}Cari NIBAR, No. Sertifikat, Kode Barang, Lokasi...{% endif %}">
+                    <i class="bi bi-search position-absolute text-muted" style="top: 50%; left: 15px; transform: translateY(-50%);"></i>
+                </form>
+
+                <button class="btn rounded-pill px-4 shadow-sm fw-bold text-white" style="background-color: #1E293B; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='#0F172A'" onmouseout="this.style.backgroundColor='#1E293B'" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvasAset" aria-controls="filterOffcanvasAset">
+                    <i class="bi bi-funnel-fill me-1"></i> Filter Tampilan
+                </button>
+            </div>
+
+            <!-- master tabel -->
+            <div class="glass-card p-0" id="table-master">
+                <div class="table-responsive table-master-container mb-0">
+                    <table class="table align-middle table-hover mb-0" style="table-layout: fixed; width: 100%;">
+                        <thead>
+                            <tr>
+                                <!-- Lebar proporsional baru -->
+                                <th class="ps-4 py-3" style="width: 14%;">KODE ASET</th>
+                                {% if request.user.profile.role|upper != 'OPERATOR_OPD' %}
+                                    <th class="py-3" style="width: 20%;">NAMA ASET & OPD</th>
+                                {% else %}
+                                    <th class="py-3" style="width: 20%;">NAMA ASET</th>
+                                {% endif %}
+                                <th class="py-3" style="width: 20%;">LOKASI & FISIK</th>
+                                <th class="py-3" style="width: 18%;">NILAI ASET (Rp)</th>
+                                <th class="py-3" style="width: 9%;">VERIFIKASI</th>
+                                <th class="py-3" style="width: 10%;">SERTIFIKAT</th>
+                                <!-- pe-4 DIHAPUS, width dinaikkan jadi 9% agar tombol 2x2 lega dan tepat di tengah -->
+                                <th class="text-center py-3" style="width: 9%;">AKSI</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white">
+                            {% for aset in semua_aset %}
+                            <tr>
+                                <!-- Kode aset dibolehkan menjadi 2 baris (wrap) -->
+                                <td class="ps-4 fw-bold" style="color: var(--accent-blue); white-space: normal; word-break: break-word;">
+                                    {{ aset.kode_barang|default:"-" }}
+                                </td>
+                                
+                                <td class="text-truncate" title="{{ aset.nama_barang }} {% if aset.opd %}({{ aset.opd.nama_opd }}){% endif %}">
+                                    <div class="fw-bold text-dark text-truncate">{{ aset.nama_barang }}</div>
+                                    {% if request.user.profile.role|upper != 'OPERATOR_OPD' %}
+                                        <div class="small text-muted text-truncate"><i class="bi bi-building me-1"></i>{{ aset.opd.nama_opd|default:"-" }}</div>
+                                    {% endif %}
+                                </td>
+                                
+                                <td class="text-truncate" title="{{ aset.alamat_lokasi|default:'-' }}">
+                                    <div class="fw-bold text-secondary text-truncate" style="font-size: 0.85rem;">{{ aset.kecamatan_nama|default:"-" }}</div>
+                                    <div class="small text-muted text-truncate">{{ aset.alamat_lokasi|default:"-" }}</div>
+                                    <div class="small fw-bold text-dark mt-1"><i class="bi bi-bounding-box text-primary me-1"></i> Luas: <span class="tampil-luas">{{ aset.luas_m2|default:"0" }}</span></div>
+                                </td>
+                                
+                                <td class="fw-semibold text-success tampil-rupiah text-truncate fs-6" title="Rp {{ aset.nilai_aset|default:'0' }}">{{ aset.nilai_aset|default:"0" }}</td>
+                                
+                                <td>
+                                    {% if aset.status_verifikasi == 'VALID' %}
+                                        <span class="badge badge-om-primary"><i class="bi bi-check-circle-fill me-1"></i>Valid</span>
+                                    {% elif aset.status_verifikasi == 'PERLU_REVIEW' %}
+                                        <span class="badge badge-om-danger"><i class="bi bi-exclamation-circle-fill me-1"></i>Revisi</span>
+                                    {% else %}
+                                        <span class="badge badge-om-warning"><i class="bi bi-clock-fill me-1"></i>Antrean</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <td>
+                                    {% if aset.status_sertifikasi == 'BERSERTIFIKAT' %}
+                                        <span class="badge badge-om-success"><i class="bi bi-shield-check me-1"></i> Sudah</span>
+                                    {% elif aset.status_sertifikasi == 'LAINNYA' %}
+                                        <span class="badge badge-om-secondary"><i class="bi bi-three-dots me-1"></i> Lainnya</span>
+                                    {% else %}
+                                        <span class="badge badge-om-danger"><i class="bi bi-x-circle me-1"></i> Belum</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- pe-4 DIHAPUS dari td ini, align-middle ditambahkan agar sejajar vertikal -->
+                                <td class="text-center align-middle">
+                                    <!-- max-width dinaikkan sedikit ke 76px agar kotak tombol tidak bertabrakan -->
+                                    <div class="d-grid gap-1 mx-auto" style="grid-template-columns: repeat(2, 1fr); max-width: 76px;">
+                                        {% if aset.status_verifikasi == 'VALID' and aset.status_sertifikasi == 'BERSERTIFIKAT' %}
+                                            <a href="{% url 'tanah:tambah_sertifikat' aset.id %}" class="btn btn-sm btn-bpkad-outline-primary shadow-sm" title="Tambah Detail Sertifikat"><i class="bi bi-file-earmark-plus"></i></a>
+                                        {% else %}
+                                            <button class="btn btn-sm btn-light border shadow-sm text-muted opacity-50" title="Aset belum Valid atau belum Bersertifikat." disabled><i class="bi bi-lock-fill"></i></button>
+                                        {% endif %}
+                                        <a href="{% url 'tanah:detail_aset_tanah' aset.id %}" class="btn btn-sm btn-bpkad-info shadow-sm" title="Lihat Detail Data"><i class="bi bi-eye"></i></a>
+                                        <a href="{% url 'tanah:edit_aset_tanah' aset.id %}" class="btn btn-sm btn-bpkad-warning shadow-sm" title="Tinjau & Validasi Data"><i class="bi bi-pencil"></i></a>
+                                        {% if aset.status_verifikasi == 'VALID' %}
+                                            <a href="{% url 'tanah:delete_aset_tanah' aset.id %}" class="btn btn-sm btn-bpkad-danger shadow-sm" title="Hapus Data" onclick="return confirm('Yakin ingin menghapus aset ini?')"><i class="bi bi-trash"></i></a>
+                                        {% else %}
+                                            <button class="btn btn-sm btn-light border shadow-sm text-muted opacity-50" title="Aset belum valid." disabled><i class="bi bi-lock-fill"></i></button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-secondary">
+                                    <i class="bi bi-folder-x fs-1 d-block mb-3 opacity-50"></i>
+                                    <h6 class="fw-bold">Belum ada master data aset.</h6>
+                                    <p class="small">Silakan tambah aset baru atau setujui usulan dari OPD.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- PAGINATOR -->
+                    </div> 
+                        {% if semua_aset.paginator.count > 0 %}
+                            <div class="d-flex justify-content-between align-items-center p-3 border-top bg-white" style="border-radius: 0 0 12px 12px;">
+                                <span class="small fw-bold text-muted">
+                                    Menampilkan {{ semua_aset.start_index }} - {{ semua_aset.end_index }} dari total {{ semua_aset.paginator.count }} data
+                                </span>
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0 shadow-sm">
+                                        
+                                        {% if semua_aset.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ semua_aset.previous_page_number }}&q={{ request.GET.q|default:'' }}&opd={{ request.GET.opd|default:'' }}&kecamatan={{ request.GET.kecamatan|default:'' }}&status_verifikasi={{ request.GET.status_verifikasi|default:'' }}&status_sertifikasi={{ request.GET.status_sertifikasi|default:'' }}">&laquo; Prev</a>
+                                            </li>
+                                        {% endif %}
+                                        
+                                        <li class="page-item active">
+                                            <span class="page-link">Halaman {{ semua_aset.number }} dari {{ semua_aset.paginator.num_pages }}</span>
+                                        </li>
+                                        
+                                        {% if semua_aset.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ semua_aset.next_page_number }}&q={{ request.GET.q|default:'' }}&opd={{ request.GET.opd|default:'' }}&kecamatan={{ request.GET.kecamatan|default:'' }}&status_verifikasi={{ request.GET.status_verifikasi|default:'' }}&status_sertifikasi={{ request.GET.status_sertifikasi|default:'' }}">Next &raquo;</a>
+                                            </li>
+                                        {% endif %}
+                                        
+                                    </ul>
+                                </nav>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+</div>
+
+<!-- filter -->
+<div class="offcanvas offcanvas-end offcanvas-filter shadow" tabindex="-1" id="filterOffcanvasAset" aria-labelledby="filterOffcanvasAsetLabel">
+    <div class="offcanvas-header bg-light border-bottom p-4">
+        <div>
+            <h5 class="offcanvas-title fw-bold text-dark mb-1" id="filterOffcanvasAsetLabel"><i class="bi bi-funnel-fill text-primary me-2"></i>Filter Master Data</h5>
+            <small class="text-muted">Saring data aset sesuai kebutuhan spesifik.</small>
+        </div>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    
+    <div class="offcanvas-body p-4 bg-white" style="overflow-y: auto;">
+        <form action="" method="GET">
+            
+            {% if request.user.profile.role|upper != 'OPERATOR_OPD' %}
+            <div class="mb-3">
+                <label class="filter-label">Instansi (OPD)</label>
+                <select class="form-select rounded-3 shadow-sm border-0 bg-light py-2" name="opd">
+                    <option value="">Semua Instansi</option>
+                    {% for o in opd_list %}
+                        <option value="{{ o.id }}" {% if request.GET.opd == o.id|stringformat:"s" %}selected{% endif %}>{{ o.nama_opd }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="filter-label">Kecamatan</label>
+                    <select class="form-select rounded-3 shadow-sm border-0 bg-light py-2" name="kecamatan">
+                        <option value="">Semua</option>
+                        {% for k in kecamatan_list %}
+                            <option value="{{ k.id }}" {% if request.GET.kecamatan == k.id|stringformat:"s" %}selected{% endif %}>{{ k.nama_kecamatan }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-6">
+                    <label class="filter-label">Kelurahan</label>
+                    <select class="form-select rounded-3 shadow-sm border-0 bg-light py-2" name="kelurahan">
+                        <option value="">Semua</option>
+                        {% for l in kelurahan_list %}
+                            <option value="{{ l.id }}" {% if request.GET.kelurahan == l.id|stringformat:"s" %}selected{% endif %}>{{ l.nama_kelurahan }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="filter-label">Status Verifikasi</label>
+                <select class="form-select rounded-3 shadow-sm border-0 bg-light py-2" name="status_verifikasi">
+                    <option value="">Semua Status</option>
+                    <option value="BELUM_DIVERIFIKASI" {% if request.GET.status_verifikasi == 'BELUM_DIVERIFIKASI' %}selected{% endif %}>Belum Diverifikasi (Antrean)</option>
+                    <option value="PERLU_REVIEW" {% if request.GET.status_verifikasi == 'PERLU_REVIEW' %}selected{% endif %}>Perlu Review (Revisi)</option>
+                    <option value="VALID" {% if request.GET.status_verifikasi == 'VALID' %}selected{% endif %}>Sudah Diverifikasi (Valid)</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="filter-label">Sertifikasi & Kondisi Lahan</label>
+                <select class="form-select rounded-3 shadow-sm border-0 bg-light mb-2 py-2" name="status_sertifikasi" id="filter_status_sertifikasi">
+                    <option value="">Status Sertifikasi (Semua)</option>
+                    <option value="BERSERTIFIKAT" {% if request.GET.status_sertifikasi == 'BERSERTIFIKAT' %}selected{% endif %}>Bersertifikat</option>
+                    <option value="BELUM_BERSERTIFIKAT" {% if request.GET.status_sertifikasi == 'BELUM_BERSERTIFIKAT' %}selected{% endif %}>Belum Bersertifikat</option>
+                    <option value="LAINNYA" {% if request.GET.status_sertifikasi == 'LAINNYA' %}selected{% endif %}>Lainnya</option>
+                </select>
+
+                <div id="filter_kriteria_lainnya" style="display: {% if request.GET.status_sertifikasi == 'LAINNYA' %}block{% else %}none{% endif %};">
+                    <select class="form-select rounded-3 shadow-sm border-info bg-info-subtle mb-2 text-info-emphasis py-2" name="kriteria_sertifikat">
+                        <option value="">Pilih Keterangan (Semua)</option>
+                        <option value="ASLI_PEMKOT" {% if request.GET.kriteria_sertifikat == 'ASLI_PEMKOT' %}selected{% endif %}>Asli Pemkot</option>
+                        <option value="FOTOKOPI_PEMKOT" {% if request.GET.kriteria_sertifikat == 'FOTOKOPI_PEMKOT' %}selected{% endif %}>Fotokopi Pemkot</option>
+                        <option value="ASLI_NON_PEMKOT" {% if request.GET.kriteria_sertifikat == 'ASLI_NON_PEMKOT' %}selected{% endif %}>Asli Non Pemkot</option>
+                        <option value="FOTOKOPI_NON_PEMKOT" {% if request.GET.kriteria_sertifikat == 'FOTOKOPI_NON_PEMKOT' %}selected{% endif %}>Fotokopi Non Pemkot</option>
+                    </select>
+                </div>
+
+                <select class="form-select rounded-3 shadow-sm border-0 bg-light py-2" name="kondisi_pemanfaatan">
+                    <option value="">Kondisi Pemanfaatan (Semua)</option>
+                    <option value="TIDAK_DIKETAHUI" {% if request.GET.kondisi_pemanfaatan == 'TIDAK_DIKETAHUI' %}selected{% endif %}>Tidak Diketahui</option>
+                    <option value="DIMANFAATKAN" {% if request.GET.kondisi_pemanfaatan == 'DIMANFAATKAN' %}selected{% endif %}>Dimanfaatkan</option>
+                    <option value="TANAH_KOSONG" {% if request.GET.kondisi_pemanfaatan == 'TANAH_KOSONG' %}selected{% endif %}>Tanah Kosong</option>
+                    <option value="RUSAK" {% if request.GET.kondisi_pemanfaatan == 'RUSAK' %}selected{% endif %}>Rusak</option>
+                    <option value="SENGKETA" {% if request.GET.kondisi_pemanfaatan == 'SENGKETA' %}selected{% endif %}>Sengketa</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="filter-label">Kepemilikan & Perolehan</label>
+                <select class="form-select rounded-3 shadow-sm border-0 bg-light mb-2 py-2" name="status_kepemilikan">
+                    <option value="">Status Kepemilikan (Semua)</option>
+                    <option value="BELUM_JELAS" {% if request.GET.status_kepemilikan == 'BELUM_JELAS' %}selected{% endif %}>Belum Jelas</option>
+                    <option value="PEMDA" {% if request.GET.status_kepemilikan == 'PEMDA' %}selected{% endif %}>Pemda</option>
+                    <option value="MASYARAKAT" {% if request.GET.status_kepemilikan == 'MASYARAKAT' %}selected{% endif %}>Masyarakat</option>
+                    <option value="PROVINSI" {% if request.GET.status_kepemilikan == 'PROVINSI' %}selected{% endif %}>Provinsi</option>
+                    <option value="PUSAT" {% if request.GET.status_kepemilikan == 'PUSAT' %}selected{% endif %}>Pusat</option>
+                </select>
+                <select class="form-select rounded-3 shadow-sm border-0 bg-light mb-2 py-2" name="cara_perolehan">
+                    <option value="">Cara Perolehan (Semua)</option>
+                    <option value="HIBAH" {% if request.GET.cara_perolehan == 'HIBAH' %}selected{% endif %}>Hibah</option>
+                    <option value="PEMBELIAN" {% if request.GET.cara_perolehan == 'PEMBELIAN' %}selected{% endif %}>Pembelian</option>
+                    <option value="PENYERAHAN" {% if request.GET.cara_perolehan == 'PENYERAHAN' %}selected{% endif %}>Penyerahan</option>
+                    <option value="GANTI_RUGI" {% if request.GET.cara_perolehan == 'GANTI_RUGI' %}selected{% endif %}>Ganti Rugi</option>
+                    <option value="LAINNYA" {% if request.GET.cara_perolehan == 'LAINNYA' %}selected{% endif %}>Lainnya</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label class="filter-label">Kelengkapan Geospasial</label>
+                <select class="form-select rounded-3 shadow-sm border-0 bg-light py-2" name="koordinat">
+                    <option value="">Semua</option>
+                    <option value="ada" {% if request.GET.koordinat == 'ada' %}selected{% endif %}>Sudah Ada Koordinat</option>
+                    <option value="belum" {% if request.GET.koordinat == 'belum' %}selected{% endif %}>Belum Ada Koordinat</option>
+                </select>
+            </div>
+
+            <div class="d-grid gap-2 mt-4 pb-4">
+                <button type="submit" class="btn btn-bpkad-primary rounded-pill py-3 fw-bold shadow-sm">Terapkan Filter</button>
+                <a href="{% url 'tanah:list_aset_tanah' %}" class="btn btn-light rounded-pill py-2 fw-bold border text-muted">Reset Filter</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- bagian portofolio -->
+<div class="modal fade" id="portofolioModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content apple-modal">
+            <div class="apple-modal-header d-flex justify-content-between align-items-center bg-white">
+                <div>
+                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-briefcase-fill text-primary me-2"></i>Rincian Portofolio Aset</h5>
+                    <p class="small text-muted mb-0">Total keseluruhan nilai termasuk data yang difilter.</p>
+                </div>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="apple-modal-body bg-white p-2">
+                
+                <div class="p-4 bg-success-subtle rounded-4 border border-success-subtle mb-3 text-center shadow-sm">
+                    <span class="small fw-bold text-success text-uppercase" style="letter-spacing: 1px;">Estimasi Total Nilai Aset Daerah</span>
+                    <h2 class="fw-bold text-success mt-2 mb-0 tampil-rupiah" style="word-wrap: break-word; white-space: normal;">{{ total_nilai|default:"0" }}</h2>
+                </div>
+                
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded-4 border text-center h-100">
+                            <span class="small fw-bold text-muted text-uppercase">Total Bidang</span>
+                            <h3 class="fw-bold text-primary mt-2 mb-0">{{ total_aset|default:"0" }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded-4 border text-center h-100">
+                            <span class="small fw-bold text-muted text-uppercase">Total Luas Fisik</span>
+                            <h3 class="fw-bold text-dark mt-2 mb-0 tampil-luas" style="word-wrap: break-word; white-space: normal;">{{ total_luas|floatformat:"0"|default:"0" }}</h3>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-primary mt-4 mb-0 small border-0 d-flex align-items-center" style="background-color: #F0F7FF;">
+                    <i class="bi bi-info-circle-fill me-2 fs-5"></i> 
+                    <span>Angka portofolio ini terhubung langsung dengan sistem filter. Anda dapat memfilter spesifik instansi atau kecamatan untuk melihat total nilainya.</span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // --- Bagian Filter ---
+    document.querySelectorAll('.offcanvas').forEach(function(offcanvas) {
+        document.body.appendChild(offcanvas);
+    });
+
+
+    // 3. Logika Menampilkan Sub-Filter Kriteria Sertifikat
+    const filterSertifikasi = document.getElementById('filter_status_sertifikasi');
+    const filterKriteria = document.getElementById('filter_kriteria_lainnya');
+
+    if(filterSertifikasi && filterKriteria) {
+        filterSertifikasi.addEventListener('change', function() {
+            if(this.value === 'LAINNYA') {
+                filterKriteria.style.display = 'block';
+            } else {
+                filterKriteria.style.display = 'none';
+                filterKriteria.querySelector('select').value = ''; // Reset nilai jika disembunyikan
+            }
+        });
+    }
+});
+</script>
+
+{% endblock %}

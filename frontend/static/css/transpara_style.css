@@ -1,0 +1,208 @@
+/* =========================================
+   TRANSPARA MASTER STYLE (DAPUR ADMIN)
+   UI/UX: Apple Minimalist Modern (BPKAD)
+   ========================================= */
+
+
+:root { 
+    /* Latar Belakang & Kartu */
+    --bg-light: #F4F6F9; 
+    --card-light: #FFFFFF; 
+    --bg-input: #F8FAFC;
+    
+    /* Warna Teks */
+    --text-main: #1E293B;   /* Slate 800 - Heading */
+    --text-body: #334155;   /* Slate 700 - Body */
+    --text-muted: #64748B;  /* Slate 500 - Label/Hint */
+    
+    /* Warna Aksen BPKAD */
+    --accent-blue: #0056B3; 
+    --accent-dark: #003F87; 
+    --accent-green: #30D158;
+    --accent-warning: #FF9F0A;
+    --accent-danger: #FF453A;
+    
+    /* Border & Shadow */
+    --border-glow: rgba(0, 86, 179, 0.1); 
+    --border-soft: #E2E8F0;
+    --shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+/* =========================================
+   1. GLOBAL LAYOUT & FONT
+   ========================================= */
+body, input, select, textarea, button, table {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+body { 
+    background-color: var(--bg-light); 
+    color: var(--text-body); 
+    overflow-x: hidden;
+}
+
+.main-wrapper { transition: all 0.3s ease; }
+
+@media (min-width: 768px) {
+    /* Menarik konten ke atas di layar Laptop (Desktop) */
+    .main-wrapper { padding-top: 20px !important; }
+}
+@media (max-width: 767px) {
+    /* Memberi ruang untuk header di layar HP (Mobile) */
+    .main-wrapper { padding-top: 80px !important; }
+}
+
+/* =========================================
+   2. NAVBAR & SIDEBAR (NAVIGASI UTAMA)
+   ========================================= */
+.glass-nav { 
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%); 
+    width: 96%; max-width: 1400px; z-index: 1050; 
+    background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(25px); 
+    border: 1px solid var(--border-glow); border-radius: 40px; 
+    padding: 12px 30px; box-shadow: 0 10px 30px rgba(0, 86, 179, 0.05); 
+}
+
+.sidebar-menu { 
+    border-right: 1px solid var(--border-glow); 
+    height: calc(100vh - 130px); position: sticky; top: 110px; 
+    padding-right: 15px; overflow-y: auto; 
+}
+.sidebar-menu::-webkit-scrollbar { width: 6px; }
+.sidebar-menu::-webkit-scrollbar-track { background: transparent; }
+.sidebar-menu::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.1); border-radius: 10px; }
+
+.menu-label { 
+    font-size: 0.7rem; font-weight: 800; color: var(--accent-blue); 
+    text-transform: uppercase; letter-spacing: 1.5px; 
+    margin-bottom: 10px; padding-left: 12px; margin-top: 20px; 
+}
+.menu-item { 
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px; 
+    border-radius: 12px; color: var(--text-main); text-decoration: none; 
+    font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; 
+    transition: all 0.3s ease; 
+}
+.menu-item:hover { background-color: #EBF5FF; color: var(--accent-dark); }
+.menu-item.active { 
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-dark) 100%); 
+    color: #ffffff !important; box-shadow: 0 4px 15px rgba(0, 86, 179, 0.2); 
+}
+
+/* =========================================
+   3. KARTU & KOMPONEN VISUAL (DASHBOARD & DETAIL)
+   ========================================= */
+.glass-card, .stat-card-transpara { 
+    background: var(--card-light); border-radius: 20px; 
+    border: 1px solid rgba(255,255,255,0.8); box-shadow: var(--shadow-soft); 
+    overflow: hidden; height: 100%;
+}
+.stat-card-transpara { padding: 20px; transition: all 0.3s ease; }
+.stat-card-transpara:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0, 86, 179, 0.08); }
+
+.summary-card {
+    background: #FFFFFF; border-radius: 20px; border: 1px solid var(--border-glow);
+    padding: 20px; height: 100%; box-shadow: var(--shadow-soft); transition: transform 0.3s ease;
+}
+.summary-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0, 86, 179, 0.08); }
+
+.summary-title, .form-section-title { 
+    font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; 
+    margin-bottom: 15px; border-bottom: 1px solid #F0F0F2; padding-bottom: 8px; 
+}
+.form-section-title { font-size: 0.8rem; color: var(--accent-blue); margin-bottom: 25px; padding-bottom: 10px; }
+
+/* Item Teks, Value, Detail & Log Aktivitas */
+.data-point { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.85rem; }
+.data-label, .detail-label { font-weight: 600; color: var(--text-muted); }
+.detail-label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+.data-value, .detail-value { font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
+.detail-value { font-size: 0.95rem; font-weight: 700; white-space: normal; } /* Pengecualian halaman detail agar bisa multilines */
+
+/* Daftar Log / Rows */
+.log-item, .notif-item, .detail-row { border-bottom: 1px dashed #E2E8F0; padding-bottom: 12px; margin-bottom: 12px; }
+.log-item:last-child, .notif-item:last-child, .detail-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+/* Judul Khusus Detail Aset */
+.detail-section { margin-bottom: 30px; }
+.detail-section-title { font-size: 1.1rem; font-weight: 800; color: var(--accent-blue); text-transform: uppercase; border-bottom: 2px solid var(--accent-blue); padding-bottom: 10px; margin-bottom: 15px; }
+
+/* =========================================
+   4. FORM & TABEL
+   ========================================= */
+label.small { margin-bottom: 6px !important; display: block; color: var(--text-muted); font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.form-control, .form-select {
+    border-radius: 12px !important; padding: 0.7rem 1rem !important;
+    background: var(--bg-input) !important; border: 1px solid var(--border-soft) !important;
+    color: var(--text-main) !important; font-size: 0.85rem !important; font-weight: 500;
+    transition: all 0.2s ease !important;
+}
+.form-control:focus, .form-select:focus { background: #FFFFFF !important; border-color: var(--accent-blue) !important; box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.15) !important; }
+.form-control::placeholder, .form-select::placeholder { color: #94A3B8 !important; font-weight: 400; }
+.input-group-text { background-color: #F1F5F9; border: 1px solid var(--border-soft); color: var(--text-muted); font-weight: 700; font-size: 0.85rem; }
+
+.table-master-container { max-height: 550px; overflow-y: auto; border-radius: 12px; border: 1px solid #E2E8F0; }
+.table thead th {
+    background-color: var(--bg-input) !important; border-bottom: 2px solid var(--border-soft) !important;
+    text-transform: uppercase; font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;
+    position: sticky; top: 0; z-index: 10;
+}
+
+/* =========================================
+   5. MODAL & OFFCANVAS (EFEK BLUR LEMBUT)
+   ========================================= */
+/* Efek Blur Latar Belakang */
+.modal-backdrop.show, .offcanvas-backdrop.show { 
+    backdrop-filter: blur(2px) !important; /* efek blur */
+    background-color: rgba(15, 23, 42, 0.8) !important; /* warnanya */
+}
+
+/* Apple Style Modal */
+.apple-modal { border-radius: 24px; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 25px 50px rgba(0, 45, 94, 0.15); overflow: hidden; background: #FFFFFF; }
+.apple-modal-header { background: #FFFFFF; padding: 20px 24px; border-bottom: 1px solid #F0F0F2; }
+.apple-modal-body { background: #F8FAFC; padding: 24px; }
+
+/* Filter Offcanvas */
+/* GANTI KODE .offcanvas-filter LAMA MENJADI INI */
+@media (min-width: 992px) {
+    /* Tampilan Filter di Laptop (Melayang di kanan atas) */
+    .offcanvas-filter {
+        top: 20px !important; 
+        right: 20px !important; 
+        bottom: auto !important;
+        height: max-content !important; 
+        max-height: calc(100vh - 40px) !important; 
+        border-radius: 24px !important; 
+        width: 380px !important;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15) !important; 
+        border: 1px solid var(--border-soft) !important;
+        
+        /* INI OBATNYA: Memotong paksa sudut header yang tajam agar ikut melengkung */
+        overflow: hidden !important; 
+    }
+}
+
+@media (max-width: 991px) {
+    /* Tampilan Filter di HP (Muncul dari bawah seperti aplikasi Gojek/Apple) */
+    .offcanvas-filter {
+        top: auto !important;
+        bottom: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        height: 80vh !important;
+        border-radius: 24px 24px 0 0 !important; 
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15) !important;
+        
+        /* Tambahkan di sini juga untuk jaga-jaga di HP */
+        overflow: hidden !important; 
+    }
+}
+.offcanvas-backdrop { z-index: 1039 !important; }
+.filter-label { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); margin-bottom: 8px; display: block; text-transform: uppercase; }
+
+/* Animasi & Highlight Utilities */
+.dynamic-panel { display: none; animation: fadeInDown 0.3s ease; }
+@keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+.asset-highlight { background: linear-gradient(135deg, #E6F0FA 0%, #FFFFFF 100%); border-left: 5px solid var(--accent-blue); border-radius: 16px; padding: 20px; margin-bottom: 25px; }
+

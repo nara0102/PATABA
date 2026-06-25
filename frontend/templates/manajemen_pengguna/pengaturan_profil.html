@@ -1,0 +1,115 @@
+{% extends 'base/base_admin_BPKAD.html' %}
+{% load static %}
+{% block title %}Pengaturan Profil - TRANSPARA{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-shrink-0">
+        <div>
+            <h4 class="fw-bold mb-1" style="color: var(--text-main);"><i class="bi bi-person-bounding-box me-2 text-primary"></i>Pengaturan Akun</h4>
+            <p class="text-muted small mb-0">Kelola informasi pribadi dan keamanan akun Anda.</p>
+        </div>
+    </div>
+
+    <form method="POST" action="" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-4">
+            
+            <div class="col-lg-4">
+                <div class="glass-card p-4 text-center h-100 d-flex flex-column justify-content-center align-items-center">
+                    <div class="position-relative mb-4">
+                        {% if user.profile.foto_profil %}
+                            <img src="{{ user.profile.foto_profil.url }}" alt="Foto Profil" class="rounded-circle shadow-sm" style="width: 150px; height: 150px; object-fit: cover; border: 4px solid #fff;">
+                        {% else %}
+                            <div class="bg-light rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 150px; height: 150px; border: 4px solid #fff;">
+                                <i class="bi bi-person text-secondary" style="font-size: 4rem;"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <label for="upload_foto" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle d-flex justify-content-center align-items-center shadow" style="width: 40px; height: 40px; cursor: pointer; transition: all 0.2s;">
+                            <i class="bi bi-camera-fill"></i>
+                        </label>
+                        <input type="file" id="upload_foto" name="foto_profil" class="d-none" accept="image/*">
+                    </div>
+                    <h5 class="fw-bold mb-1">{{ user.first_name }} {{ user.last_name }}</h5>
+                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 mb-2">{{ user.profile.get_role_display|default:user.profile.role }}</span>
+                    <p class="small text-muted mb-0">Format file: JPG, PNG. Maksimal 2MB.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="glass-card p-4 h-100">
+                    <h6 class="form-section-title"><i class="bi bi-card-text me-2"></i>Informasi Dasar</h6>
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="small">Nama Depan</label>
+                            <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small">Nama Belakang</label>
+                            <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small">Alamat Email</label>
+                            <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small">Nomor HP</label>
+                            <input type="text" name="nomor_hp" class="form-control" value="{{ user.profile.nomor_hp|default:'' }}">
+                        </div>
+                    </div>
+
+                    <h6 class="form-section-title"><i class="bi bi-briefcase me-2"></i>Informasi Jabatan (Opsional)</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="small">NIP (Nomor Induk Pegawai)</label>
+                            <input type="text" name="nip" class="form-control" value="{{ user.profile.nip|default:'' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small">Jabatan</label>
+                            <input type="text" name="jabatan" class="form-control" value="{{ user.profile.jabatan|default:'' }}">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold text-muted border">Batal</button>
+                        <button type="submit" class="btn btn-bpkad-primary rounded-pill px-5 shadow-sm">Simpan Perubahan</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('upload_foto').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgElement = document.querySelector('.col-lg-4 img');
+                if (imgElement) {
+                    imgElement.src = e.target.result;
+                } else {
+                    // Jika sebelumnya pakai ikon (belum ada foto), ganti ikonnya jadi tag <img>
+                    const container = document.querySelector('.position-relative.mb-4');
+                    const iconDiv = document.querySelector('.position-relative.mb-4 > div.bg-light');
+                    if (iconDiv) {
+                        const newImg = document.createElement('img');
+                        newImg.src = e.target.result;
+                        newImg.className = 'rounded-circle shadow-sm';
+                        newImg.style.width = '150px';
+                        newImg.style.height = '150px';
+                        newImg.style.objectFit = 'cover';
+                        newImg.style.border = '4px solid #fff';
+                        container.replaceChild(newImg, iconDiv);
+                    }
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}

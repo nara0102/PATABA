@@ -1,0 +1,451 @@
+{% extends 'base/base_admin_BPKAD.html' %}
+{% block title %}Formulir Aset Tanah - Transpara{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    @media (min-width: 992px) {
+        body { overflow: hidden !important; }
+        .locked-container { height: calc(100vh - 110px); display: flex; flex-direction: column; padding-bottom: 0 !important; }
+        .locked-row { flex-grow: 1; overflow: hidden; margin-bottom: 20px; }
+        .scrollable-pane { height: 100%; overflow-y: auto; padding-right: 15px; padding-bottom: 50px; }
+        .scrollable-pane::-webkit-scrollbar { width: 6px; }
+        .scrollable-pane::-webkit-scrollbar-track { background: transparent; }
+        .scrollable-pane::-webkit-scrollbar-thumb { background-color: rgba(0, 86, 179, 0.15); border-radius: 10px; }
+        .scrollable-pane:hover::-webkit-scrollbar-thumb { background-color: rgba(0, 86, 179, 0.3); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 locked-container">
+    
+    <!-- header judul -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom flex-shrink-0 px-lg-3">
+        <h4 class="fw-bold mb-0">{% if aset %}Edit Data Aset{% else %}Input Data Aset Baru{% endif %}</h4>
+        <a href="javascript:history.back()" class="btn btn-bpkad-outline px-4 fw-bold shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Kembali
+        </a>
+    </div>
+
+    <div class="row justify-content-center locked-row">
+        <div class="col-lg-10 scrollable-pane">
+            <form method="POST" id="formAsetTanah" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% if aset.status_verifikasi == 'PERLU_REVIEW' and request.user.profile.role == 'OPERATOR_OPD' %}
+                <div class="alert alert-danger rounded-4 shadow-sm mb-4 border-danger border-2 d-flex align-items-start" style="background-color: #FEF2F2;">
+                    <i class="bi bi-exclamation-triangle-fill fs-2 text-danger me-3"></i>
+                    <div>
+                        <h6 class="fw-bold text-danger mb-1">Aset Dikembalikan oleh BPKAD!</h6>
+                        <p class="mb-0 small text-dark"><strong>Catatan Revisi:</strong> {{ aset.catatan_revisi|default:"Periksa kembali data yang diinputkan." }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <input type="hidden" name="status_verifikasi" value="VALID">
+
+                <!-- A. Identitas -->
+                <div class="glass-card p-4 mb-4">
+                    <div class="form-section-title">A. Identitas & Legalitas</div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="small fw-bold">Instansi (OPD)</label>
+                            {% if request.user.profile.role == 'ADMIN_BPKAD' or request.user.is_superuser %}
+                            <div class="position-relative">
+                                <select name="opd" id="select-opd" class="form-select pe-5 sort-az bg-light border-0" required>
+                                    <option value="">-- Pilih Instansi --</option>
+                                    {% for o in opd_list %}
+                                    <option value="{{ o.id }}" {% if aset.opd.id == o.id %}selected{% endif %}>{{ o.nama_opd }}</option>
+                                    {% endfor %}
+                                </select>
+                                <i class="bi bi-chevron-down position-absolute" style="right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #86868B;"></i>
+                            </div>
+                            {% else %}
+                            <input type="text" class="form-control text-muted fw-bold auto-title-case border-0" style="background-color: #F1F5F9 !important;" value="{{ request.user.profile.opd.nama_opd }}" disabled readonly>
+                            <input type="hidden" name="opd" value="{{ request.user.profile.opd.id }}">
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12"><label class="small fw-bold">Nama Barang<span class="text-danger ms-1">*</span></label>
+                            <input type="text" name="nama_barang" class="form-control fw-bold auto-title-case" value="{{ aset.nama_barang|default:'' }}" placeholder="Tanah Bangunan Kantor Pemerintah" required></div>
+                        <div class="col-md-4"><label class="small fw-bold">Kode Barang<span class="text-danger ms-1">*</span></label>
+                            <input type="text" name="kode_barang" class="form-control" value="{{ aset.kode_barang|default:'' }}" placeholder="1.3.1.01.01.04.001" required></div>
+                        <div class="col-md-4"><label class="small fw-bold">NIBAR<span class="text-danger ms-1">*</span></label>
+                            <input type="text" name="nibar" class="form-control" value="{{ aset.nibar|default:'' }}" placeholder="7271199550201001001131010104001000001" required></div>
+                        <div class="col-md-4"><label class="small fw-bold">No. Register<span class="text-danger ms-1">*</span></label>
+                            <input type="text" name="nomor_register" class="form-control" value="{{ aset.nomor_register|default:'' }}" placeholder="0001" required></div>
+                        <div class="col-md-12">
+                            <label class="small fw-bold">Status Kepemilikan<span class="text-danger ms-1">*</span></label>
+                            <div class="position-relative">
+                                <select name="status_kepemilikan" class="form-select pe-5 bg-light border-0">
+                                    <option value="BELUM_JELAS" {% if aset.status_kepemilikan == 'BELUM_JELAS' %}selected{% endif %}>Belum Jelas</option>
+                                    <option value="PEMDA" {% if aset.status_kepemilikan == 'PEMDA' %}selected{% endif %}>Pemda</option>
+                                    <option value="MASYARAKAT" {% if aset.status_kepemilikan == 'MASYARAKAT' %}selected{% endif %}>Masyarakat</option>
+                                    <option value="PROVINSI" {% if aset.status_kepemilikan == 'PROVINSI' %}selected{% endif %}>Provinsi</option>
+                                    <option value="PUSAT" {% if aset.status_kepemilikan == 'PUSAT' %}selected{% endif %}>Pusat</option>
+                                </select>
+                                <i class="bi bi-chevron-down position-absolute" style="right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #86868B;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- B. Data Fisik -->
+                <div class="glass-card p-4 mb-4">
+                    <div class="form-section-title">B. Data Fisik & Perolehan</div>
+                    <div class="row g-3">
+                        <input type="hidden" name="satuan" value="m2">
+                    
+                        <div class="col-md-6">
+                            <label class="small fw-bold">Luas (m²)<span class="text-danger ms-1">*</span></label>
+                            <input type="text" name="luas_m2" class="form-control format-ribuan bg-light border-0" value="{{ aset.luas_m2|floatformat:0|default:'' }}" placeholder="0" required>
+                            <small class="text-muted ms-3 d-block" style="font-size: 0.75rem; font-style: italic;">tanpa titik</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="small fw-bold">Nilai Aset / Harga <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text fw-bold border-0 shadow-sm" style="background: #E2E8F0; border-radius: 14px 0 0 14px;">Rp.</span>
+                                <input type="text" name="nilai_aset" class="form-control format-ribuan fw-bold bg-light border-0" style="border-radius: 0 !important;" value="{{ aset.nilai_aset|floatformat:0|default:'' }}" required placeholder="0">
+                                <span class="input-group-text fw-bold border-0 shadow-sm" style="background: #E2E8F0; border-radius: 0 14px 14px 0;">,00</span>   
+                            </div>
+                            <small class="text-muted ms-3 d-block" style="font-size: 0.75rem; font-style: italic;">tanpa titik</small>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="small fw-bold">Cara Perolehan<span class="text-danger">*</span></label>
+                            <div class="position-relative">
+                                <select name="cara_perolehan" class="form-select pe-5 bg-light border-0">
+                                    <option value="HIBAH" {% if aset.cara_perolehan == 'HIBAH' %}selected{% endif %}>Hibah</option>
+                                    <option value="PEMBELIAN" {% if aset.cara_perolehan == 'PEMBELIAN' %}selected{% endif %}>Pembelian</option>
+                                    <option value="PENYERAHAN" {% if aset.cara_perolehan == 'PENYERAHAN' %}selected{% endif %}>Penyerahan</option>
+                                    <option value="GANTI_RUGI" {% if aset.cara_perolehan == 'GANTI_RUGI' %}selected{% endif %}>Ganti Rugi</option>
+                                    <option value="LAINNYA" {% if aset.cara_perolehan == 'LAINNYA' %}selected{% endif %}>Lainnya</option>
+                                </select>
+                                <i class="bi bi-chevron-down position-absolute" style="right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #86868B;"></i>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6"><label class="small fw-bold">Tanggal Perolehan<span class="text-danger">*</span></label>
+                            <input type="date" name="tanggal_perolehan" class="form-control" value="{{ aset.tanggal_perolehan|date:'Y-m-d'|default:'' }}"></div>
+                    </div>
+                </div>
+
+                <!-- C. Lokasi -->
+                <div class="glass-card p-4 mb-4">
+                    <div class="form-section-title">C. Lokasi, Koordinat & Peta</div>
+                    <div id="map" class="mb-3 rounded-4" style="height: 300px; z-index: 1;"></div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="small fw-bold">Latitude</label>
+                            <input type="text" name="latitude" id="lat" class="form-control" value="{{ aset.latitude|default:'' }}" placeholder="-0.920241" oninput="updateMarkerFromInput()">
+                            <small class="text-muted ms-3 d-block" style="font-size: 0.75rem; font-style: italic;">Kosongkan jika tidak ada</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small fw-bold">Longitude</label>
+                            <input type="text" name="longitude" id="lng" class="form-control" value="{{ aset.longitude|default:'' }}" placeholder="119.879888" oninput="updateMarkerFromInput()">
+                            <small class="text-muted ms-3 d-block" style="font-size: 0.75rem; font-style: italic; ">Kosongkan jika tidak ada</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="small fw-bold">Kecamatan<span class="text-danger">*</span></label>
+                            <div class="position-relative">
+                                <select name="kecamatan" id="select-kecamatan" class="form-select pe-5 sort-az bg-light border-0" required>
+                                    <option value="">-- Pilih Kecamatan --</option>
+                                    {% for k in kecamatan_list %}
+                                        <option value="{{ k.id }}" {% if aset.kelurahan.kecamatan.id == k.id %}selected{% endif %}>{{ k.nama_kecamatan }}</option>
+                                    {% endfor %}
+                                </select>
+                                <i class="bi bi-chevron-down position-absolute" style="right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #86868B;"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="small fw-bold">Kelurahan<span class="text-danger">*</span></label>
+                            <div class="position-relative">
+                                <select name="kelurahan" id="select-kelurahan" class="form-select pe-5 sort-az bg-light border-0" required>
+                                    <option value="">-- Pilih Kelurahan --</option>
+                                    {% if aset and aset.kelurahan %}
+                                        <option value="{{ aset.kelurahan.id }}" selected>{{ aset.kelurahan.nama_kelurahan }}</option>
+                                    {% endif %}
+                                </select>
+                                <i class="bi bi-chevron-down position-absolute" style="right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #86868B;"></i>
+                            </div>
+                        </div>
+
+                        <div class="col-12"><label class="small fw-bold">Alamat Lokasi<span class="text-danger">*</span></label>
+                            <textarea name="alamat_lokasi" class="form-control mb-2 auto-title-case bg-light border-0" rows="2" placeholder="Contoh: Jl. Baruga No. 1...">{{ aset.alamat_lokasi|default:'' }}</textarea></div>
+                    </div>
+                </div>
+
+                <!-- D. Status -->
+                <div class="glass-card p-4 mb-4">
+                    <div class="form-section-title">D. Status & Keterangan</div>
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="small fw-bold">Status Penggunaan<span class="text-danger">*</span></label>
+                            <input type="text" name="status_penggunaan" class="form-control auto-title-case" value="{{ aset.status_penggunaan|default:'' }}" placeholder="Contoh: Badan Pengelola Keuangan Dan Aset Daerah 5.02.01.001.001" requred>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="small fw-bold">Kondisi Pemanfaatan<span class="text-danger">*</span></label>
+                            <div class="position-relative">
+                                <select name="kondisi_pemanfaatan" class="form-select pe-5 bg-light border-0" required>
+                                    <option value="TIDAK_DIKETAHUI" {% if aset.kondisi_pemanfaatan == 'TIDAK_DIKETAHUI' %}selected{% endif %}>Tidak Diketahui</option>
+                                    <option value="DIMANFAATKAN" {% if aset.kondisi_pemanfaatan == 'DIMANFAATKAN' %}selected{% endif %}>Dimanfaatkan</option>
+                                    <option value="TANAH_KOSONG" {% if aset.kondisi_pemanfaatan == 'TANAH_KOSONG' %}selected{% endif %}>Tanah Kosong</option>
+                                    <option value="RUSAK" {% if aset.kondisi_pemanfaatan == 'RUSAK' %}selected{% endif %}>Rusak</option>
+                                    <option value="SENGKETA" {% if aset.kondisi_pemanfaatan == 'SENGKETA' %}selected{% endif %}>Sengketa</option>
+                                </select>
+                                <i class="bi bi-chevron-down position-absolute" style="right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #86868B;"></i>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mt-4 pt-3 border-top">
+                            <label class="small fw-bold">Status Sertifikasi Utama<span class="text-danger">*</span></label>
+                            <select name="status_sertifikasi" id="status_sertifikasi" class="form-select bg-light border-0 fw-bold" required>
+                                <option value="BELUM_BERSERTIFIKAT" {% if aset.status_sertifikasi == 'BELUM_BERSERTIFIKAT' %}selected{% else %}selected{% endif %}>Belum Bersertifikat</option>
+                                <option value="BERSERTIFIKAT" {% if aset.status_sertifikasi == 'BERSERTIFIKAT' %}selected{% endif %}>Sudah Bersertifikat</option>
+                            </select>
+                        </div>
+
+                        <div id="panel_belum_sertifikat" class="col-12 bg-white p-3 rounded-3 border mt-3" style="display: none;">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="small fw-bold">Status Hak (Proses) <span class="text-danger">*</span></label>
+                                    <select name="status_hak_sementara" id="status_hak_sementara" class="form-select bg-light border-0 shadow-none">
+                                        <option value="" disabled {% if not aset.status_hak_sementara %}selected{% endif %}>-- Pilih Status Hak --</option>
+                                        <option value="HAK_PAKAI" {% if aset.status_hak_sementara == 'HAK_PAKAI' %}selected{% endif %}>Hak Pakai</option>
+                                        <option value="HAK_MILIK" {% if aset.status_hak_sementara == 'HAK_MILIK' %}selected{% endif %}>Hak Milik</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6" id="kotak_nomor_hak" style="display: none;">
+                                    <label class="small fw-bold">Nomor Hak</label>
+                                    <input type="text" name="nomor_hak_sementara" id="ui_nomor_hak" class="form-control bg-light border-0 shadow-none" placeholder="Contoh: No. 19">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="panel_sudah_sertifikat" class="col-12 bg-white p-3 rounded-3 border mt-3" style="display: none;">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label class="small fw-bold">Nomor Sertifikat <span class="text-danger">*</span></label>
+                                    <input type="text" name="nomor_sertifikat" id="input_nomor_sertifikat" class="form-control bg-light border-0 shadow-none" placeholder="Contoh: 20.01.01.04.1.00012" value="{{ aset.nomor_sertifikat|default:'' }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="small fw-bold">Bukti Fisik<span class="text-danger">*</span></label>
+                                    <select id="ui_bukti_fisik" class="form-select bg-light border-0 shadow-none">
+                                        <option value="ASLI">Dokumen Asli</option>
+                                        <option value="FOTOKOPI">Dokumen Fotokopi</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="small fw-bold">Kepemilikan<span class="text-danger">*</span></label>
+                                    <select id="ui_kepemilikan" class="form-select bg-light border-0 shadow-none">
+                                        <option value="PEMKOT" selected>Pemerintah Kota Palu (Pemkot)</option>
+                                        <option value="NON_PEMKOT">Lainnya (Pribadi/Provinsi/Kementerian)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12" id="kotak_pemilik_lainnya" style="display: none;">
+                                    <label class="small fw-bold">Tuliskan Atas Nama Pemilik<span class="text-danger">*</span></label>
+                                    <input type="text" name="pemilik_lainnya" id="ui_pemilik_teks" class="form-control bg-light border-0 shadow-none auto-title-case" placeholder="Sebutkan Nama Pemegang HAK">
+                                </div>
+                            </div>
+                            <input type="hidden" name="keterangan_sertifikasi_lainnya" id="db_keterangan_lainnya" value="{{ aset.keterangan_sertifikasi_lainnya|default:'' }}" required>
+                        </div>
+
+                        <div class="col-12 mt-4"><label class="small fw-bold">Spesifikasi Nama Barang</label>
+                            <input type="text" name="spesifikasi_nama_barang" class="form-control auto-title-case" value="{{ aset.spesifikasi_nama_barang|default:'' }}" placeholder="Tanah Bangunan Kantor Pemerintah"></div>
+                        <div class="col-12"><label class="small fw-bold">Spesifikasi Lainnya</label>
+                            <textarea name="spesifikasi_lainnya" class="form-control auto-title-case" rows="2" placeholder="Kantor Badan Pengelola Keuangan dan Aset Daerah">{{ aset.spesifikasi_lainnya|default:'' }}</textarea></div>
+                        <div class="col-12"><label class="small fw-bold">Keterangan Tambahan</label><textarea name="keterangan" id="input_keterangan" class="form-control auto-title-case bg-light border-0" rows="3" placeholder="Opsional...">{{ aset.keterangan|default:'' }}</textarea></div>
+                    </div>
+                </div>
+
+                {% if request.user.profile.role == 'ADMIN_BPKAD' or request.user.is_superuser %}
+                    {% if aset %}
+                        <div class="glass-card p-4 mb-4" style="border: 2px solid var(--accent-blue); background: #F0F7FF;">
+                            <div class="form-section-title text-primary border-primary mb-3"><i class="bi bi-shield-check me-2"></i>E. Panel Keputusan Verifikasi BPKAD</div>
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label class="small fw-bold text-primary">Tindakan untuk Aset Ini <span class="text-danger">*</span></label>
+                                    <select name="status_verifikasi" id="select_keputusan_admin" class="form-select border-primary fw-bold text-primary" style="background-color: #FFFFFF;" required>
+                                        <option value="" disabled {% if not aset or aset.status_verifikasi == 'BELUM_DIVERIFIKASI' %}selected{% endif %}>-- Pilih Tindakan Verifikasi --</option>
+                                        <option value="VALID" {% if aset.status_verifikasi == 'VALID' %}selected{% endif %}>✅ Setujui & Validasi (Data Valid)</option>
+                                        <option value="PERLU_REVIEW" {% if aset.status_verifikasi == 'PERLU_REVIEW' %}selected{% endif %}>⚠️ Tolak & Kembalikan ke OPD (Perlu Direvisi)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-12 dynamic-panel mt-3" id="kotak_catatan_revisi">
+                                    <label class="small fw-bold text-danger">Catatan Revisi untuk OPD <span class="text-danger">*</span></label>
+                                    <textarea name="catatan_revisi" id="input_catatan_revisi" class="form-control border-danger bg-white" rows="3" placeholder="Sebutkan dengan jelas data apa yang salah dan perlu diperbaiki oleh instansi terkait..."></textarea>
+                                </div>
+
+                                <div class="col-12 mt-2">
+                                    <div class="alert alert-primary mb-0 py-2 small border-0" style="background-color: rgba(0, 86, 179, 0.08);">
+                                        <i class="bi bi-info-circle-fill me-2"></i>Jika <b>Dikembalikan</b>, aset ini akan masuk ke daftar perbaikan OPD. Saat OPD memperbaikinya, status akan kembali menjadi <b>Menunggu Verifikasi</b>.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <input type="hidden" name="status_verifikasi" value="VALID">
+                    {% endif %}
+                {% endif %}
+
+                <div class="text-end mb-5">
+                    <button type="submit" class="btn btn-bpkad-primary px-5 py-3 rounded-pill fw-bold shadow-sm w-100">
+                        <i class="bi bi-floppy me-2"></i> 
+                        {% if request.user.profile.role == 'ADMIN_BPKAD' or request.user.is_superuser %}
+                            {% if aset %}
+                                Eksekusi Keputusan BPKAD
+                            {% else %}
+                                Simpan Aset Master (Otomatis Valid)
+                            {% endif %}
+                        {% elif aset %}
+                            Kirim Ulang Usulan Revisi OPD
+                        {% else %}
+                            Simpan & Usulkan Aset Baru
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    var map;
+    var marker;
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const lat = parseFloat("{{ aset.latitude|default:'-0.8917' }}");
+        const lng = parseFloat("{{ aset.longitude|default:'119.8707' }}");
+
+        map = L.map('map').setView([lat, lng], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        marker = L.marker([lat, lng], {draggable: true}).addTo(map);
+
+        marker.on('dragend', function(e) {
+            var pos = marker.getLatLng();
+            document.getElementById('lat').value = pos.lat.toFixed(6);
+            document.getElementById('lng').value = pos.lng.toFixed(6);
+        });
+
+        setTimeout(function() { map.invalidateSize(); }, 300);
+    });
+
+    function updateMarkerFromInput() {
+        var lat = parseFloat(document.getElementById('lat').value);
+        var lng = parseFloat(document.getElementById('lng').value);
+        if (!isNaN(lat) && !isNaN(lng)) {
+            marker.setLatLng([lat, lng]);
+            map.setView([lat, lng], 13);
+        }
+    }
+
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        const selectKecamatan = document.getElementById('select-kecamatan');
+        const selectKelurahan = document.getElementById('select-kelurahan');
+
+        selectKecamatan.addEventListener('change', function() {
+            const kecamatanId = this.value;
+            selectKelurahan.innerHTML = '<option value="">Memuat data...</option>';
+            
+            if (kecamatanId) {
+                fetch(`{% url 'api_get_kelurahan' %}?kecamatan_id=${kecamatanId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        selectKelurahan.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
+                        data.forEach(item => {
+                            const option = document.createElement('option');
+                            option.value = item.id;
+                            option.textContent = item.nama_kelurahan;
+                            selectKelurahan.appendChild(option);
+                        });
+                    }).catch(error => { selectKelurahan.innerHTML = '<option value="">Gagal memuat kelurahan</option>'; });
+            } else { selectKelurahan.innerHTML = '<option value="">-- Pilih Kelurahan --</option>'; }
+        });
+    });
+
+    const selectSertifikasi = document.getElementById('status_sertifikasi');
+    const panelBelum = document.getElementById('panel_belum_sertifikat');
+    const selectHakSementara = document.getElementById('status_hak_sementara');
+    const kotakNomorHak = document.getElementById('kotak_nomor_hak');
+    const uiNomorHak = document.getElementById('ui_nomor_hak');
+    
+    const panelSudah = document.getElementById('panel_sudah_sertifikat');
+    const inputNomorSertifikat = document.getElementById('input_nomor_sertifikat');
+    const uiBuktiFisik = document.getElementById('ui_bukti_fisik');
+    const uiKepemilikan = document.getElementById('ui_kepemilikan');
+    const kotakPemilikLainnya = document.getElementById('kotak_pemilik_lainnya');
+    const uiPemilikTeks = document.getElementById('ui_pemilik_teks');
+    const dbKeteranganLainnya = document.getElementById('db_keterangan_lainnya');
+
+    function toggleSertifikasi() {
+        if (selectSertifikasi.value === 'BERSERTIFIKAT') {
+            panelSudah.style.display = 'block';
+            panelBelum.style.display = 'none';
+            inputNomorSertifikat.required = true;
+
+            if (uiKepemilikan.value === 'NON_PEMKOT') {
+                kotakPemilikLainnya.style.display = 'block';
+                uiPemilikTeks.required = true;
+            } else { 
+                kotakPemilikLainnya.style.display = 'none'; 
+                uiPemilikTeks.required = false;
+            }
+            
+        } else {
+            panelSudah.style.display = 'none';
+            panelBelum.style.display = 'block';
+            inputNomorSertifikat.required = false;
+
+            if (selectHakSementara.value) {
+                kotakNomorHak.style.display = 'block';
+            } else { 
+                kotakNomorHak.style.display = 'none'; 
+            }
+        }
+    }
+
+    selectSertifikasi.addEventListener('change', toggleSertifikasi);
+    selectHakSementara.addEventListener('change', toggleSertifikasi);
+    uiKepemilikan.addEventListener('change', toggleSertifikasi);
+    document.addEventListener("DOMContentLoaded", toggleSertifikasi);
+
+    document.getElementById('formAsetTanah').addEventListener('submit', function() {
+        numberInputs.forEach(function(input) { input.value = input.value.replace(/\./g, ''); });
+
+        if (selectSertifikasi.value === 'BERSERTIFIKAT') {
+            dbKeteranganLainnya.value = uiBuktiFisik.value + "_" + uiKepemilikan.value;
+        } else {
+            dbKeteranganLainnya.value = "";
+        }
+    });
+
+    const selectKeputusan = document.getElementById('select_keputusan_admin');
+    const kotakCatatan = document.getElementById('kotak_catatan_revisi');
+    const inputCatatan = document.getElementById('input_catatan_revisi');
+
+    if (selectKeputusan) {
+        selectKeputusan.addEventListener('change', function() {
+            if (this.value === 'PERLU_REVIEW') {
+                kotakCatatan.style.display = 'block';
+                inputCatatan.required = true;
+            } else {
+                kotakCatatan.style.display = 'none';
+                inputCatatan.required = false;
+            }
+        });
+    }
+
+</script>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends 'base/base_superadmin.html' %}
+{% block title %}{{ title }} - TRANSPARA{% endblock %}
+{% block content %}
+
+<div class="row g-4 mb-4">
+    <div class="col-xl-6 col-md-6">
+        <div class="stat-card-outline" style="border-left: 5px solid var(--accent-pink);">
+            <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;">TOTAL PENGGUNA {{ title|upper }}</span>
+            <h2 class="fw-bold mt-2 mb-0" style="color: var(--text-main);">{{ users.count|default:"0" }} <span class="fs-6 fw-normal text-secondary ms-1">Akun</span></h2>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card mb-5">
+    <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="fw-bold mb-1" style="color: var(--text-main);">Registry Pengguna: {{ title }}</h5>
+            <p class="small fw-medium mb-0" style="color: var(--text-muted);">Manajemen dan kontrol akses pengguna.</p>
+        </div>
+        <div class="position-relative" style="width: 320px;">
+            <i class="bi bi-search position-absolute text-secondary" style="top: 50%; left: 15px; transform: translateY(-50%);"></i>
+            <input type="text" id="searchUser" onkeyup="cariPengguna()" class="form-control search-pink rounded-pill ps-5 bg-light border" placeholder="Cari Nama atau Username...">
+        </div>
+    </div>
+        
+    <div class="table-responsive table-scroll-container">
+        <table class="table align-middle table-hover">
+            <thead>
+                <tr>
+                    <th class="ps-4 border-0" style="width: 35%;">Profil Pengguna</th>
+                    <th class="border-0">NIP & Jabatan</th>
+                    <th class="border-0">Instansi / OPD</th>
+                    <th class="border-0 text-center">Status Akun</th>
+                    <th class="text-center pe-4 border-0" style="width: 150px;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for profile in users %}
+                <tr class="user-row">
+                    <td class="ps-4">
+                        <div class="small text-muted mb-1">Nama: <span class="fw-bold user-nama" style="color: var(--text-main);">{{ profile.user.first_name }} {{ profile.user.last_name|default:"" }}</span></div>
+                        <div class="small text-muted mb-1">Username: <span class="fw-bold user-username" style="color: var(--accent-pink);">@{{ profile.user.username }}</span></div>
+                        <div class="small text-muted">Email: <span class="fw-bold text-secondary">{{ profile.user.email|default:"-" }}</span></div>
+                    </td>
+                    <td>
+                        <div class="fw-bold" style="color: var(--text-main);">{{ profile.nip|default:"NIP Belum diisi" }}</div>
+                        <div class="small fw-bold text-muted">{{ profile.jabatan|default:"-" }}</div>
+                    </td>
+                    <td>
+                        <div class="small fw-bold">
+                            {% if profile.opd %}
+                                <i class="bi bi-building me-1 text-secondary"></i> {{ profile.opd.nama_opd }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        {% if profile.user.is_active == 1 %}
+                            <span class="badge-glow-active" style="font-size: 0.7rem;">Aktif</span>
+                        {% else %}
+                            <span class="badge-glow-inactive" style="font-size: 0.7rem;">Non-Aktif</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center pe-4">
+                        <div class="d-flex flex-column gap-1">
+                            <a href="{% url 'auth:detail_pengguna' profile.user.id %}" class="btn btn-sm btn-action-pink rounded-pill fw-bold w-100">
+                                <i class="bi bi-person-lines-fill me-1"></i> Detail
+                            </a>
+                            
+                            {% if request.user.is_superuser %}
+                            <form action="{% url 'auth:delete_user' profile.user.id %}" method="POST" onsubmit="return confirm('Yakin ingin menghapus pengguna ini secara permanen?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill fw-bold w-100">
+                                    <i class="bi bi-trash me-1"></i> Hapus
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-secondary">
+                        <i class="bi bi-people fs-1 d-block mb-2 opacity-50"></i>
+                        Belum ada data pengguna untuk kategori ini.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function cariPengguna() {
+    let input = document.getElementById("searchUser").value.toLowerCase();
+    let rows = document.getElementsByClassName("user-row");
+
+    for (let i = 0; i < rows.length; i++) {
+        let nama = rows[i].querySelector(".user-nama").innerText.toLowerCase();
+        let username = rows[i].querySelector(".user-username").innerText.toLowerCase();
+
+        if (nama.includes(input) || username.includes(input)) {
+            rows[i].style.display = "";
+        } else {
+            rows[i].style.display = "none";
+        }
+    }
+}
+</script>
+
+{% endblock %}

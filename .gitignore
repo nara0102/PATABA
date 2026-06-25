@@ -1,0 +1,21 @@
+# Lingkungan Virtual
+venv/
+env/
+
+# File Rahasia & Cache Python
+__pycache__/
+*.pyc
+db.sqlite3
+
+# File Sistem Mac
+.DS_Store
+
+# Konfigurasi & Secret
+.env
+z.notes.doc
+SKILL.md
+new
+
+# Folder Upload Media (Aset Publikasi)
+media/
+dataset/

@@ -1,0 +1,175 @@
+{% extends 'base/base_admin_BPKAD.html' %}
+{% block title %}Detail Aset: {{ aset.kode_barang }} - TRANSPARA{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media (min-width: 992px) {
+        /* 1. Kunci layar utama agar tidak bisa di-scroll sama sekali */
+        body { overflow: hidden !important; }
+        
+        /* 2. Buat container mengambil sisa tinggi layar tepat di bawah Glass Nav (110px) */
+        .locked-container { 
+            height: calc(100vh - 110px); 
+            display: flex; 
+            flex-direction: column; 
+            padding-bottom: 0 !important;
+        }
+        
+        /* 3. Baris ini mengambil sisa ruang bawah */
+        .locked-row { flex-grow: 1; overflow: hidden; margin-bottom: 20px; }
+        
+        /* 4. Kolom Kanan yang BISA DI-SCROLL secara mandiri */
+        .scrollable-pane { 
+            height: 100%; 
+            overflow-y: auto; 
+            padding-right: 15px; 
+            padding-bottom: 50px;
+        }
+        
+        /* Desain Scrollbar Estetik khusus untuk panel kanan */
+        .scrollable-pane::-webkit-scrollbar { width: 6px; }
+        .scrollable-pane::-webkit-scrollbar-track { background: transparent; }
+        .scrollable-pane::-webkit-scrollbar-thumb { background-color: rgba(0, 86, 179, 0.15); border-radius: 10px; }
+        .scrollable-pane:hover::-webkit-scrollbar-thumb { background-color: rgba(0, 86, 179, 0.3); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 locked-container">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 px-2 flex-shrink-0">
+        <div>
+            <h4 class="fw-bold mb-1">{{ aset.nama_barang }}</h4>
+            <p class="text-muted small mb-0"><i class="bi bi-upc-scan me-1"></i> Kode Barang: <span class="fw-bold text-primary">{{ aset.kode_barang|default:"-" }}</span></p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="javascript:history.back()" class="btn btn-light border rounded-pill px-4 fw-bold shadow-sm"><i class="bi bi-arrow-left me-1"></i> Kembali</a>
+            
+            {% if request.user.profile.role == 'ADMIN_BPKAD' or request.user.is_superuser %}
+                <a href="{% url 'tanah:edit_aset_tanah' aset.id %}" class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm"><i class="bi bi-pencil-square me-1"></i> Edit Data</a>
+                <a href="{% url 'tanah:tambah_sertifikat' aset.id %}" class="btn btn-bpkad-primary rounded-pill px-4 fw-bold shadow-sm"><i class="bi bi-file-earmark-plus me-1"></i> Tambah Sertifikat</a>
+            {% else %}
+                {% if aset.status_verifikasi != 'VALID' %}
+                <a href="{% url 'tanah:edit_aset_tanah' aset.id %}" class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm"><i class="bi bi-pencil-square me-1"></i> Revisi Data</a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row g-4 px-lg-3 locked-row">
+        
+        <div class="col-lg-4 h-100">
+            <div class="glass-card p-4 text-center d-flex flex-column" style="height: auto;">
+                
+                <div class="bg-light rounded-4 d-flex align-items-center justify-content-center w-100 mb-3" style="aspect-ratio: 4/3; border: 2px dashed #CBD5E1; overflow: hidden;">
+                    <div class="text-muted">
+                        <i class="bi bi-image" style="font-size: 3.5rem;"></i>
+                        <p class="small mt-2 fw-bold">Foto Aset Belum Tersedia</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-4 border">
+                    <span class="data-label mb-0 text-start text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Status Verifikasi</span>
+                    {% if aset.status_verifikasi == 'VALID' %}
+                        <span class="badge bg-success px-3 py-2"><i class="bi bi-check-circle-fill me-1"></i> VALID</span>
+                    {% elif aset.status_verifikasi == 'PERLU_REVIEW' %}
+                        <span class="badge bg-danger px-3 py-2"><i class="bi bi-exclamation-circle-fill me-1"></i> REVISI</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark px-3 py-2"><i class="bi bi-clock-fill me-1"></i> ANTREAN</span>
+                    {% endif %}
+                </div>
+                
+            </div>
+        </div>
+
+        <div class="col-lg-8 scrollable-pane">
+            
+            <div class="glass-card p-4 mb-4" style="height: auto;">
+                <div class="detail-section-title">A. Identitas & Instansi Pengelola</div>
+                <div class="row">
+                    <div class="col-12 detail-row"><div class="data-label">Instansi/Organisasi Perangkat Daerah</div><div class="data-value text-primary fs-5">{{ aset.opd.nama_opd|default:"-" }}</div></div>
+                    <div class="col-sm-6 detail-row"><div class="data-label">Nama Barang</div><div class="data-value">{{ aset.nama_barang|default:"-" }}</div></div>
+                    <div class="col-sm-6 detail-row"><div class="data-label">NIBAR</div><div class="data-value">{{ aset.nibar|default:"-" }}</div></div>
+                    <div class="col-sm-6 detail-row"><div class="data-label">Kode Barang</div><div class="data-value">{{ aset.kode_barang|default:"-" }}</div></div>
+                    <div class="col-sm-6 detail-row"><div class="data-label">Nomor Register</div><div class="data-value">{{ aset.nomor_register|default:"-" }}</div></div>
+                </div>
+            </div>
+
+            <div class="glass-card p-4 mb-4" style="height: auto;">
+                <div class="detail-section-title">B. Data Fisik & Perolehan</div>
+                <div class="row">
+                    <div class="col-sm-6 detail-row"><div class="data-label">Luas Tanah</div><div class="data-value text-primary fs-5 tampil-luas">{{ aset.luas_m2|default:"0" }}</div></div>
+                    <div class="col-sm-6 detail-row"><div class="data-label">Nilai Aset (Rp)</div><div class="data-value text-success fs-5 tampil-rupiah">{{ aset.nilai_aset|default:"0" }}</div></div>
+                    <div class="col-sm-6 detail-row"><div class="data-label">Cara Perolehan</div><div class="data-value">{{ aset.cara_perolehan|default:"-" }}</div></div>
+                    <div class="col-sm-6 detail-row"><div class="data-label">Tanggal Perolehan</div><div class="data-value">{{ aset.tanggal_perolehan|date:"d F Y"|default:"-" }}</div></div>
+                </div>
+            </div>
+
+            <div class="glass-card p-4 mb-4" style="height: auto;">
+                <div class="detail-section-title">C. Lokasi Administratif & Koordinat</div>
+                <div class="row">
+                    <div class="col-sm-6 detail-row"><div class="data-label">Kecamatan</div><div class="data-value">{{ aset.kecamatan_nama|default:"-" }}</div></div>
+                    <div class="col-sm-6 detail-row"><div class="data-label">Kelurahan</div><div class="data-value">{{ aset.kelurahan_nama|default:"-" }}</div></div>
+                    <div class="col-12 detail-row"><div class="data-label">Alamat Lengkap</div><div class="data-value">{{ aset.alamat_lokasi|default:"-" }}</div></div>
+                    
+                    <div class="col-sm-6 detail-row"><div class="data-label"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Latitude</div><div class="data-value font-monospace text-primary">{{ aset.latitude|default:"-" }}</div></div>
+                    <div class="col-sm-6 detail-row"><div class="data-label"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Longitude</div><div class="data-value font-monospace text-primary">{{ aset.longitude|default:"-" }}</div></div>
+                </div>
+            </div>
+
+            <div class="glass-card p-4 mb-4" style="height: auto;">
+                <div class="detail-section-title text-success" style="border-color: var(--accent-green);">D. Status Legalitas & Sertifikasi</div>
+                <div class="row">
+                    <div class="col-sm-6 detail-row"><div class="data-label">Status Kepemilikan</div><div class="data-value">{{ aset.status_kepemilikan|default:"-" }}</div></div>
+                    <div class="col-sm-6 detail-row">
+                        <div class="data-label">Status Sertifikasi</div>
+                        <div class="data-value">
+                            {% if aset.status_sertifikasi == 'BERSERTIFIKAT' %}
+                                <span class="badge bg-success"><i class="bi bi-shield-check me-1"></i> Bersertifikat</span>
+                            {% elif aset.status_sertifikasi == 'LAINNYA' %}
+                                <span class="badge bg-info"><i class="bi bi-three-dots me-1"></i> Lainnya</span>
+                            {% else %}
+                                <span class="badge bg-secondary"><i class="bi bi-x-circle me-1"></i> Belum Bersertifikat</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-12 detail-row">
+                        {% if aset.status_sertifikasi == 'BERSERTIFIKAT' %}
+                            <div class="data-label text-success">Nomor Sertifikat (BPN)</div>
+                            <div class="data-value fs-5 font-monospace text-dark">{{ aset.nomor_sertifikat|default:"-" }}</div>
+                        {% elif aset.status_sertifikasi == 'BELUM_BERSERTIFIKAT' %}
+                            <div class="data-label text-warning text-dark">Status Hak Sementara</div>
+                            <div class="data-value">{{ aset.status_hak_sementara|default:"-" }}</div>
+                        {% elif aset.status_sertifikasi == 'LAINNYA' %}
+                            <div class="data-label text-info text-dark">Keterangan Sertifikasi Lainnya</div>
+                            <div class="data-value">{{ aset.keterangan_sertifikasi_lainnya|default:"-" }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card p-4" style="height: auto;">
+                <div class="detail-section-title">E. Penggunaan & Keterangan Tambahan</div>
+                <div class="row">
+                    <div class="col-sm-6 detail-row"><div class="data-label">Status Penggunaan</div><div class="data-value">{{ aset.status_penggunaan|default:"-" }}</div></div>
+                    <div class="col-sm-6 detail-row">
+                        <div class="data-label">Kondisi Pemanfaatan</div>
+                        <div class="data-value">
+                            {% if aset.kondisi_pemanfaatan == 'SENGKETA' or aset.kondisi_pemanfaatan == 'RUSAK' %}
+                                <span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill me-1"></i> {{ aset.kondisi_pemanfaatan }}</span>
+                            {% else %}
+                                {{ aset.kondisi_pemanfaatan|default:"-" }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-12 detail-row"><div class="data-label">Spesifikasi Nama Barang</div><div class="data-value">{{ aset.spesifikasi_nama_barang|default:"-" }}</div></div>
+                    <div class="col-12 detail-row"><div class="data-label">Spesifikasi Lainnya</div><div class="data-value text-muted">{{ aset.spesifikasi_lainnya|default:"Tidak ada." }}</div></div>
+                    <div class="col-12 detail-row border-0"><div class="data-label">Keterangan Tambahan</div><div class="data-value text-muted">{{ aset.keterangan|default:"Tidak ada keterangan." }}</div></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

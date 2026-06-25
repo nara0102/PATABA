@@ -1,0 +1,126 @@
+{% extends 'base/base_superadmin.html' %}
+{% block title %}Daftar OPD Terdaftar - TRANSPARA{% endblock %}
+{% block content %}
+
+<!-- Kotak Statistik (Total, Aktif, Tidak Aktif) -->
+<div class="row g-4 mb-4">
+    <div class="col-xl-4 col-md-6">
+        <div class="stat-card-outline" style="border-left: 5px solid #0056B3;">
+            <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;">TOTAL SELURUH OPD</span>
+            <h2 class="fw-bold mt-2 mb-0" style="color: var(--text-main);">{{ total_opd|default:"0" }} <span class="fs-6 fw-normal text-secondary ms-1">Instansi</span></h2>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+        <div class="stat-card-outline" style="border-left: 5px solid #28A745;">
+            <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;">OPD AKTIF BEROPERASI</span>
+            <h2 class="fw-bold mt-2 mb-0" style="color: var(--text-main);">{{ total_aktif|default:"0" }} <span class="fs-6 fw-normal text-success ms-1">Aktif</span></h2>
+        </div>
+    </div>
+    <div class="col-xl-4 col-md-6">
+        <div class="stat-card-outline" style="border-left: 5px solid #C62828;">
+            <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;">OPD TIDAK AKTIF</span>
+            <h2 class="fw-bold mt-2 mb-0" style="color: var(--text-main);">{{ total_tidak|default:"0" }} <span class="fs-6 fw-normal text-danger ms-1">Instansi</span></h2>
+        </div>
+    </div>
+</div>
+
+<!-- Tabel Utama Daftar OPD -->
+<div class="glass-card mb-5">
+    <div class="p-4 border-bottom d-flex justify-content-between align-items-center sticky-header-section">
+        <div>
+            <h5 class="fw-bold mb-1" style="color: var(--text-main);">Registry Instansi (OPD) Terdaftar</h5>
+            <p class="small fw-medium mb-0" style="color: var(--text-muted);">Data utama seluruh organisasi perangkat daerah.</p>
+        </div>
+        <div class="position-relative" style="width: 320px;">
+            <i class="bi bi-search position-absolute text-secondary" style="top: 50%; left: 15px; transform: translateY(-50%);"></i>
+            <input type="text" id="searchInput" onkeyup="cariOPD()" class="form-control search-pink rounded-pill ps-5 bg-light border" placeholder="Cari Nama, Kode, atau Kepala OPD...">
+        </div>
+    </div>
+        
+    <div class="table-responsive table-scroll-container">
+        <table class="table align-middle table-hover" id="opdTable">
+            <thead>
+                <tr>
+                    <th class="ps-4 border-0">Instansi / OPD</th>
+                    <th class="border-0">Alamat Kantor</th>
+                    <th class="border-0">Kepala OPD</th>
+                    <th class="border-0 text-center">Status</th>
+                    <th class="text-center pe-4 border-0" style="width: 150px;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for opd in daftar_opd %}
+                <tr class="opd-row">
+                    <td class="ps-4">
+                        <div class="fw-bold opd-nama" style="color: var(--text-main);">{{ opd.nama_opd }}</div>
+                        <div class="small fw-bold text-muted opd-kode">Kode: {{ opd.kode_opd|default:"-" }} | Lokasi: {{ opd.kode_lokasi|default:"-" }}</div>
+                        <div class="fw-bold" style="font-size: 0.75rem; color: var(--text-muted);">
+                            Kategori: {{ opd.kategori_opd|default:"-" }}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="small fw-bold text-secondary">
+                            <i class="bi bi-geo-alt me-1"></i> {{ opd.alamat_kantor|default:"Belum diisi" }}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="small fw-bold text-dark opd-kepala">
+                            <i class="bi bi-person-badge me-1"></i> {{ opd.kepala_opd|default:"Belum diisi" }}
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        {% if opd.is_active == 1 %}
+                            <span class="badge-glow-active" style="font-size: 0.7rem;">Aktif</span>
+                        {% else %}
+                            <span class="badge-glow-pending" style="font-size: 0.7rem;">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center pe-4">
+                        <div class="d-flex flex-column gap-1">
+                            <a href="{% url 'auth:detail_opd' opd.id %}" class="btn btn-sm btn-action-pink rounded-pill fw-bold w-100">
+                                <i class="bi bi-pencil-square me-1"></i> Detail
+                            </a>
+                            
+                            <form action="{% url 'auth:hapus_opd' opd.id %}" method="POST" onsubmit="return confirm('Yakin ingin menghapus OPD ini secara permanen?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill fw-bold w-100">
+                                    <i class="bi bi-trash me-1"></i> Hapus
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-secondary">
+                        <i class="bi bi-building-exclamation fs-1 d-block mb-2 opacity-50"></i>
+                        Belum ada data OPD yang terdaftar.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function cariOPD() {
+    let input = document.getElementById("searchInput").value.toLowerCase();
+    let rows = document.getElementsByClassName("opd-row");
+
+    for (let i = 0; i < rows.length; i++) {
+        let nama = rows[i].querySelector(".opd-nama").innerText.toLowerCase();
+        let kode = rows[i].querySelector(".opd-kode").innerText.toLowerCase();
+        let kepala = rows[i].querySelector(".opd-kepala").innerText.toLowerCase();
+
+        // Jika input ada di nama, kode, ATAU kepala OPD, tampilkan barisnya
+        if (nama.includes(input) || kode.includes(input) || kepala.includes(input)) {
+            rows[i].style.display = "";
+        } else {
+            rows[i].style.display = "none";
+        }
+    }
+}
+</script>
+
+{% endblock %}

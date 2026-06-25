@@ -1,0 +1,185 @@
+{% extends 'base/base_superadmin.html' %}
+{% block title %}Tinjauan Utama - TRANSPARA{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<div class="glass-card p-4 mb-4" style="background: linear-gradient(135deg, #FFF0F5 0%, #FFFFFF 100%);">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h3 class="fw-bold mb-2" style="color: var(--accent-dark);">Selamat Datang Kembali.</h3>
+            <p class="mb-0 fw-medium" style="color: var(--text-muted);">Seluruh infrastruktur sistem dan integritas data BPKAD berada dalam pengawasan penuh Anda. Tinjau antrean pendaftaran di bawah ini.</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="https://supabase.com/dashboard" target="_blank" class="btn btn-fem-primary px-4">
+                <i class="bi bi-cloud-arrow-down-fill me-2"></i>Akses Cloud Database
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Kotak Statistik Dashboard -->
+<div class="row g-4 mb-5">
+    
+    <div class="col-xl-5 col-md-12">
+        <div class="stat-card" style="border-left: 4px solid var(--accent-pink);">
+            <span style="color: var(--accent-pink); font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;">DISTRIBUSI PENGGUNA AKTIF</span>
+            <div class="d-flex align-items-baseline justify-content-between mt-2">
+                <div class="text-center">
+                    <h3 class="fw-bold mb-0" style="color: var(--text-main);">{{ total_admin|default:"0" }}</h3>
+                    <span class="fs-6 fw-bold text-secondary" style="font-size: 0.75rem !important;">Admin BPKAD</span>
+                </div>
+                <span class="text-secondary" style="font-size: 1.5rem; opacity: 0.2;">|</span>
+                <div class="text-center">
+                    <h3 class="fw-bold mb-0" style="color: var(--text-main);">{{ total_operator|default:"0" }}</h3>
+                    <span class="fs-6 fw-bold text-secondary" style="font-size: 0.75rem !important;">Operator OPD</span>
+                </div>
+                <span class="text-secondary" style="font-size: 1.5rem; opacity: 0.2;">|</span>
+                <div class="text-center">
+                    <h3 class="fw-bold mb-0" style="color: var(--text-main);">{{ total_staf|default:"0" }}</h3>
+                    <span class="fs-6 fw-bold text-secondary" style="font-size: 0.75rem !important;">Staf / Atasan</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card" style="border-left: 4px solid var(--accent-pink);">
+            <span style="color: var(--accent-pink); font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;">MENUNGGU PERSETUJUAN</span>
+            <div class="d-flex align-items-baseline gap-3 mt-3">
+                <h3 class="fw-bold mb-0" style="color: var(--text-main);">{{ jumlah_antrean_user|default:"0" }} <span class="fs-6 fw-medium text-secondary">Akun</span></h3>
+                <span class="text-secondary" style="font-size: 1.5rem; opacity: 0.3;">|</span>
+                <h3 class="fw-bold mb-0" style="color: var(--text-main);">{{ jumlah_antrean_opd|default:"0" }} <span class="fs-6 fw-medium text-secondary">OPD</span></h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-2 col-md-6">
+        <div class="stat-card" style="border-left: 4px solid var(--accent-pink);">
+            <span style="color: var(--accent-pink); font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;">TOTAL INSTANSI</span>
+            <h2 class="fw-bold mt-2 mb-0" style="color: var(--text-main);">{{ total_opd|default:"0" }} <span class="fs-6 fw-bold">Terdaftar</span></h2>
+        </div>
+    </div>
+
+    <div class="col-xl-2 col-md-6">
+        <div class="stat-card" style="border-left: 4px solid var(--accent-pink);">
+            <span style="color: var(--accent-pink); font-size: 0.75rem; font-weight: 800; letter-spacing: 1px;">SERVER</span>
+            <h3 class="fw-bold mt-4 mb-0 text-success">Sehat <i class="bi bi-cloud-check-fill ms-1 fs-5"></i></h3>
+        </div>
+    </div>
+</div>
+
+<div id="antrean-section"></div>
+
+<!-- Tabel Antrean User -->
+<div class="glass-card mb-5">
+    <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="fw-bold mb-1" style="color: var(--text-main);">Antrean Persetujuan Akun Pengguna</h5>
+            <p class="small fw-medium mb-0" style="color: var(--text-muted);">Tinjau pendaftaran operator OPD atau Admin BPKAD yang baru masuk.</p>
+        </div>
+        <span class="badge rounded-pill" style="background-color: var(--accent-pink);">{{ jumlah_antrean_user|default:"0" }} Antrean</span>
+    </div>
+        
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th class="ps-4 border-0">Nama Lengkap & Akun</th>
+                    <th class="border-0">Peran (Role)</th>
+                    <th class="border-0">Instansi / OPD</th>
+                    <th class="border-0">Waktu Mendaftar</th>
+                    <th class="border-0">Status</th>
+                    <th class="text-center pe-4 border-0">Tindakan Keputusan</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for profile in antrean_user %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="fw-bold" style="color: var(--text-main);">{{ profile.user.first_name }} {{ profile.user.last_name|default:"" }}</div>
+                        <div class="fw-bold" style="font-size: 0.75rem; color: var(--accent-pink);">@{{ profile.user.username }}</div>
+                    </td>
+                    
+                    <td><div class="fw-bold text-primary">{{ profile.role|default:"Operator" }}</div></td>
+                    
+                    <td>{{ profile.opd.nama_opd|default:"-" }}</td>
+                    
+                    <td><div style="font-size: 0.8rem;">{{ profile.user.date_joined|date:"d M Y, H:i" }}</div></td>
+                    
+                    <td><span class="badge-glow-pending" style="font-size: 0.7rem;">Menunggu</span></td>
+                    
+                    <td class="text-center pe-4">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="{% url 'auth:setujui_user' profile.user.id %}" class="btn btn-sm btn-outline-success fw-bold" title="Setujui Akses"><i class="bi bi-check-lg"></i> Setujui</a>
+                            <a href="{% url 'auth:tolak_user' profile.user.id %}" class="btn btn-sm btn-outline-danger fw-bold" title="Tolak Instansi" onclick="return confirm('Apakah Anda yakin ingin menolak instansi ini?');">
+                                <i class="bi bi-x-lg"></i> Tolak</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-secondary">
+                        <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
+                        Tidak ada antrean pendaftaran akun pengguna saat ini.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Tabel Antrean OPD -->
+<div class="glass-card mb-4">
+    <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="fw-bold mb-1" style="color: var(--text-main);">Antrean Pendaftaran Instansi (OPD)</h5>
+            <p class="small fw-medium mb-0" style="color: var(--text-muted);">Tinjau pendaftaran OPD baru dan setujui untuk mengirimkan instruksi via Email Resmi.</p>
+        </div>
+        <span class="badge rounded-pill" style="background-color: var(--accent-pink);">{{ jumlah_antrean_opd|default:"0" }} Antrean</span>
+    </div>
+        
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th class="ps-4 border-0">Nama Instansi & Kode</th>
+                    <th class="border-0">Kategori</th>
+                    <th class="border-0">Email Resmi</th>
+                    <th class="border-0">Waktu Mendaftar</th>
+                    <th class="border-0">Status</th>
+                    <th class="text-center pe-4 border-0">Tindakan Keputusan</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for opd in antrean_opd %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="fw-bold" style="color: var(--text-main);">{{ opd.nama_opd }}</div>
+                        <div class="fw-bold" style="font-size: 0.75rem; color: var(--accent-pink);">{{ opd.kode_opd }}</div>
+                    </td>
+                    <td><div class="fw-bold text-primary">{{ opd.kategori_opd|default:"-" }}</div></td>
+                    <td><div style="font-size: 0.85rem;" class="text-secondary">{{ opd.email_resmi|default:"-" }}</div></td>
+                    <td><div style="font-size: 0.8rem;">{{ opd.created_at|date:"d M Y, H:i" }}</div></td>
+                    <td><span class="badge-glow-pending" style="font-size: 0.7rem;">Menunggu</span></td>
+                    <td class="text-center pe-4">
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="{% url 'auth:setujui_opd' opd.id %}" class="btn btn-sm btn-outline-success fw-bold" title="Setujui Instansi & Kirim Email"><i class="bi bi-envelope-check me-1"></i> Setujui</a>
+                            <a href="{% url 'auth:tolak_opd' opd.id %}" class="btn btn-sm btn-outline-danger fw-bold" title="Tolak Instansi" onclick="return confirm('Apakah Anda yakin ingin menolak instansi ini?');">
+                                <i class="bi bi-x-lg"></i> Tolak</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-secondary">
+                        <i class="bi bi-building fs-1 d-block mb-2 opacity-50"></i>
+                        Tidak ada antrean pendaftaran instansi/OPD saat ini.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

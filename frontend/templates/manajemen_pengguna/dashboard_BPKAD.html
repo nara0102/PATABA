@@ -1,0 +1,621 @@
+{% extends 'base/base_admin_BPKAD.html' %} 
+{% block title %}Dashboard Admin BPKAD - TRANSPARA{% endblock %}
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<!-- START: CONTAINER KONTEN -->
+<div class="container-fluid py-4">
+
+    <!-- Header Dashboard -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1" style="color: var(--text-main);">Tinjauan Utama</h4>
+            <p class="text-muted small mb-0">Ringkasan status seluruh aset tanah daerah secara real-time.</p>
+        </div>
+    </div>
+
+    <!-- 4 KOTAK SUMMARY DASHBOARD -->
+    <div class="row g-4 mb-4">
+        <!-- 1. Total Aset & Nilai -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card-transpara" style="border-left: 5px solid var(--accent-blue);">
+                <div class="d-flex justify-content-between">
+                    <i class="bi bi-bank fs-3 text-primary"></i>
+                    <div class="text-end">
+                        <p class="text-secondary small fw-bold mb-0">TOTAL BIDANG</p>
+                        <h3 class="fw-bold mb-0 text-dark">{{ total_aset|default:"0" }}</h3>
+                    </div>
+                </div>
+                
+                <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+                    <span class="small fw-medium text-muted me-2">Estimasi Nilai</span>
+                    
+                    <span class="fw-bold text-success tampil-rupiah d-inline-block text-truncate text-end" 
+                        style="font-size: 0.9rem; max-width: 60%;" 
+                        title="Rp {{ total_nilai|default:'0' }},00">
+                        {{ total_nilai|default:"0" }},00
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 2. Bersertifikat -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card-transpara" style="border-left: 5px solid #28A745;">
+                <div class="d-flex justify-content-between">
+                    <i class="bi bi-shield-check fs-3 text-success"></i>
+                    <div class="text-end">
+                        <p class="text-secondary small fw-bold mb-0">BERSERTIFIKAT</p>
+                        <h3 class="fw-bold mb-0 text-dark">{{ aset_bersertifikat|default:"0" }}</h3>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3">
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ persen_bersertifikat|default:'0' }}%;"></div>
+                    </div>
+                    <div class="text-end mt-1"><small class="text-muted fw-bold" style="font-size: 0.7rem;">{{ persen_bersertifikat|default:"0"|floatformat:1 }}% Tersertifikasi</small></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 3. Belum Sertifikat & Lainnya -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card-transpara" style="border-left: 5px solid #17A2B8;">
+                <div class="d-flex justify-content-between">
+                    <i class="bi bi-file-earmark-x fs-3 text-info"></i>
+                    <div class="text-end">
+                        <p class="text-secondary small fw-bold mb-0">BELUM SERTIFIKAT</p>
+                        <h3 class="fw-bold mb-0 text-dark">{{ aset_belum_sertifikat|default:"0" }}</h3>
+                    </div>
+                </div>
+                <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+                    <span class="small fw-medium text-muted">Status Lainnya</span>
+                    <span class="fw-bold text-info" style="font-size: 0.9rem;">{{ aset_sertifikat_lainnya|default:"0" }} Bidang</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 4. Perhatian Khusus (Sengketa & Antrean) -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card-transpara" style="border-left: 5px solid #DC3545; background-color: #FEF2F2;">
+                <div class="d-flex justify-content-between">
+                    <i class="bi bi-exclamation-triangle fs-3 text-danger"></i>
+                    <div class="text-end">
+                        <p class="text-danger small fw-bold mb-0">BELUM VERIFIKASI</p>
+                        <h3 class="fw-bold mb-0 text-danger">{{ jumlah_antrean|default:"0" }}</h3>
+                    </div>
+                </div>
+                <div class="mt-3 pt-2 border-top border-danger border-opacity-25 d-flex justify-content-between align-items-center">
+                    <span class="small fw-medium text-danger">Sengketa/Rusak</span>
+                    <span class="fw-bold text-danger" style="font-size: 0.9rem;">{{ aset_bermasalah|default:"0" }} Bidang</span>
+                </div>
+                <div class="mt-2 text-center">
+                    <a href="#antrean-verifikasi-section" class="small text-danger fw-bold text-decoration-none border-bottom border-danger">Tindak Lanjuti &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BARIS GRAFIK & LOG AKTIVITAS -->
+    <div class="row g-4 mb-4">
+        <!-- Kolom Kiri: Grafik -->
+        <div class="col-lg-8">
+            <div class="glass-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold text-dark mb-0">Tren Perolehan Aset Tanah</h5>
+                    <div class="d-flex gap-2">
+                        
+                        <select class="form-select w-auto form-select-sm border-0 bg-light rounded-pill px-3 fw-bold text-primary" 
+                                onchange="window.location.href='?tahun='+this.value">
+                            {% for t in list_tahun %}
+                                <option value="{{ t|stringformat:'d' }}" {% if t == tahun_grafik %}selected{% endif %}>
+                                    Tahun {{ t|stringformat:'d' }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <button class="btn btn-sm btn-light border rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#chartModal" title="Perbesar Grafik">
+                            <i class="bi bi-arrows-fullscreen text-primary"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="asetGrowthChart" style="min-height: 280px;"></div>
+            </div>
+        </div>
+        
+        <!-- Kolom Kanan: Log Aktivitas -->
+        <div class="col-lg-4">
+            <div class="glass-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold text-dark mb-0">Log Aktivitas <i class="bi bi-broadcast text-success ms-1 blink"></i></h5>
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#logModal" class="small text-decoration-none text-primary fw-bold border-bottom border-primary pb-1">
+                        Lihat Semua <i class="bi bi-arrows-angle-expand ms-1" style="font-size: 0.7rem;"></i>
+                    </a>
+                </div>
+                
+                <div class="log-wrapper" style="max-height: 280px; overflow-y: auto; padding-right: 5px;">
+                    {% for log in logs_aktivitas %}
+                    <div class="log-item">
+                        <div class="d-flex">
+                            <i class="bi bi-activity text-primary me-3 fs-5 mt-1"></i>
+                            <div>
+                                <span class="small text-dark fw-medium"><b>{{ log.user }}</b> {{ log.aksi }} <span class="text-primary">{{ log.objek }}</span>.</span><br>
+                                <small class="text-muted" style="font-size: 0.7rem;"><i class="bi bi-clock me-1"></i>{{ log.waktu }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-center text-muted small mt-5">Belum ada aktivitas terekam hari ini.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AREA MANAJEMEN PUBLIKASI & KONTEN -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-7">
+            <div class="glass-card p-4 h-100" style="background-color: #FAFAFA;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-dark mb-0"><i class="bi bi-megaphone-fill text-warning me-2"></i>Papan Pengumuman & Berita</h6>
+                    <a href="{% url 'publik:tambah_publikasi' %}" class="btn btn-sm btn-bpkad-primary rounded-pill"><i class="bi bi-pencil-square me-1"></i> Tulis Baru</a>
+                </div>
+                
+                <div class="list-group list-group-flush border-top">
+                    {% for item in list_berita_pengumuman %}
+                    <div class="list-group-item bg-transparent px-0 py-3 d-flex gap-3">
+                        <div class="{% if item.kategori == 'PENGUMUMAN' %}bg-danger{% else %}bg-primary-blue{% endif %} text-white rounded p-2 text-center shadow-sm" style="width: 60px; height: 60px; flex-shrink: 0;">
+                            <span class="d-block fw-bold fs-5 lh-1">{{ item.tanggal_upload|date:"d" }}</span>
+                            <small style="font-size: 0.6rem; text-transform: uppercase;">{{ item.tanggal_upload|date:"M" }}</small>
+                        </div>
+                        <div>
+                            <span class="badge {% if item.kategori == 'PENGUMUMAN' %}bg-danger-subtle text-danger border-danger-subtle{% else %}bg-primary-subtle text-primary border-primary-subtle{% endif %} border mb-1" style="font-size: 0.65rem;">
+                                {{ item.get_kategori_display|upper }}
+                            </span>
+                            <h6 class="fw-bold mb-1">{{ item.judul }}</h6>
+                            <p class="small text-muted mb-0">{{ item.isi_konten|truncatechars:100 }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-center text-muted small mt-4">Belum ada pengumuman atau berita yang diterbitkan.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="glass-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-dark mb-0"><i class="bi bi-images text-success me-2"></i>Sorotan Kegiatan</h6>
+                    <a href="{% url 'publik:list_publikasi' %}#kegiatan" class="small text-decoration-none text-primary fw-bold">Kelola Galeri</a>
+                </div>
+                
+                <p class="small text-muted mb-3">Pratinjau dokumentasi kegiatan terbaru.</p>
+                
+                <div class="row g-2">
+                    {% for kegiatan in list_kegiatan %}
+                        {% if forloop.first %}
+                        <div class="col-12 position-relative mb-1">
+                            {% if kegiatan.gambar_utama %}
+                                <img src="{{ kegiatan.gambar_utama.url }}" class="img-fluid rounded-3 w-100 object-fit-cover shadow-sm" style="height: 160px;" alt="{{ kegiatan.judul }}">
+                            {% else %}
+                                <div class="bg-secondary rounded-3 w-100 d-flex justify-content-center align-items-center" style="height: 160px;"><i class="bi bi-camera fs-1 text-white opacity-50"></i></div>
+                            {% endif %}
+                            <div class="position-absolute bottom-0 start-0 w-100 p-2" style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;">
+                                <p class="text-white small fw-bold mb-0 text-truncate px-2">{{ kegiatan.judul }}</p>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="col-6">
+                            {% if kegiatan.gambar_utama %}
+                                <img src="{{ kegiatan.gambar_utama.url }}" class="img-fluid rounded-3 w-100 object-fit-cover shadow-sm" style="height: 100px;" alt="{{ kegiatan.judul }}">
+                            {% else %}
+                                <div class="bg-secondary rounded-3 w-100 d-flex justify-content-center align-items-center" style="height: 100px;"><i class="bi bi-camera fs-3 text-white opacity-50"></i></div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% empty %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-image fs-1 text-muted opacity-25"></i>
+                        <p class="small text-muted mt-2">Belum ada foto kegiatan.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ANTREAN VERIFIKASI -->
+    <div id="antrean-verifikasi-section" style="scroll-margin-top: 130px;">
+        <div class="glass-card mb-5" style="background: linear-gradient(135deg, #fff5f5 0%, #faffe3 100%); border-color: rgba(220, 192, 53, 0.2);">
+            <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold mb-1 text-dark"><i class="bi bi-bell-fill text-warning me-2"></i>Antrean Verifikasi Aset Baru</h5>
+                    <p class="small text-muted mb-0">Menampilkan daftar aset tanah yang perlu ditinjau.</p>
+                </div>
+                <a class="btn btn-sm btn-outline-warning text-dark fw-bold background: #f5f5f5 rounded-pill px-3">
+                    {% if jumlah_antrean > 0 %}Ada {{ jumlah_antrean }} antrian{% else %}Antrean Bersih{% endif %}
+                </a>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr class="small text-uppercase text-secondary">
+                            <th class="ps-4 py-3 border-0">Instansi (OPD) Pengusul</th>
+                            <th class="py-3 border-0">Nama Aset & Lokasi</th>
+                            <th class="py-3 border-0">Waktu Usulan</th>
+                            <th class="text-center py-3 border-0" style="width: 150px;">Tindakan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usulan in antrean_aset|slice:":5" %}
+                        <tr style="background-color: #ffffff;">
+                            <td class="ps-4 fw-bold"><i class="bi bi-building me-1 text-muted"></i> {{ usulan.opd.nama_opd }}</td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ usulan.nama_barang }}</div>
+                                <div class="small text-muted">{{ usulan.kecamatan_nama|default:"-" }}</div>
+                            </td>
+                            <td class="small text-muted">{{ usulan.created_at|date:"d M Y, H:i" }}</td>
+                            <td class="text-center pe-4">
+                                <a href="{% url 'tanah:edit_aset_tanah' usulan.id %}" class="btn btn-sm btn-warning rounded-pill fw-bold w-100 shadow-sm text-dark">
+                                    <i class="bi bi-clipboard-check me-1"></i> Tinjau
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr style="background-color: #ffffff;">
+                            <td colspan="4" class="text-center py-5">
+                                <div class="d-inline-flex align-items-center justify-content-center bg-success-subtle rounded-circle mb-3" style="width: 60px; height: 60px;">
+                                    <i class="bi bi-check2-all text-success fs-1"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-1">Hore! Antrean Bersih.</h6>
+                                <p class="small text-muted mb-0">Belum ada usulan aset baru dari instansi OPD saat ini.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- RINGKASAN DAFTAR ASET -->
+    <div id="daftar-aset-section" style="scroll-margin-top: 130px;">
+        <div class="glass-card mb-4">
+            <div class="p-4 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h5 class="fw-bold mb-1 text-dark"><i class="bi bi-collection-fill text-primary me-2"></i>Ringkasan Daftar Aset</h5>
+                    <p class="small text-muted mb-0">Menampilkan data aset tanah terbaru yang telah diregistrasi/diverifikasi.</p>
+                </div>
+                
+                <div class="d-flex align-items-center gap-2">
+                    <div class="position-relative" style="width: 280px;">
+                        <i class="bi bi-search position-absolute text-muted" style="top: 50%; left: 15px; transform: translateY(-50%); z-index: 5;"></i>
+                        <input type="text" id="quickSearchOPD" onkeyup="cariCepatOPD()" class="form-control bg-light shadow-none" style="padding-left: 2.5rem !important; border-radius: 50rem !important;" placeholder="Cari OPD atau Aset...">
+                    </div>
+                    
+                    <a href="{% url 'tanah:list_aset_tanah' %}" class="btn btn-bpkad-outline rounded-pill px-4"><i class="bi bi-arrows-fullscreen me-1"></i> Kelola Semua Data</a>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr class="small text-uppercase text-secondary">
+                            <th class="ps-4 py-3 border-0">Nama Barang & OPD</th>
+                            <th class="py-3 border-0">NIBAR</th>
+                            <th class="py-3 border-0">Kecamatan</th>
+                            <th class="py-3 border-0">Status Sertifikat</th>
+                            <th class="text-center py-3 border-0" style="width: 120px;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelRingkasanAset">
+                        {% for aset in semua_aset|slice:":5" %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold text-dark nama-aset">{{ aset.nama_barang }}</div>
+                                <div class="small text-muted nama-opd"><i class="bi bi-building me-1"></i>{{ aset.opd.nama_opd|default:"BPKAD" }}</div>
+                            </td>
+                            <td><div class="badge bg-light text-primary border border-primary-subtle px-2 py-1 shadow-sm">{{ aset.nibar|default:"-" }}</div></td>
+                            <td><div class="fw-bold text-secondary" style="font-size: 0.9rem;">{{ aset.kecamatan_nama|default:"-" }}</div></td>
+                            <td>
+                                {% if aset.status_sertifikasi == 'BERSERTIFIKAT' %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2"><i class="bi bi-shield-check me-1"></i>Bersertifikat</span>
+                                {% elif aset.status_sertifikasi == 'LAINNYA' %}
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle px-2"><i class="bi bi-three-dots me-1"></i>Lainnya</span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2"><i class="bi bi-x-circle me-1"></i>Belum</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center pe-4">
+                                <!-- PENTING: Tombol Detail Modal diubah agar tidak menggunakan data-bs-target yang langsung -->
+                                
+                                    <button type="button" class="btn btn-sm btn-bpkad-outline rounded-pill px-3 fw-bold w-100" data-bs-toggle="modal" data-bs-target="#detailAsetModal{{ aset.id }}">
+                                        Detail
+                                    </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-secondary">
+                                <i class="bi bi-folder-x fs-1 d-block mb-2 opacity-50"></i>
+                                Belum ada data aset tanah yang diregistrasi.
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                        <tr id="noResultRow" style="display: none;">
+                            <td colspan="5" class="text-center py-5 text-secondary" style="background-color: #FAFAFA;">
+                                <i class="bi bi-search fs-2 d-block mb-2 opacity-25"></i>
+                                <p class="mb-0">Pencarian untuk "<b id="searchText" class="text-dark"></b>" tidak ditemukan.</p>
+                                <small class="text-muted">Coba periksa ejaan kata atau gunakan kata kunci lain.</small>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div> <!-- Akhir dari container-fluid -->
+
+<!-- ==========================================
+     KUMPULAN MODAL (DIBUAT TERPISAH)
+     ========================================== -->
+
+<!-- TEMPAT PENAMPUNGAN MODAL (Modal Container) -->
+<div id="modalContainer">
+
+    <!-- 1. MODAL DETAIL ASET -->
+    {% for aset in semua_aset|slice:":5" %}
+    <div class="modal fade" id="detailAsetModal{{ aset.id }}" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content apple-modal">
+                <div class="apple-modal-header d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="badge bg-primary-blue text-white mb-2 px-3 py-1 rounded-pill">Informasi Utama Aset</div>
+                        <h4 class="fw-bold text-dark mb-1">{{ aset.nama_barang }}</h4>
+                        <div class="text-muted small"><i class="bi bi-building me-1"></i> {{ aset.opd.nama_opd|default:"-" }}</div>
+                    </div>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="apple-modal-body">
+                    <div class="row g-4">
+                        <!-- Identitas & Nilai -->
+                        <div class="col-lg-6">
+                            <div class="detail-box">
+                                <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">Identitas Barang</h6>
+                                <div class="row g-3">
+                                    <div class="col-6"><div class="detail-label">NIBAR</div><div class="detail-value text-primary">{{ aset.nibar|default:"-" }}</div></div>
+                                    <div class="col-6"><div class="detail-label">Kode Barang</div><div class="detail-value">{{ aset.kode_barang|default:"-" }}</div></div>
+                                    <div class="col-6"><div class="detail-label">No. Register</div><div class="detail-value">{{ aset.nomor_register|default:"-" }}</div></div>
+                                    <div class="col-6"><div class="detail-label">Nilai Aset</div><div class="detail-value text-success tampil-rupiah">{{ aset.nilai_aset|default:"0" }}</div></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Lokasi & Fisik -->
+                        <div class="col-lg-6">
+                            <div class="detail-box">
+                                <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">Lokasi & Fisik</h6>
+                                <div class="row g-3">
+                                    <div class="col-12"><div class="detail-label">Alamat Lokasi</div><div class="detail-value">{{ aset.alamat_lokasi|default:"-" }}</div></div>
+                                    <div class="col-6"><div class="detail-label">Kecamatan</div><div class="detail-value">{{ aset.kecamatan_nama|default:"-" }}</div></div>
+                                    <div class="col-6"><div class="detail-label">Kelurahan</div><div class="detail-value">{{ aset.kelurahan_nama|default:"-" }}</div></div>
+                                    <div class="col-6"><div class="detail-label">Luas Tanah</div><div class="detail-value tampil-luas">{{ aset.luas_m2|default:"0" }}</div></div>
+                                    <div class="col-6"><div class="detail-label">Koordinat (Lat, Lng)</div><div class="detail-value">{{ aset.latitude|default:"0" }}, {{ aset.longitude|default:"0" }}</div></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Penggunaan & Status Akhir -->
+                        <div class="col-12">
+                            <div class="detail-box" style="background: #FFFDF3; border-color: #FFC107;">
+                                <div class="row g-3 text-center">
+                                    <div class="col-md-3 border-end"><div class="detail-label">Status Penggunaan</div><div class="detail-value">{{ aset.status_penggunaan|default:"-" }}</div></div>
+                                    <div class="col-md-3 border-end"><div class="detail-label">Kondisi Pemanfaatan</div><div class="detail-value">{{ aset.kondisi_pemanfaatan|default:"-" }}</div></div>
+                                    <div class="col-md-3 border-end"><div class="detail-label">Status Sertifikasi</div><div class="detail-value">{{ aset.get_status_sertifikasi_display|default:"-" }}</div></div>
+                                    <div class="col-md-3">
+                                        <div class="detail-label">Status Verifikasi</div>
+                                        {% if aset.status_verifikasi == 'VALID' %}
+                                            <div class="badge bg-success text-white px-3 mt-1 rounded-pill">Data Valid</div>
+                                        {% else %}
+                                            <div class="badge bg-warning text-dark px-3 mt-1 rounded-pill">{{ aset.status_verifikasi|default:"Menunggu" }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- 2. MODAL LOG AKTIVITAS -->
+    <div class="modal fade" id="logModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content apple-modal">
+                <div class="apple-modal-header d-flex justify-content-between align-items-center bg-white sticky-top">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-list-columns-reverse text-primary me-2"></i>Rekaman Jejak Audit</h5>
+                        <p class="small text-muted mb-0">Riwayat lengkap aktivitas pengguna di sistem Transpara BPKAD.</p>
+                    </div>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="apple-modal-body p-0" style="background-color: #FAFAFA;">
+                    <div class="list-group list-group-flush">
+                        {% for log in logs_aktivitas %}
+                        <div class="list-group-item bg-transparent px-4 py-3 log-item">
+                            <div class="d-flex align-items-start">
+                                <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-3 mt-1" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-activity fs-5"></i>
+                                </div>
+                                <div>
+                                    <span class="text-dark fw-medium"><b>{{ log.user }}</b> {{ log.aksi }} <span class="text-primary">{{ log.objek }}</span>.</span><br>
+                                    <small class="text-muted"><i class="bi bi-clock me-1"></i>{{ log.waktu }} | <i class="bi bi-geo-alt mx-1"></i>IP: 192.168.1.x</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="p-5 text-center text-muted">Belum ada aktivitas yang direkam.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MODAL GRAFIK LENGKAP -->
+    <div class="modal fade" id="chartModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content apple-modal">
+                <div class="apple-modal-header d-flex flex-wrap justify-content-between align-items-center px-4 py-3 border-bottom">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Analisis Pendaftaran Aset</h5>
+                    </div>
+                    <div class="d-flex align-items-center mt-3 mt-md-0">
+                        <div class="position-relative me-2" style="width: 140px;">
+                            <select class="form-select form-select-sm shadow-none fw-bold text-secondary pe-4" style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; appearance: none; -webkit-appearance: none; -moz-appearance: none;">
+                                <option>Aset Tanah</option>
+                                <option disabled>Aset Kendaraan</option>
+                            </select>
+                            <i class="bi bi-chevron-down position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; pointer-events: none; color: #486581;"></i>
+                        </div>
+                        <div class="position-relative" style="width: 130px;">
+                            <select class="form-select w-auto form-select-sm border-0 bg-light rounded-pill px-3 fw-bold text-primary" 
+                                    onchange="window.location.href='?tahun='+this.value">
+                                {% for t in list_tahun %}
+                                    <option value="{{ t|stringformat:'d' }}" {% if t == tahun_grafik %}selected{% endif %}>
+                                        Tahun {{ t|stringformat:'d' }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <i class="bi bi-chevron-down position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; pointer-events: none; color: #0056B3;"></i>
+                        </div>
+                        <div style="width: 2px; height: 24px; background-color: #E2E8F0; margin: 0 16px;"></div>
+                        <button type="button" class="btn-close shadow-none m-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="apple-modal-body bg-white p-4">
+                    <div id="asetGrowthChartExpanded" style="min-height: 450px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div> <!-- Akhir Modal Container -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // --- 1. AMBIL DATA DARI DJANGO ---
+    // (Ini yang bikin grafiknya hidup sesuai terminal lo)
+    var dataArray = JSON.parse('{{ data_grafik_bulanan|safe }}');
+
+
+    // --- 4. GRAFIK KECIL DI DASHBOARD (AREA) ---
+    var elKecil = document.querySelector("#asetGrowthChart");
+    if (elKecil) {
+        var optionsKecil = {
+            series: [{ name: 'Aset Diperoleh', data: dataArray }],
+            chart: { height: 280, type: 'area', fontFamily: 'inherit', toolbar: { show: false } },
+            colors: ['#0056B3'],
+            fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05, stops: [0, 90, 100] } },
+            dataLabels: { enabled: false },
+            // Pake straight biar angka 1 bidang tanah kelihatan jelas, gak ilang ketarik lengkungan
+            stroke: { curve: 'straight', width: 3 }, 
+            xaxis: { categories: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'], tooltip: { enabled: false } },
+            yaxis: {
+                min: 0,
+                forceNiceScale: true,
+                labels: { formatter: function (val) { return Math.round(val); } }
+            }
+        };
+        new ApexCharts(elKecil, optionsKecil).render();
+    }
+
+    // --- 5. GRAFIK BESAR DI DALAM MODAL (BAR) ---
+    // (Penyebab layar putih lo kemarin karena kode ini ada di luar, sekarang udah aman di dalam)
+    var modalEl = document.getElementById('chartModal');
+    if (modalEl) {
+        var chartBesarRendered = false; 
+        
+        modalEl.addEventListener('shown.bs.modal', function () {
+            if (!chartBesarRendered) {
+                var elBesar = document.querySelector("#asetGrowthChartExpanded");
+                
+                if (elBesar) {
+                    var optionsBesar = {
+                        series: [{ name: 'Total Aset Masuk', data: dataArray }],
+                        chart: { type: 'bar', height: 450, fontFamily: 'inherit', toolbar: { show: true } },
+                        colors: ['#0056B3'],
+                        plotOptions: { bar: { borderRadius: 6, columnWidth: '45%' } },
+                        dataLabels: { enabled: true, style: { fontSize: '12px', colors: ['#fff'] } },
+                        stroke: { show: true, width: 2, colors: ['transparent'] },
+                        xaxis: { categories: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'], labels: { style: { fontWeight: 600 } } },
+                        yaxis: {
+                            min: 0,
+                            forceNiceScale: true,
+                            title: { text: 'Jumlah Aset (Bidang)' },
+                            labels: { formatter: function (val) { return Math.round(val); } }
+                        },
+                        fill: { opacity: 1 },
+                        tooltip: { y: { formatter: function (val) { return val + " Bidang Tanah" } } }
+                    };
+
+                    new ApexCharts(elBesar, optionsBesar).render();
+                    chartBesarRendered = true; // Kunci biar dia gak render ulang berkali-kali
+                }
+            }
+        });
+    }
+
+    // --- 6. FITUR PENCARIAN CEPAT OPD & ASET ---
+    // (Fitur lo yang udah jalan paten)
+    const quickSearchInput = document.getElementById("quickSearchOPD");
+    if (quickSearchInput) {
+        quickSearchInput.addEventListener("keyup", function() {
+            let input = this.value.toLowerCase();
+            let tableBody = document.getElementById("tabelRingkasanAset");
+            if(!tableBody) return; 
+            
+            let rows = tableBody.getElementsByTagName("tr");
+            let hasResult = false;
+            let noResultRow = document.getElementById("noResultRow");
+            let searchText = document.getElementById("searchText");
+
+            for (let i = 0; i < rows.length; i++) {
+                if (rows[i].id === "noResultRow" || rows[i].classList.contains("django-empty-row") || rows[i].classList.contains("modal")) continue;
+
+                let opdElement = rows[i].querySelector(".nama-opd");
+                let asetElement = rows[i].querySelector(".nama-aset"); 
+                
+                if (opdElement && asetElement) {
+                    if (opdElement.innerText.toLowerCase().includes(input) || asetElement.innerText.toLowerCase().includes(input)) {
+                        rows[i].style.display = "";
+                        hasResult = true; 
+                    } else {
+                        rows[i].style.display = "none";
+                    }
+                }
+            }
+
+            if (noResultRow) {
+                if (hasResult || input === "") {
+                    noResultRow.style.display = "none";
+                } else {
+                    noResultRow.style.display = "";
+                    if (searchText) searchText.innerText = quickSearchInput.value;
+                }
+            }
+        });
+    }
+
+});
+</script>
+{% endblock %}

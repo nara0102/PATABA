@@ -1,0 +1,99 @@
+{% extends 'base/base_admin_BPKAD.html' %}
+{% block title %}Pembebasan Lahan (Ganti Rugi) - TRANSPARA{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1" style="color: var(--text-main);"><i class="bi bi-map-fill me-2 text-warning"></i>Pembebasan Lahan & Ganti Rugi</h4>
+            <p class="text-muted small mb-0">Daftar sertifikat dan dokumen ganti rugi tanah daerah (Mode Pratinjau).</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-bpkad-outline rounded-pill px-3 shadow-sm"><i class="bi bi-printer me-1"></i> Cetak Daftar</button>
+            <button class="btn btn-bpkad-primary rounded-pill px-4 shadow-sm" disabled title="Fitur dalam tahap pengembangan"><i class="bi bi-plus-lg me-1"></i> Tambah Data</button>
+        </div>
+    </div>
+
+    <div class="alert alert-warning border-warning border-2 rounded-4 shadow-sm mb-4 d-flex align-items-center">
+        <i class="bi bi-info-circle-fill fs-3 text-warning me-3"></i>
+        <div>
+            <h6 class="fw-bold text-dark mb-0">Halaman Pratinjau (Mockup)</h6>
+            <p class="small text-muted mb-0">Halaman ini adalah pratinjau struktur data ganti rugi tanah untuk bahan diskusi dengan Dinas. Fungsi database belum diaktifkan.</p>
+        </div>
+    </div>
+
+    <div class="glass-card p-0" id="table-pembebasan">
+        <div class="table-responsive table-master-container mb-0">
+            <table class="table align-middle table-hover mb-0" style="table-layout: fixed; width: 100%;">
+                <thead class="bg-light">
+                    <tr>
+                        <th colspan="8" class="text-center py-3 fs-6 text-dark border-bottom border-2">Daftar Sertifikat Ganti Rugi Tanah Tahun 2006</th>
+                    </tr>
+                    <tr class="small text-secondary">
+                        <th class="ps-4 py-3" style="width: 15%;">NAMA PEMILIK</th>
+                        <th class="py-3" style="width: 25%;">NO. SERTIFIKAT / AKTA</th>
+                        <th class="py-3" style="width: 10%;">TANGGAL</th>
+                        <th class="py-3" style="width: 12%;">STATUS</th>
+                        <th class="py-3" style="width: 8%;">LUAS (m²)</th>
+                        <th class="py-3" style="width: 15%;">PERUNTUKAN GANTI RUGI</th>
+                        <th class="py-3" style="width: 15%;">ALAMAT</th>
+                        <th class="text-center pe-4 py-3" style="width: 7%;">KET</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white">
+                    <tr>
+                        <td class="ps-4 fw-bold text-dark">Drs. Mustakim</td>
+                        <td class="text-primary font-monospace small">No. Sertifikat : 19.05.01.01.1.01088 AU 393412</td>
+                        <td class="small text-muted">23/09/2003</td>
+                        <td><span class="badge bg-success-subtle text-success border border-success-subtle">Hak Milik No.1088</span></td>
+                        <td class="fw-bold">261</td>
+                        <td class="small">Perluasan Bandara</td>
+                        <td class="small text-muted">Lasoani, Palu Timur</td>
+                        <td class="text-center pe-4 fw-bold text-success">ASLI</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4 fw-bold text-dark">Dra. Alsemeika Arumpone</td>
+                        <td class="text-primary font-monospace small">No. Sertifikat : 19.05.02.05.1.00596 AJ 314690</td>
+                        <td class="small text-muted">09/04/1998</td>
+                        <td><span class="badge bg-success-subtle text-success border border-success-subtle">Hak Milik No. 596</span></td>
+                        <td class="fw-bold">1.148</td>
+                        <td class="small">Perluasan Bandara</td>
+                        <td class="small text-muted">Lasoani, Palu Timur</td>
+                        <td class="text-center pe-4 fw-bold text-success">ASLI</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4 fw-bold text-dark">Sarman</td>
+                        <td class="text-primary font-monospace small">No. Sertifikat : 19.05.01.01.1.01265 AX 654104</td>
+                        <td class="small text-muted">31/12/2005</td>
+                        <td><span class="badge bg-success-subtle text-success border border-success-subtle">Hak Milik No.1265</span></td>
+                        <td class="fw-bold">528</td>
+                        <td class="small">Perluasan Bandara</td>
+                        <td class="small text-muted">Lasoani, Palu Timur</td>
+                        <td class="text-center pe-4 fw-bold text-success">ASLI</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4 fw-bold text-dark">Dra. Sihar R Sinaga</td>
+                        <td class="text-primary font-monospace small">No. Sertifikat : 19.05.02.05.1.00601 AJ 321555</td>
+                        <td class="small text-muted">20/04/1998</td>
+                        <td><span class="badge bg-success-subtle text-success border border-success-subtle">Hak Milik No. 607</span></td>
+                        <td class="fw-bold">235</td>
+                        <td class="small">Perluasan Bandara</td>
+                        <td class="small text-muted">Lasoani, Palu Timur</td>
+                        <td class="text-center pe-4 fw-bold text-success">ASLI</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4 fw-bold text-dark">Akbar Usman</td>
+                        <td class="text-primary font-monospace small">No. Sertifikat : 19.01. . .1.00293 AD 538697</td>
+                        <td class="small text-muted">05/04/1993</td>
+                        <td><span class="badge bg-success-subtle text-success border border-success-subtle">Hak Milik No.293</span></td>
+                        <td class="fw-bold">7.272</td>
+                        <td class="small">Perluasan Bandara</td>
+                        <td class="small text-muted">Lasoani, Palu Timur</td>
+                        <td class="text-center pe-4 fw-bold text-success">ASLI</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

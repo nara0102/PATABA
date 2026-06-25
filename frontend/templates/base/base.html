@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TRANSPARA - Portal Aset BPKAD{% endblock %}</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <link rel="stylesheet" href="{% static 'css/transpara_publik.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-floating-box">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold" style="color: #003F87;" href="{% url 'publik:home' %}">PATABA</a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="bi bi-list fs-2 text-dark"></i>
+            </button>
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav gap-3">
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'home' %}active fw-bold{% endif %}" href="{% url 'publik:home' %}">Beranda</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'data_aset_publik' %}active fw-bold{% endif %}" href="{% url 'publik:data_aset_publik' %}">Data Aset</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'peta_gis' %}active fw-bold{% endif %}" href="{% url 'publik:peta_gis' %}">Peta GIS</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'publik:home' %}#berita">Berita</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'kontak' %}active fw-bold{% endif %}" href="{% url 'publik:kontak' %}">Kontak</a></li>
+                </ul>
+            </div>
+            
+            <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
+                {% block nav_button %}
+                <a href="{% url 'auth:login' %}" class="btn rounded-pill px-4 shadow-sm fw-medium text-white btn-login-hover" style="background-color: #003F87; border: none;">Login</a>
+                {% endblock %}
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}
+    {% endblock %}
+
+    {% block footer %}
+    <footer class="footer-minimalis">
+        <div class="container-fluid px-4">
+            <div class="row g-2 mb-2">
+                <div class="col-lg-5">
+                    <h5 class="fw-bold mb-2" style="color: #1d1d1f;">Transpara</h5>
+                    <p class="mb-1" style="line-height: 1.4; font-size: 0.8rem; color: #86868b;">
+                        Sistem Informasi Transparansi Aset Daerah Kota Palu.<br>Dikelola oleh Bidang Aset BPKAD Kota Palu.
+                    </p>
+                    <div class="d-flex gap-3 mt-2">
+                        <a href="#" style="font-size: 1rem;"><i class="bi bi-globe"></i></a>
+                        <a href="#" style="font-size: 1rem;"><i class="bi bi-share"></i></a>
+                        <a href="mailto:bpkad@palukota.go.id" style="font-size: 1rem;"><i class="bi bi-envelope"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <h6 class="fw-bold mb-2">TAUTAN CEPAT</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-1 mb-0">
+                        <li><a href="{% url 'publik:data_aset_publik' %}">Data Aset</a></li>
+                        <li><a href="{% url 'publik:peta_gis' %}">Peta GIS</a></li>
+                        <li><a href="{% url 'publik:home' %}#berita">Berita & Galeri</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h6 class="fw-bold mb-2">INFORMASI KONTAK</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-1 mb-0">
+                        <li class="d-flex gap-2"><i class="bi bi-geo-alt text-secondary"></i> <span>Kompleks Kantor Walikota Palu, Blok B, Lt. 2</span></li>
+                        <li class="d-flex gap-2"><i class="bi bi-telephone text-secondary"></i> <span>(0451) 421001</span></li>
+                        <li class="d-flex gap-2"><i class="bi bi-clock text-secondary"></i> <span>Senin - Jumat: 08:00 - 16:00</span></li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="row align-items-center" style="font-size: 0.75rem; color: #86868b;">
+                <div class="col-md-6 text-center text-md-start">&copy; 2024 BPKAD Kota Palu. Hak Cipta Dilindungi Undang-Undang.</div>
+                <div class="col-md-6 text-center text-md-end d-flex gap-3 justify-content-center justify-content-md-end">
+                    <a href="#">Kebijakan Privasi</a>
+                    <a href="#">Syarat & Ketentuan</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    
+</body>
+</html>

@@ -1,0 +1,203 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Data Aset Daerah - TRANSPARA{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Mengunci layar agar terasa seperti web-app */
+    body { overflow: hidden; height: 100vh; }
+    
+    .main-wrapper-aset { flex-grow: 1; display: flex; flex-direction: column; padding-top: 20px; padding-bottom: 20px; overflow: hidden; }
+    
+    .tabel-scroll-wrapper { flex-grow: 1; overflow-y: auto; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); background: white; margin-bottom: 0; }
+    .tabel-scroll-wrapper thead th { position: sticky; top: 0; background-color: #003F87; color: white; z-index: 10; border-bottom: none; white-space: nowrap; }
+    
+    td { white-space: nowrap; font-size: 0.9rem; }
+    
+    /* Animasi Glow Search */
+    #quickSearchOPD { transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); border: 2px solid transparent !important; }
+    #quickSearchOPD:focus { border: 2px solid #0056B3 !important; box-shadow: 0 0 15px rgba(0,86,179,0.15) !important; transform: translateY(-2px); outline: none; }
+</style>
+{% endblock %}
+
+{% block nav_button %}
+<button onclick="window.history.back()" class="btn rounded-pill px-4 shadow-sm fw-medium text-white btn-login-hover" style="background-color: #003F87; border: none;">
+    <i class="bi bi-arrow-left me-1"></i> Kembali
+</button>
+{% endblock %}
+
+{% block content %}
+<main class="container-fluid px-4 main-wrapper-aset">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+        <div>
+            <h4 class="fw-bold text-dark mb-0">Daftar Aset Tanah Daerah</h4>
+            <p class="text-secondary mb-0" style="font-size: 0.85rem;">Rincian aset tervalidasi oleh BPKAD Kota Palu.</p>
+        </div>
+        
+        <div class="position-relative" style="width: 300px;">
+            <i class="bi bi-search position-absolute text-muted" style="top: 50%; left: 15px; transform: translateY(-50%);"></i>
+            <input type="text" id="quickSearchOPD" onkeyup="cariCepatOPD()" class="form-control bg-white shadow-sm border-0" style="padding-left: 2.5rem !important; border-radius: 50rem !important;" placeholder="Cari Nama Aset atau OPD...">
+        </div>
+    </div>
+
+    <div class="tabel-scroll-wrapper">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr class="small text-uppercase">
+                    <th class="ps-4 py-3 border-0">Nama Barang & OPD</th>
+                    <th class="py-3 border-0">NIBAR</th>
+                    <th class="py-3 border-0">Kecamatan</th>
+                    <th class="py-3 border-0">Status Sertifikat</th>
+                    <th class="text-center py-3 border-0" style="width: 120px;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tabelRingkasanAset">
+                {% for aset in semua_aset %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="fw-bold text-dark nama-aset">{{ aset.nama_barang }}</div>
+                        <div class="small text-muted nama-opd"><i class="bi bi-building me-1"></i>{{ aset.opd.nama_opd|default:"BPKAD" }}</div>
+                    </td>
+                    <td><div class="badge bg-light text-primary border border-primary-subtle px-2 py-1 shadow-sm">{{ aset.nibar|default:"-" }}</div></td>
+                    <td><div class="fw-bold text-secondary" style="font-size: 0.9rem;">{{ aset.kecamatan_nama|default:"-" }}</div></td>
+                    <td>
+                        {% if aset.status_sertifikasi == 'BERSERTIFIKAT' %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2"><i class="bi bi-shield-check me-1"></i>Bersertifikat</span>
+                        {% elif aset.status_sertifikasi == 'LAINNYA' %}
+                            <span class="badge bg-info-subtle text-info border border-info-subtle px-2"><i class="bi bi-three-dots me-1"></i>Lainnya</span>
+                        {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2"><i class="bi bi-x-circle me-1"></i>Belum</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center pe-4">
+                        <button type="button" class="btn btn-sm btn-bpkad-outline rounded-pill px-3 fw-bold w-100" data-bs-toggle="modal" data-bs-target="#detailAsetModal{{ aset.id }}">Detail</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-secondary" style="height: 40vh; vertical-align: middle;">
+                        <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
+                        <h6 class="fw-bold text-dark">Belum ada data aset tanah</h6>
+                        <p class="small mb-0">Data yang telah diverifikasi akan muncul di sini.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+
+                <tr id="noResultRow" style="display: none;">
+                    <td colspan="5" class="text-center text-secondary" style="height: 40vh; vertical-align: middle; background-color: #FAFAFA;">
+                        <i class="bi bi-search fs-2 d-block mb-2 opacity-25"></i>
+                        <p class="mb-0">Pencarian untuk "<b id="searchText" class="text-dark"></b>" tidak ditemukan.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+{% for aset in semua_aset %}
+<div class="modal fade" id="detailAsetModal{{ aset.id }}" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content apple-modal">
+            <div class="apple-modal-header d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="badge bg-primary-blue text-white mb-2 px-3 py-1 rounded-pill">Informasi Publik Aset</div>
+                    <h4 class="fw-bold text-dark mb-1">{{ aset.nama_barang }}</h4>
+                    <div class="text-muted small"><i class="bi bi-building me-1"></i> {{ aset.opd.nama_opd|default:"-" }}</div>
+                </div>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="apple-modal-body">
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="detail-box">
+                            <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">Identitas Barang</h6>
+                            <div class="row g-3">
+                                <div class="col-6"><div class="detail-label">NIBAR</div><div class="detail-value text-primary text-break">{{ aset.nibar|default:"-" }}</div></div>
+                                <div class="col-6"><div class="detail-label">Kode Barang</div><div class="detail-value text-break">{{ aset.kode_barang|default:"-" }}</div></div>
+                                <div class="col-6"><div class="detail-label">No. Register</div><div class="detail-value">{{ aset.nomor_register|default:"-" }}</div></div>
+                                <div class="col-6"><div class="detail-label">Nilai Aset</div><div class="detail-value text-success tampil-rupiah">{{ aset.nilai_aset|default:"0" }}</div></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="detail-box">
+                            <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">Lokasi & Fisik</h6>
+                            <div class="row g-3">
+                                <div class="col-12"><div class="detail-label">Alamat Lokasi</div><div class="detail-value">{{ aset.alamat_lokasi|default:"-" }}</div></div>
+                                <div class="col-6"><div class="detail-label">Kecamatan</div><div class="detail-value">{{ aset.kecamatan_nama|default:"-" }}</div></div>
+                                <div class="col-6"><div class="detail-label">Kelurahan</div><div class="detail-value">{{ aset.kelurahan_nama|default:"-" }}</div></div>
+                                <div class="col-6"><div class="detail-label">Luas Tanah</div><div class="detail-value tampil-luas">{{ aset.luas_m2|default:"0" }}</div></div>
+                                <div class="col-6"><div class="detail-label">Navigasi Peta</div>
+                                    <div class="detail-value">
+                                        {% if aset.latitude and aset.longitude %}
+                                            <a href="http://googleusercontent.com/maps.google.com/4{{ aset.latitude }},{{ aset.longitude }}" target="_blank" class="text-decoration-none text-primary"><i class="bi bi-geo-alt-fill me-1"></i>Buka Peta</a>
+                                        {% else %}
+                                            <a href="http://googleusercontent.com/maps.google.com/5{{ aset.alamat_lokasi|urlencode }} Palu" target="_blank" class="text-decoration-none text-primary"><i class="bi bi-search me-1"></i>Cari di Peta</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.tampil-rupiah').forEach(function(el) {
+            let rawText = el.innerText.split(',')[0]; 
+            let val = parseFloat(rawText.replace(/\./g, "").replace(/[^0-9.-]+/g,""));
+            if(!isNaN(val)) { el.innerText = 'Rp ' + val.toLocaleString('id-ID') + ',00'; }
+        });
+        document.querySelectorAll('.tampil-luas').forEach(function(el) {
+            let val = parseFloat(el.innerText.replace(/[^0-9.-]+/g,""));
+            if(!isNaN(val)) { el.innerText = val.toLocaleString('id-ID') + ' m²'; }
+        });
+    });
+
+    function cariCepatOPD() {
+        let inputRaw = document.getElementById("quickSearchOPD").value;
+        let input = inputRaw.toLowerCase();
+        let tableBody = document.getElementById("tabelRingkasanAset");
+        if(!tableBody) return; 
+        
+        let rows = tableBody.getElementsByTagName("tr");
+        let hasResult = false;
+        let noResultRow = document.getElementById("noResultRow");
+        let searchText = document.getElementById("searchText");
+
+        for (let i = 0; i < rows.length; i++) {
+            if (rows[i].id === "noResultRow" || rows[i].classList.contains("modal")) continue;
+
+            let opdElement = rows[i].querySelector(".nama-opd");
+            let asetElement = rows[i].querySelector(".nama-aset"); 
+            
+            if (opdElement && asetElement) {
+                if (opdElement.innerText.toLowerCase().includes(input) || asetElement.innerText.toLowerCase().includes(input)) {
+                    rows[i].style.display = "";
+                    hasResult = true; 
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+
+        if (noResultRow) {
+            if (hasResult || input === "") {
+                noResultRow.style.display = "none";
+            } else {
+                noResultRow.style.display = "";
+                if (searchText) searchText.innerText = inputRaw;
+            }
+        }
+    }
+</script>
+{% endblock %}

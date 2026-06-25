@@ -1,0 +1,99 @@
+{% if messages %}
+    <div id="topToast" class="toast-center-container">
+        {% for message in messages %}
+            <div class="mac-toast-center {% if message.tags == 'error' %}border-danger text-danger{% endif %}">
+                <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill text-success{% elif message.tags == 'error' %}bi-x-circle-fill text-danger{% else %}bi-exclamation-triangle-fill text-warning{% endif %} fs-5"></i>
+                <div class="fw-bold text-dark" style="font-size: 0.9rem;">{{ message }}</div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <style>
+        .toast-center-container {
+            position: fixed; 
+            top: 30px; /* Jarak tetap dari atas */
+            left: 50%; 
+            transform: translateX(-50%);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px; /* Jarak antar notifikasi jika ada banyak */
+            pointer-events: none; /* Agar tidak memblokir klik saat tidak terlihat */
+        }
+        
+        .mac-toast-center {
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 50rem; /* Bentuk lonjong sempurna ala Dynamic Island */
+            padding: 12px 24px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            border: 1px solid rgba(0,0,0,0.08); 
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
+            
+            /* Status Awal (Tersembunyi di atas) */
+            opacity: 0;
+            transform: translateY(-40px) scale(0.95);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Kelas untuk memunculkan notifikasi */
+        .mac-toast-center.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toasts = document.querySelectorAll('.mac-toast-center');
+            
+            // Konfigurasi Enterprise UX
+            let delayMuncul = 100; // Waktu tunggu awal sebelum toast pertama muncul
+            const durasiTampil = 6000; // 6 detik (waktu yang cukup untuk membaca 1-2 kalimat)
+            const jedaAntarToast = 500; // Jeda setengah detik sebelum pesan error berikutnya muncul
+
+            toasts.forEach((toast, index) => {
+                // 1. Logika Muncul (Berurutan / Queue)
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, delayMuncul); 
+                
+                // 2. Logika Menghilang
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    
+                    // Hapus elemen dari HTML setelah animasi turun selesai
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 500);
+                }, delayMuncul + durasiTampil); 
+                
+                // 3. Tambahkan akumulasi waktu untuk toast berikutnya
+                // Toast kedua HANYA akan muncul SETELAH toast pertama benar-benar hilang
+                delayMuncul += (durasiTampil + jedaAntarToast);
+            });
+        });
+    </script>
+{% endif %}
+
+{% comment %} 
+
+    <div aria-live="polite" aria-atomic="true" class="position-fixed p-3" style="top: 20px; right: 20px; z-index: 9999;">
+        {% include 'includes/_toast_messages.html' %}
+    </div>
+
+<script>
+// alret
+    document.addEventListener('DOMContentLoaded', function () {
+        var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+        var toastList = toastElList.map(function (toastEl) {
+            var toast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
+            toast.show();
+            return toast;
+        });
+</script>
+
+{% endcomment %}

@@ -1,0 +1,170 @@
+/* =========================================
+   TRANSPARA BUTTONS & BADGES 
+   Quiet Luxury
+   ========================================= */
+
+   
+/* -----------------------------------------
+   1. PRIMARY
+----------------------------------------- */
+
+/* A. Tombol Primary (Sapphire Navy) - TETAP SOLID (Untuk tombol utama luar tabel) */
+.btn-bpkad-primary {
+    background-color: #1E3A8A !important; 
+    color: #FFFFFF !important;
+    border: 1.5px solid #1E3A8A !important; 
+    border-radius: 24px !important;
+    padding: 0.5rem 1.2rem !important; 
+    font-weight: 600 !important; 
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 6px rgba(30, 58, 138, 0.15) !important;
+}
+.btn-bpkad-primary:hover {
+    background-color: #172554 !important; 
+    border-color: #172554 !important;
+    transform: translateY(-2px); 
+    box-shadow: 0 8px 15px rgba(30, 58, 138, 0.3) !important; 
+}
+
+/* B. Tombol Primary OUTLINE (Sapphire Navy) - Untuk icon Tambah Sertifikat di tabel */
+.btn-bpkad-outline-primary {
+    background-color: transparent !important;
+    color: #1E3A8A !important;
+    border: 1.5px solid #1E3A8A !important;
+    border-radius: 24px !important;
+    padding: 0.5rem 1.2rem !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+.btn-bpkad-outline-primary:hover {
+    background-color: #1E3A8A !important;
+    color: #FFFFFF !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2) !important;
+}
+
+/* C. Tombol Warning (Antique Bronze) - Tembus Pandang */
+.btn-bpkad-warning {
+    background-color: transparent !important; 
+    color: #B45309 !important;
+    border: 1.5px solid #B45309 !important; 
+    border-radius: 24px !important;
+    padding: 0.5rem 1.2rem !important; 
+    font-weight: 600 !important; 
+    transition: all 0.3s ease !important;
+}
+.btn-bpkad-warning:hover {
+    background-color: #B45309 !important; 
+    color: #FFFFFF !important;
+    transform: translateY(-2px); 
+    box-shadow: 0 8px 15px rgba(180, 83, 9, 0.2) !important; 
+}
+
+/* D. Tombol Info (Slate/Teal) - Tembus Pandang */
+.btn-bpkad-info {
+    background-color: transparent !important; 
+    color: #475569 !important;
+    border: 1.5px solid #475569 !important; 
+    border-radius: 24px !important;
+    padding: 0.5rem 1.2rem !important; 
+    font-weight: 600 !important; 
+    transition: all 0.3s ease !important;
+}
+.btn-bpkad-info:hover {
+    background-color: #475569 !important; 
+    color: #FFFFFF !important;
+    transform: translateY(-2px); 
+    box-shadow: 0 8px 15px rgba(71, 85, 105, 0.2) !important; 
+}
+
+/* E. Tombol Danger (Terracotta) - Tembus Pandang */
+.btn-bpkad-danger {
+    background-color: transparent !important; 
+    color: #991B1B !important;
+    border: 1.5px solid #991B1B !important; 
+    border-radius: 24px !important;
+    padding: 0.5rem 1.2rem !important; 
+    font-weight: 600 !important; 
+    transition: all 0.3s ease !important;
+}
+.btn-bpkad-danger:hover {
+    background-color: #991B1B !important; 
+    color: #FFFFFF !important;
+    transform: translateY(-2px); 
+    box-shadow: 0 8px 15px rgba(153, 27, 27, 0.2) !important; 
+}
+
+/* F. Tombol Outline Netral (Kembali / Reset) */
+.btn-bpkad-outline {
+    background-color: #FFFFFF !important; 
+    border: 1.5px solid #CBD5E1 !important;
+    color: #475569 !important; 
+    border-radius: 24px !important;
+    padding: 0.5rem 1.2rem !important; 
+    font-weight: 600 !important; 
+    transition: all 0.3s ease !important;
+}
+.btn-bpkad-outline:hover {
+    background-color: #F8FAFC !important; 
+    border-color: #94A3B8 !important;
+    color: #0F172A !important; 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05) !important; 
+}
+
+
+/* -----------------------------------------
+   2. BADGE STATUS (BENTUK LONJONG/PILL)
+----------------------------------------- */
+.table .badge, .glass-card .badge, .offcanvas .badge, .detail-value .badge {
+    border-radius: 50rem !important; 
+    padding: 0.5em 0.8em !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px;
+    border: 1px solid transparent;
+}
+
+
+/* -----------------------------------------
+   3. UKURAN TOMBOL KECIL DI TABEL (ACTION BUTTONS)
+----------------------------------------- */
+.btn-sm.btn-bpkad-primary, 
+.btn-sm.btn-bpkad-outline-primary,
+.btn-sm.btn-bpkad-warning, 
+.btn-sm.btn-bpkad-info, 
+.btn-sm.btn-bpkad-danger, 
+.btn-sm.btn-bpkad-outline {
+    padding: 0.35rem 0.5rem !important; 
+    font-size: 0.85rem !important; 
+    border-radius: 8px !important;
+}
+
+
+/* -----------------------------------------
+   4. STATUS BADGES
+   (Warna redup pastel dengan teks tajam)
+----------------------------------------- */
+.badge-om-primary { background-color: #DBEAFE !important; color: #1E3A8A !important; border: 1px solid #BFDBFE !important; } /* Biru Valid */
+.badge-om-success { background-color: #D1FAE5 !important; color: #065F46 !important; border: 1px solid #A7F3D0 !important; } /* Hijau Sertifikat */
+.badge-om-warning { background-color: #FEF3C7 !important; color: #92400E !important; border: 1px solid #FDE68A !important; } /* Emas Antrean */
+.badge-om-danger { background-color: #FEE2E2 !important; color: #991B1B !important; border: 1px solid #FECACA !important; } /* Merah Belum/Revisi */
+.badge-om-secondary { background-color: #F1F5F9 !important; color: #475569 !important; border: 1px solid #E2E8F0 !important; } /* Abu-abu Lainnya */
+
+/* -----------------------------------------
+   5. TOMBOL KHUSUS (GLOW EFFECT BIRU BPKAD)
+----------------------------------------- */
+.btn-bpkad-glow {
+    background-color: transparent !important;
+    color: #1E3A8A !important;
+    border: 1.5px solid #1E3A8A !important;
+    border-radius: 24px !important;
+    padding: 0.5rem 1.2rem !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+.btn-bpkad-glow:hover {
+    background-color: #1E3A8A !important;
+    color: #FFFFFF !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2) !important;
+}
