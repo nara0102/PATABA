@@ -22,18 +22,18 @@ Sistem ini dibangun untuk menyelesaikan tantangan dalam manajemen aset daerah, d
 ## 🏗️ Arsitektur Sistem (Domain-Driven Design)
 Proyek ini memisahkan logika bisnis ke dalam tiga aplikasi utama (*Separation of Concerns*) agar kode tetap rapi dan *scalable*:
 
-* 📂 **`aset_tanah` (Core Domain):** Menangani logika utama inventarisasi aset, sertifikasi tanah, relasi dengan Master OPD, dan pemetaan kelurahan/kecamatan.
-* 📂 **`manajemen_pengguna` (HR & Security Domain):** Mengelola autentikasi, level akses (*Role-Based Access Control*), profil pengguna, pengaturan akun, dan perekaman jejak (*Audit Log*).
-* 📂 **`portal_publik` (Public & Media Domain):** Menangani portal informasi untuk warga, GIS publik, kontak pesan, serta manajemen publikasi instansi (Berita, Pengumuman, Galeri).
+1. 📂 **`aset_tanah` (Core Domain):** Menangani logika utama inventarisasi aset, sertifikasi tanah, relasi dengan Master OPD, dan pemetaan kelurahan/kecamatan.
+2. 📂 **`manajemen_pengguna` (HR & Security Domain):** Mengelola autentikasi, level akses (*Role-Based Access Control*), profil pengguna, pengaturan akun, dan perekaman jejak (*Audit Log*).
+3. 📂 **`portal_publik` (Public & Media Domain):** Menangani portal informasi untuk warga, GIS publik, kontak pesan, serta manajemen publikasi instansi (Berita, Pengumuman, Galeri).
 
 ---
 
 ## 🚀 Fitur Utama
-- **Role-Based Access Control (RBAC):** Pemisahan hak akses antara Superadmin (HR System), Admin BPKAD (Verifikator Utama), dan Operator OPD (Pengusul Aset).
-- **Alur Kerja Usulan Aset:** Sistem tiket "Ping-Pong" dengan kewajiban mengisi **Catatan Revisi** jika usulan aset ditolak/dikembalikan ke OPD.
-- **Manajemen Sertifikat Berjenjang:** Pendataan detail sertifikat (Hak Pakai/Hak Milik) dengan sinkronisasi otomatis ke status master aset.
-- **Integrasi Cloud Storage:** Pemisahan *bucket* Supabase S3 secara logis untuk `Publikasi` (Publik) dan `User Profiles` (Privat).
-- **Export Laporan:** Pembuatan laporan Excel dinamis yang menyesuaikan dengan parameter filter (OPD, Kecamatan, Status Sertifikasi).
+1. **Role-Based Access Control (RBAC):** Pemisahan hak akses antara Superadmin (HR System), Admin BPKAD (Verifikator Utama), dan Operator OPD (Pengusul Aset).
+2. **Alur Kerja Usulan Aset:** Sistem tiket "Ping-Pong" dengan kewajiban mengisi **Catatan Revisi** jika usulan aset ditolak/dikembalikan ke OPD.
+3. **Manajemen Sertifikat Berjenjang:** Pendataan detail sertifikat (Hak Pakai/Hak Milik) dengan sinkronisasi otomatis ke status master aset.
+4. **Integrasi Cloud Storage:** Pemisahan *bucket* Supabase S3 secara logis untuk `Publikasi` (Publik) dan `User Profiles` (Privat).
+5. **Export Laporan:** Pembuatan laporan Excel dinamis yang menyesuaikan dengan parameter filter (OPD, Kecamatan, Status Sertifikasi).
 
 ---
 
@@ -46,4 +46,38 @@ Langkah-langkah untuk menjalankan *environment* PATABA di mesin lokal:
    git clone <url-repo-kamu>
    cd PATABA
    python3 -m venv venv
-   source venv/bin/activate  # (Mac/Linux) atau venv\Scripts\activate (Windows)
+   source venv/bin/activate
+   ```  
+(Mac/Linux) atau venv\Scripts\activate (Windows)
+
+2. **Install Dependensi:**
+```bash
+pip install -r requirements.txt
+```
+(Pastikan django-storages dan boto3 sudah terinstall untuk fitur Supabase)
+
+3. **Konfigurasi Environment:**
+
+5. **Jalankan Migrasi dan Server:**
+```bash
+python manage.py makemigrations
+python manage.py migrate
+python manage.py runserver
+```
+---
+## ⚠️ Notes
+1. Trik Nama Tabel (Supabase):
+   Setiap menambahkan model baru, WAJIB menambahkan `db_table = 'nama_tabel'` di dalam `class Meta:` agar nama tabel di PostgreSQL tetap sinkron dan tidak berantakan.
+2. Aturan Migrasi Ulang:
+Jika terjadi error bentrok antar tabel akibat perombakan, gunakan trik `python manage.py migrate --fake` agar Django mendata migrasi tanpa menimpa/menghapus data asli di database.
+3. Upload File / Gambar HTML:
+Setiap tag `<form>` yang memiliki fitur upload file/foto WAJIB memiliki atribut `enctype="multipart/form-data"`. Jika tidak, file tidak akan pernah terkirim ke backend.
+4. Manajemen Cloud Storage:
+File dilarang disimpan di lokal untuk versi Production. Selalu gunakan file `pataba_core/storages.py` untuk mengarahkan pengunggahan gambar ke bucket Supabase yang terpisah (contoh: `PublikasiStorage()` dan `ProfileStorage()`).
+
+---
+_Dikembangkan dengan penuh dedikasi untuk transparansi aset daerah Kota Palu. ✨_
+
+Salam, Tim Dveleoper
+
+Lukii
