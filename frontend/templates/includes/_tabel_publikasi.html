@@ -42,10 +42,10 @@
                 
                 <td class="text-center pe-4">
                     <div class="d-flex justify-content-center gap-1">
-                        <a href="{% url 'tanah:edit_publikasi' item.id %}" class="btn btn-sm btn-light border text-warning shadow-sm" title="Edit">
+                        <a href="{% url 'publik:edit_publikasi' item.id %}" class="btn btn-sm btn-light border text-warning shadow-sm" title="Edit">
                             <i class="bi bi-pencil-fill"></i>
                         </a>
-                        <a href="{% url 'tanah:delete_publikasi' item.id %}" class="btn btn-sm btn-light border text-danger shadow-sm" title="Hapus" onclick="return confirm('Yakin ingin menghapus konten ini?')">
+                        <a href="{% url 'publik:delete_publikasi' item.id %}" class="btn btn-sm btn-light border text-danger shadow-sm" title="Hapus" onclick="return confirm('Yakin ingin menghapus konten ini?')">
                             <i class="bi bi-trash-fill"></i>
                         </a>
                     </div>

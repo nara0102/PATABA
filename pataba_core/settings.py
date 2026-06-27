@@ -3,19 +3,17 @@ import os
 import environ
 from dotenv import load_dotenv
 
-# 1. Setup BASE_DIR (HARUS PALING AWAL)
+# Setup BASE_DIR (HARUS PALING AWAL)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 2. Setup Environ
+# Setup Environ
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-# 3. Database Configuration (Supabase)
+# Database Configuration (Supabase)
 DATABASES = {
     'default': env.db(),
 }
-
-# Quick-start development settings
 SECRET_KEY = env('SECRET_KEY', default='narvt010201chzie3000')
 DEBUG = env.bool('DEBUG', default=True)
 
@@ -36,7 +34,6 @@ USE_X_FORWARDED_HOST = True
 # session terbaca dari https ke http
 SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
-# ------------------------------------------------------------------
 
 # Application definition
 INSTALLED_APPS = [
@@ -48,7 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     
-    # Aplikasi Lokal (Sudah Diberi Koma dengan Benar)
+    'storages',
+    # Aplikasi Lokal
     'apps.aset_tanah',
     'apps.manajemen_pengguna',
     'apps.portal_publik',
@@ -58,6 +56,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware', # penting untuk deployment
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware', # language
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -74,12 +73,10 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug', # Dikembalikan untuk debugging template
+                'django.template.context_processors.debug', 
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                
-                # Lokasi baru Penyiar Radio Global Profil Pengguna
                 'apps.manajemen_pengguna.context_processors.user_profile',
             ],
         },
@@ -97,14 +94,26 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-USE_THOUSAND_SEPARATOR = True
+USE_THOUSAND_SEPARATOR = False
 LANGUAGE_CODE = 'id' # Bahasa Indonesia
 TIME_ZONE = 'Asia/Makassar' # Zona Waktu WITA (Palu)
 USE_I18N = True
+USE_L10N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# DAFTARKAN BAHASA YANG KITA JUAL (Indonesia & Inggris)
+from django.utils.translation import gettext_lazy as _
+LANGUAGES = [
+    ('id', _('Indonesian')),
+    ('en', _('English')),
+]
 
+# TEMPAT MENYIMPAN KAMUS TERJEMAHAN NANTI
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
+
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'frontend/static'), 
@@ -119,7 +128,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='') 
 
-# Disesuaikan dengan Namespace Baru
+# Login
 LOGIN_URL = 'auth:login'
 
 # Session Remember me
@@ -130,16 +139,16 @@ SESSION_COOKIE_AGE = 1209600
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Load file .env
-load_dotenv()
+# storages
+AWS_ACCESS_KEY_ID = env('SUPABASE_ACCESS_KEY', default='')
+AWS_SECRET_ACCESS_KEY = env('SUPABASE_SECRET_KEY', default='')
+AWS_S3_ENDPOINT_URL = env('SUPABASE_ENDPOINT', default='')
+AWS_S3_REGION_NAME = env('SUPABASE_REGION', default='ap-northeast-1')
+AWS_DEFAULT_ACL = None
 
-# --- Konfigurasi Storage ---
-# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# Konfigurasi Tambahan Wajib agar gambar bisa tampil di HTML:
+AWS_QUERYSTRING_AUTH = False 
+AWS_S3_FILE_OVERWRITE = True
 
-AWS_ACCESS_KEY_ID = os.getenv('SUPABASE_ACCESS_KEY')
-AWS_SECRET_ACCESS_KEY = os.getenv('SUPABASE_SECRET_KEY')
-AWS_STORAGE_BUCKET_NAME = os.getenv('SUPABASE_BUCKET_NAME')
-AWS_S3_ENDPOINT_URL = os.getenv('SUPABASE_ENDPOINT')
-AWS_S3_REGION_NAME = 'ap-northeast-1'
-AWS_DEFAULT_ACL = 'public-read'
+AWS_S3_ADDRESSING_STYLE = 'path'   
 AWS_S3_SIGNATURE_VERSION = 's3v4'

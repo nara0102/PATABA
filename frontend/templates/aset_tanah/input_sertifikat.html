@@ -5,8 +5,8 @@
 <style>
     @media (min-width: 992px) {
         body { overflow: hidden !important; }
-        .locked-container { height: calc(100vh - 110px); display: flex; flex-direction: column; padding-bottom: 0 !important; }
-        .locked-row { flex-grow: 1; overflow: hidden; margin-bottom: 20px; }
+        .locked-container { height: calc(100vh - 40px); display: flex; flex-direction: column; padding-bottom: 0 !important; }
+        .locked-row { flex-grow: 1; overflow: hidden; margin-bottom: 0; }
         .scrollable-pane { height: 100%; overflow-y: auto; padding-right: 15px; padding-bottom: 50px; }
         .scrollable-pane::-webkit-scrollbar { width: 6px; }
         .scrollable-pane::-webkit-scrollbar-track { background: transparent; }
@@ -48,8 +48,9 @@
                 <div class="glass-card p-4 mb-4">
                     <div class="form-section-title">A. Identitas Hukum (BPN)</div>
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="small fw-bold">Status Hak Sertifikat <span class="text-danger">*</span></label>
+                        
+                        <div class="col-md-4">
+                            <label class="small fw-bold">Status Hak <span class="text-danger">*</span></label>
                             <div class="position-relative">
                                 <select name="status_hak" id="status_hak" class="form-select pe-5 bg-light border-0" required>
                                     <option value="" disabled {% if not sertifikat.status_hak %}selected{% endif %}>-- Pilih Hak --</option>
@@ -60,9 +61,14 @@
                             </div>
                         </div>
 
-                        <div class="col-md-6 dynamic-panel" id="kotak_nomor_hak">
-                            <label class="small fw-bold">Nomor Sertifikat / Hak <span class="text-danger">*</span></label>
-                            <input type="text" name="nomor_sertifikat" id="nomor_sertifikat" class="form-control fw-bold" value="{{ sertifikat.nomor_sertifikat|default:aset.nomor_sertifikat }}" placeholder="Ketik nomor di sini...">
+                        <div class="col-md-4 dynamic-panel" id="kotak_nomor_hak">
+                            <label class="small fw-bold">Nomor Hak <span class="text-danger">*</span></label>
+                            <input type="text" name="nomor_hak" id="nomor_hak" class="form-control fw-bold border-primary text-primary bg-light" value="{{ sertifikat.nomor_hak|default:aset.nomor_hak|default:'' }}" placeholder="Contoh: No. 19" required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="small fw-bold">Nomor Sertifikat (BPN) <span class="text-danger">*</span></label>
+                            <input type="text" name="nomor_sertifikat" id="nomor_sertifikat" class="form-control fw-bold" value="{{ sertifikat.nomor_sertifikat|default:aset.nomor_sertifikat|default:'' }}" placeholder="Contoh: 20.01.01..." required>
                         </div>
 
                         <div class="col-md-12 mt-4 pt-3 border-top">
@@ -180,18 +186,18 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     
-    // --- 3. LOGIKA DINAMIS STATUS HAK -> NOMOR SERTIFIKAT ---
+    // --- 3. LOGIKA DINAMIS STATUS HAK -> NOMOR HAK ---
     const selectStatusHak = document.getElementById('status_hak');
     const kotakNomorHak = document.getElementById('kotak_nomor_hak');
-    const inputNomorSertifikat = document.getElementById('nomor_sertifikat');
+    const inputNomorHak = document.getElementById('nomor_hak'); // Ganti id ke nomor_hak
 
     function toggleStatusHak() {
         if (selectStatusHak.value) {
             kotakNomorHak.style.display = 'block';
-            inputNomorSertifikat.required = true;
+            inputNomorHak.required = true;
         } else {
             kotakNomorHak.style.display = 'none';
-            inputNomorSertifikat.required = false;
+            inputNomorHak.required = false;
         }
     }
     selectStatusHak.addEventListener('change', toggleStatusHak);

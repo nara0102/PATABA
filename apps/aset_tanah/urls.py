@@ -19,6 +19,7 @@ urlpatterns = [
     path('aset/tanah/sertifikat/daftar/', views.list_sertifikat, name='list_sertifikat'),
     path('aset/tanah/sertifikat/edit/<int:sertifikat_id>/', views.edit_sertifikat, name='edit_sertifikat'),
     path('sertifikat/hapus/<int:sertifikat_id>/', views.delete_sertifikat, name='delete_sertifikat'),
+    path('sertifikat/<int:sertifikat_id>/detail/', views.detail_sertifikat, name='detail_sertifikat'),
     
     # Sertif pembebasan
     path('pembebasan-lahan/', views.list_pembebasan_lahan, name='list_pembebasan_lahan'),
@@ -28,5 +29,9 @@ urlpatterns = [
     # path('api/get-kelurahan/', views.get_kelurahan_by_kecamatan, name='api_get_kelurahan'),
     
     # Excel
-    path('export/excel/', views.export_excel_aset, name='export_excel_aset'),
+    path('export/konfigurasi/', views.halaman_export_view, name='halaman_export'),
+    path('export/proses-excel/', views.proses_export_excel, name='proses_export_excel'),
+    
+    # PDF
+    path('detail/<int:id_aset>/pdf/', views.export_pdf_detail, name='export_pdf_detail'),
 ]

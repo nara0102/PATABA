@@ -36,5 +36,5 @@ urlpatterns = [
     path('pengguna/edit/<int:user_id>/', views.edit_pengguna_view, name='edit_pengguna'),
     
     # Pengaturan Profil
-    path('pengaturan/', views.edit_profil_sendiri_view, name='pengaturan_profil'),
+    path('pengaturan/', views.pengaturan_profil_view, name='pengaturan_profil'),
 ]

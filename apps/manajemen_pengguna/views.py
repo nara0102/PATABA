@@ -646,49 +646,43 @@ def edit_pengguna_view(request, user_id):
         'title': f"Edit - @{target_user.username}"
     })
     
-    
+
 @login_required(login_url='auth:login')
-def edit_profil_sendiri_view(request):
-    # Mengambil data dari user yang sedang login saat ini
+def pengaturan_profil_view(request):
     target_user = request.user
     profile = get_object_or_404(UserProfile, user=target_user)
-    
-    # Hanya untuk menampilkan daftar OPD jika dia operator (opsional)
-    daftar_opd = MasterOPD.objects.all()
 
     if request.method == 'POST':
-        # Update data user
-        target_user.email = request.POST.get('email')
-        nama_lengkap = request.POST.get('nama_lengkap', '').strip()
+        # 1. Tangkap sesuai atribut name="" di HTML
+        target_user.first_name = request.POST.get('first_name', '').strip()
+        target_user.last_name = request.POST.get('last_name', '').strip()
+        target_user.email = request.POST.get('email', '').strip()
         
-        if ' ' in nama_lengkap:
-            target_user.first_name, target_user.last_name = nama_lengkap.split(' ', 1)
-        else:
-            target_user.first_name, target_user.last_name = nama_lengkap, ''
+        profile.nomor_hp = request.POST.get('nomor_hp', '').strip()
+        profile.nip = request.POST.get('nip', '').strip()
+        profile.jabatan = request.POST.get('jabatan', '').strip()
 
-        # Update data profile
-        profile.nip = request.POST.get('nip')
-        profile.jabatan = request.POST.get('jabatan')
-        profile.nomor_hp = request.POST.get('nomor_hp')
-        
-        # Tangkap foto baru
+        # 2. Tangkap Foto
         if 'foto_profil' in request.FILES:
             profile.foto_profil = request.FILES['foto_profil']
 
         try:
-            target_user.save()
-            profile.save()
+            # 3. KUNCI TRANSAKSI: Jika gagal satu, batalkan semua
+            with transaction.atomic():
+                target_user.save()
+                profile.save()
+            
+            # Jika lolos sampai sini, catat ke log dan sukses
             catat_aktivitas(request.user, "Mengedit Profil Sendiri", "Pengaturan Akun", request)
             messages.success(request, "Profil Anda berhasil diperbarui.")
-            # Redirect ke dashboard masing-masing
-            if profile.role == 'OPERATOR_OPD': return redirect('auth:dashboard_opd')
-            return redirect('auth:dashboard_bpkad')
+            
+            return redirect('auth:pengaturan_profil') # Sesuaikan nama url kamu
+            
         except Exception as e:
+             # Jika S3 error, data yang kosong tadi TIDAK akan tersimpan ke database
              messages.error(request, f"Terjadi kesalahan: {str(e)}")
 
     return render(request, 'manajemen_pengguna/pengaturan_profil.html', {
-        'target_user': target_user, 
-        'profile': profile, 
-        'daftar_opd': daftar_opd,
-        'title': "Pengaturan Profil"
+        'user': target_user,
+        'profile': profile,
     })

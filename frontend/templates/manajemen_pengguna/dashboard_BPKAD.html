@@ -33,8 +33,8 @@
                     
                     <span class="fw-bold text-success tampil-rupiah d-inline-block text-truncate text-end" 
                         style="font-size: 0.9rem; max-width: 60%;" 
-                        title="Rp {{ total_nilai|default:'0' }},00">
-                        {{ total_nilai|default:"0" }},00
+                        title="Rp {{ total_nilai|default:'0' }}">
+                        {{ total_nilai|default:"0" }}
                     </span>
                 </div>
             </div>
@@ -229,7 +229,7 @@
 
     <!-- ANTREAN VERIFIKASI -->
     <div id="antrean-verifikasi-section" style="scroll-margin-top: 130px;">
-        <div class="glass-card mb-5" style="background: linear-gradient(135deg, #fff5f5 0%, #faffe3 100%); border-color: rgba(220, 192, 53, 0.2);">
+        <div class="glass-card mb-5 card-antrean">
             <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="fw-bold mb-1 text-dark"><i class="bi bi-bell-fill text-warning me-2"></i>Antrean Verifikasi Aset Baru</h5>
@@ -288,16 +288,20 @@
             <div class="p-4 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
                     <h5 class="fw-bold mb-1 text-dark"><i class="bi bi-collection-fill text-primary me-2"></i>Ringkasan Daftar Aset</h5>
-                    <p class="small text-muted mb-0">Menampilkan data aset tanah terbaru yang telah diregistrasi/diverifikasi.</p>
+                    <p class="small text-muted mb-0">Menampilkan 5 data aset tanah terbaru yang telah diregistrasi/diverifikasi.</p>
                 </div>
                 
-                <div class="d-flex align-items-center gap-2">
-                    <div class="position-relative" style="width: 280px;">
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end align-items-md-center">
+                    
+                    <div class="position-relative" style="width: 100%; max-width: 320px;">
                         <i class="bi bi-search position-absolute text-muted" style="top: 50%; left: 15px; transform: translateY(-50%); z-index: 5;"></i>
-                        <input type="text" id="quickSearchOPD" onkeyup="cariCepatOPD()" class="form-control bg-light shadow-none" style="padding-left: 2.5rem !important; border-radius: 50rem !important;" placeholder="Cari OPD atau Aset...">
+                        <input type="text" id="quickSearchOPD" onkeyup="cariCepatOPD()" class="form-control bg-light shadow-none border-0 w-100" style="padding-left: 2.5rem !important; border-radius: 50rem !important;" placeholder="Cari OPD atau Aset...">
                     </div>
                     
-                    <a href="{% url 'tanah:list_aset_tanah' %}" class="btn btn-bpkad-outline rounded-pill px-4"><i class="bi bi-arrows-fullscreen me-1"></i> Kelola Semua Data</a>
+                    <a href="{% url 'tanah:list_aset_tanah' %}" class="btn btn-bpkad-outline rounded-pill px-4 fw-bold shadow-sm text-nowrap text-center">
+                        <i class="bi bi-arrows-fullscreen me-1"></i> Kelola Semua Data
+                    </a>
+                    
                 </div>
             </div>
             
@@ -392,7 +396,7 @@
                                     <div class="col-6"><div class="detail-label">NIBAR</div><div class="detail-value text-primary">{{ aset.nibar|default:"-" }}</div></div>
                                     <div class="col-6"><div class="detail-label">Kode Barang</div><div class="detail-value">{{ aset.kode_barang|default:"-" }}</div></div>
                                     <div class="col-6"><div class="detail-label">No. Register</div><div class="detail-value">{{ aset.nomor_register|default:"-" }}</div></div>
-                                    <div class="col-6"><div class="detail-label">Nilai Aset</div><div class="detail-value text-success tampil-rupiah">{{ aset.nilai_aset|default:"0" }}</div></div>
+                                    <div class="col-6"><div class="detail-label">Nilai Aset</div><div class="detail-value text-success tampil-rupiah" data-raw="{{ aset.nilai_aset|default:'0' }}">{{ aset.nilai_aset|default:"0" }}</div></div>
                                 </div>
                             </div>
                         </div>
@@ -405,7 +409,7 @@
                                     <div class="col-12"><div class="detail-label">Alamat Lokasi</div><div class="detail-value">{{ aset.alamat_lokasi|default:"-" }}</div></div>
                                     <div class="col-6"><div class="detail-label">Kecamatan</div><div class="detail-value">{{ aset.kecamatan_nama|default:"-" }}</div></div>
                                     <div class="col-6"><div class="detail-label">Kelurahan</div><div class="detail-value">{{ aset.kelurahan_nama|default:"-" }}</div></div>
-                                    <div class="col-6"><div class="detail-label">Luas Tanah</div><div class="detail-value tampil-luas">{{ aset.luas_m2|default:"0" }}</div></div>
+                                    <div class="col-6"><div class="detail-label">Luas Tanah</div><div class="detail-value tampil-luas" data-raw="{{ aset.luas_m2|default:'0' }}">{{ aset.luas_m2|default:"0" }}</div></div>
                                     <div class="col-6"><div class="detail-label">Koordinat (Lat, Lng)</div><div class="detail-value">{{ aset.latitude|default:"0" }}, {{ aset.longitude|default:"0" }}</div></div>
                                 </div>
                             </div>
@@ -429,6 +433,27 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- foto -->
+                        <div class="col-12 mt-4">
+                            <div class="detail-box">
+                                <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">Dokumentasi Lapangan</h6>
+                                <div class="d-flex flex-wrap gap-3">
+                                    {% if aset.koleksi_foto.all %}
+                                        {% for foto in aset.koleksi_foto.all %}
+                                            <a href="{{ foto.file_foto.url }}" target="_blank">
+                                                <img src="{{ foto.file_foto.url }}" class="rounded-3 shadow-sm border" style="width: 140px; height: 100px; object-fit: cover; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" alt="Dokumentasi">
+                                            </a>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="text-muted small w-100 text-center py-3 bg-light rounded-3">
+                                            <i class="bi bi-camera me-1"></i> Foto dokumentasi belum diunggah.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

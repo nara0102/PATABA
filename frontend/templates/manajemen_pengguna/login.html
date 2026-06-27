@@ -7,14 +7,61 @@
     <title>Sistem Autentikasi - PATABA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- FAVICON MUTLAK: Ini yang membuat logo P muncul di tab atas browser[cite: 9] -->
+    <link rel="icon" type="image/png" href="{% static 'images/p-favicon.png' %}">
+    
+    <!-- ANTI-FOUC SCRIPT: Mencegah layar berkedip putih saat Dark Mode[cite: 9] -->
+    <script>
+        (function() {
+            const currentTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (currentTheme === 'dark' || (!currentTheme && systemPrefersDark)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+
     <style>
-        /* CSS Dasar & Palet Apple Minimalist */
+        /* =========================================
+           VARIABEL TEMA LOGIN (LIGHT & DARK)[cite: 9]
+           ========================================= */
+        :root {
+            --bg-panel: #F5F5F7;
+            --card-bg: #FFFFFF;
+            --input-bg: #F5F5F7;
+            --input-focus: #FFFFFF;
+            --text-main: #1B263B;
+            --text-muted: #86868B;
+            --border-card: rgba(0,0,0,0.02);
+            --border-input: transparent;
+            --icon-color: #86868B;
+            --link-color: #0056B3;
+        }
+
+        [data-theme="dark"] {
+            --bg-panel: #121212;
+            --card-bg: #1C1C1E;
+            --input-bg: #2C2C2E;
+            --input-focus: #1C1C1E;
+            --text-main: #F5F5F7;
+            --text-muted: #A1A1A6;
+            --border-card: #2C2C2E;
+            --border-input: #3A3A3C;
+            --icon-color: #A1A1A6;
+            --link-color: #82B1FF;
+        }
+
+        /* CSS Dasar & Palet Apple Minimalist[cite: 9] */
         body { 
-            background-color: #FFFFFF; 
+            background-color: var(--bg-panel); 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            color: #1B263B;
+            color: var(--text-main);
             overflow-x: hidden;
             height: 100vh;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
 
         @keyframes smoothPageLoad {
@@ -22,79 +69,79 @@
             100% { opacity: 1; transform: translateY(0); }
         }
 
-        /* Panel Kiri (Branding BPKAD) */
+        /* Panel Kiri (Gambar lebih terang sesuai request)[cite: 9] */
         .left-panel {
-            background: linear-gradient(135deg, rgba(0, 87, 179, 0.34), rgba(0, 63, 135, 0.7)), 
+            /* Gradasi ditipiskan drastis agar gambar jembatannya terlihat jelas */
+            background: linear-gradient(135deg, rgba(0, 30, 70, 0.2), rgba(0, 10, 30, 0.5)), 
                         url("{% static 'images/bg_index.png' %}");
-            
             background-size: cover; 
             background-position: center; 
             background-repeat: no-repeat;
-            
             color: white;
             position: relative;
             overflow: hidden;
         }
 
-        /* Panel Kanan */
+        /* Panel Kanan (Transisi Halus Tema)[cite: 9] */
         .right-panel {
-            background-color: #F5F5F7; 
+            background-color: var(--bg-panel); 
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
+            transition: background-color 0.4s ease;
         }
 
         .auth-card {
             width: 90%;
             max-width: 520px;      
             padding: 3.5rem 3rem;  
-            background: #FFFFFF;
+            background: var(--card-bg);
             border-radius: 32px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-            border: 1px solid rgba(0,0,0,0.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-card);
             position: relative;
             z-index: 2;
+            transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
         }
-        .auth-card .mb-3 {
-            margin-bottom: 0.8rem !important; /* Mengurangi spasi antar field agar lebih kompak */
-        }
+        
+        .auth-card h3 { color: var(--text-main); transition: color 0.4s ease; }
+        .auth-card p.text-secondary, .form-label.text-secondary { color: var(--text-muted) !important; transition: color 0.4s ease; }
+        .auth-card .link-custom { color: var(--link-color) !important; transition: color 0.4s ease; }
 
-        /* Input Form Apple Style */
+        .auth-card .mb-3 { margin-bottom: 0.8rem !important; }
+
+        /* Input Form Apple Style (Adaptif)[cite: 9] */
         .form-control, .form-select {
             border-radius: 14px;
             padding: 0.9rem 1rem 0.9rem 2.8rem;
-            background: #F5F5F7;
-            border: 1px solid transparent;
-            color: #1B263B;
-            transition: all 0.2s ease;
+            background: var(--input-bg);
+            border: 1px solid var(--border-input);
+            color: var(--text-main);
+            transition: all 0.3s ease;
             font-size: 0.80rem;
         }
 
         .form-control:focus, .form-select:focus {
-            background: #FFFFFF;
-            border-color: #0056B3;
-            box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.1);
+            background: var(--input-focus);
+            color: var(--text-main);
+            border-color: var(--link-color);
+            box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.15);
         }
 
-        /* Ikon Presisi di Tengah */
+        /* Ikon Presisi di Tengah[cite: 9] */
         .input-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #86868B;
-            font-size: 1.1rem; /* Kurangi sedikit ukurannya */
-            z-index: 10;
-            display: flex; /* Tambahkan ini agar ikon tetap proporsional */
-            align-items: center;
-            justify-content: center;
-            height: 100%; /* Pastikan tingginya pas dengan input */
+            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+            color: var(--icon-color); font-size: 1.1rem; z-index: 10;
+            display: flex; align-items: center; justify-content: center; height: 100%;
+            transition: color 0.4s ease;
         }
 
-        /* Tombol Utama */
+        /* =========================================
+           TOMBOL (HOVER BIRU GELAP)[cite: 9]
+           ========================================= */
         .btn-primary-custom {
-            background:  #003F87 100%;
+            background: #003F87;
             color: #ffffff;
             border: none;
             border-radius: 14px;
@@ -103,29 +150,29 @@
             transition: all 0.3s ease;
             font-size: 1rem;
         }
-
         .btn-primary-custom:hover {
-            background-color: #002D5E !important; /* Sedikit lebih gelap dari biru aslinya */
-            transform: translateY(-2px); /* Sedikit naik untuk kesan 'klik-able' */
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+            background-color: #002D5E !important; 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 45, 94, 0.3) !important;
             color: #ffffff;
         }
 
         .btn-outline-primary-custom {
-            background-color: transparent;
-            border: 1.5px solid #0056B3; /* Border warna tema biru */
-            color: #0056B3;
+            background-color: var(--card-bg);
+            border: 1.5px solid var(--border-card); 
+            color: var(--text-main);
             transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
-
         .btn-outline-primary-custom:hover {
-            background-color: #002D5E; /* Background berubah jadi biru saat di-hover */
-            color: #ffffff; /* Teks berubah jadi putih */
-            box-shadow: 0 4px 12px rgba(0, 86, 179, 0.2); /* Sedikit bayangan biar elegan */
-            transform: translateY(-2px); /* Efek melayang sedikit */
+            background-color: #002D5E; 
+            color: #ffffff; 
+            border-color: #002D5E;
+            box-shadow: 0 6px 15px rgba(0, 45, 94, 0.2); 
+            transform: translateY(-2px); 
         }
 
-        /* Animasi Shake Error */
+        /* Animasi Shake Error[cite: 9] */
         @keyframes shakeError {
             0%, 100% { transform: translateX(0); }
             20%, 60% { transform: translateX(-8px); }
@@ -133,16 +180,8 @@
         }
         .shake-animation { animation: shakeError 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
 
-        /* Mengecilkan tulisan contoh di dalam kotak */
-        ::placeholder {
-            font-size: 0.75rem !important; 
-            color: #A0AEC0 !important; 
-            font-weigth: 400;            
-        }
-
-        textarea::placeholder {
-            font-size: 0.75rem !important;
-        }
+        ::placeholder { font-size: 0.75rem !important; color: #A0AEC0 !important; font-weight: 400; }
+        textarea::placeholder { font-size: 0.75rem !important; }
     </style>
 </head>
 
@@ -154,31 +193,35 @@
         
             <div class="col-lg-5 d-none d-lg-flex left-panel px-5 py-5 flex-column justify-content-between">   
                 <div class="position-relative z-3 mt-4" style="max-width: 500px; margin-left: auto; margin-right: auto;">
+                    
                     <div class="d-flex align-items-center mb-5">
-                        <i class="bi bi-bank2 fs-1 me-3"></i>
-                        <h4 class="fw-bold mb-0 text-white">PATABA - BPKAD Kota Palu</h4>
+                        <!-- LOGO DIBESARKAN (85px) + EFEK GLOWING PUTIH AGAR MENYALA DI GAMBAR[cite: 9] -->
+                        <img src="{% static 'images/logo.png' %}" alt="Logo" height="85" class="me-3" style="filter: drop-shadow(0 0 15px rgba(255,255,255,0.7));">
+                        
+                        <!-- TEKS DIBESARKAN & DIBERI SHADOW HITAM AGAR JELAS TERBACA[cite: 9] -->
+                        <h4 class="fw-bold mb-0 text-white" style="font-family: 'Playfair Display', serif; letter-spacing: 2px; font-size: 2.8rem; text-shadow: 0 4px 10px rgba(0,0,0,0.4);">PATABA</h4>
                     </div>
                     
-                    <h1 class="display-4 fw-bolder mb-4 text-white" style="line-height: 1.15; letter-spacing: -1px;">
+                    <h1 class="display-4 fw-bolder mb-4 text-white" style="line-height: 1.15; letter-spacing: -1px; text-shadow: 0 4px 10px rgba(0,0,0,0.4);">
                         Portal Aset<br>Tanah Pemerintah<br>Daerah
                     </h1>
                     
-                    <p class="fs-5 opacity-75" style="line-height: 1.6; font-weight: 300;">
+                    <p class="fs-5 opacity-100 text-white" style="line-height: 1.6; font-weight: 400; text-shadow: 0 2px 8px rgba(0,0,0,0.6);">
                         Akses khusus administrator untuk pengelolaan, pemantauan, dan audit aset pemerintah Kota Palu secara sistematis, transparan, dan akuntabel.
                     </p>
                 </div>
 
-                <div class="row">
-                        <div class="col-6">
-                            <h1 class="fw-bold mb-0 text-white">{{ total_aset|default:"0" }}</h1>
-                            <p class="small opacity-75 fw-medium text-uppercase tracking-wide mt-1">Aset Terdata</p>
-                        </div>
-                        <div class="col-6">
-                            <h1 class="fw-bold mb-0 text-white">{{ persentase_sertifikat|default:"0" }}%</h1>
-                            <p class="small opacity-75 fw-medium text-uppercase tracking-wide mt-1">Telah Bersertifikat</p>
-                        </div>
+                <div class="row position-relative z-3">
+                    <div class="col-6">
+                        <h1 class="fw-bold mb-0 text-white" style="text-shadow: 0 2px 8px rgba(0,0,0,0.6);">{{ total_aset|default:"0" }}</h1>
+                        <p class="small opacity-100 text-white fw-medium text-uppercase mt-1" style="letter-spacing: 1px; text-shadow: 0 2px 8px rgba(0,0,0,0.6);">Aset Terdata</p>
+                    </div>
+                    <div class="col-6">
+                        <h1 class="fw-bold mb-0 text-white" style="text-shadow: 0 2px 8px rgba(0,0,0,0.6);">{{ persentase_sertifikat|default:"0" }}%</h1>
+                        <p class="small opacity-100 text-white fw-medium text-uppercase mt-1" style="letter-spacing: 1px; text-shadow: 0 2px 8px rgba(0,0,0,0.6);">Telah Bersertifikat</p>
                     </div>
                 </div>
+            </div>
 
             <div class="col-lg-7 right-panel">
                 
@@ -188,8 +231,9 @@
                     <i class="bi bi-house-door-fill me-1"></i> Kembali ke Beranda
                 </a>
 
+                <!-- KOTAK LOGIN -->
                 <div class="auth-card" id="loginBox">
-                    <h3 class="fw-bold mb-2 text-center" style="color: #1B263B;">Login Admin</h3>
+                    <h3 class="fw-bold mb-2 text-center">Login Admin</h3>
                     <p class="text-secondary small mb-4 text-center">Silakan masuk menggunakan kredensial resmi Anda.</p>
                     
                     <form method="POST" action="">
@@ -207,41 +251,40 @@
                             <div class="position-relative">
                                 <i class="bi bi-lock input-icon"></i>
                                 <input type="password" name="password" id="loginPassword" class="form-control" placeholder="********" required>
-                                <i class="bi bi-eye position-absolute" id="toggleLoginPassword" style="right: 16px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #86868B;"></i>
+                                <i class="bi bi-eye position-absolute" id="toggleLoginPassword" style="right: 16px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--icon-color);"></i>
                             </div>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center mb-4 px-1">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="rememberMe" name="remember_me">
-                                <label class="form-check-label text-secondary small" for="rememberMe">Ingat saya</label>
+                                <label class="form-check-label text-secondary small fw-medium" for="rememberMe">Ingat saya</label>
                             </div>
-                            <a href="#" class="text-decoration-none small fw-bold" style="color: #0056B3;">Lupa sandi?</a>
+                            <a href="#" class="text-decoration-none small fw-bold link-custom">Lupa sandi?</a>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary-custom w-100 shadow-sm mb-4">Masuk ke Dashboard</button>
+                        <button type="submit" class="btn btn-primary-custom w-100 mb-4">Masuk ke Dashboard</button>
                             
                     </form>
 
                     <div class="text-center">
-                        <p class="small text-secondary mb-0">Belum punya akun resmi? <a href="#" id="showRegister" class="text-decoration-none fw-bold" style="color: #0056B3;">Daftar di sini</a></p>
+                        <p class="small text-secondary mb-0">Belum punya akun resmi? <a href="#" id="showRegister" class="text-decoration-none fw-bold link-custom">Daftar di sini</a></p>
                     </div>
 
                     <div class="text-center mt-3">
-                        <a href="{% url 'publik:bantuan' %}" class="small text-muted text-decoration-none">
-                            <i class="bi bi-question-circle"></i> Help
+                        <a href="{% url 'publik:bantuan' %}" class="small text-secondary text-decoration-none fw-medium hover-link">
+                            <i class="bi bi-question-circle"></i> Bantuan
                         </a>
                     </div>
-
                 </div>
 
+                <!-- KOTAK REGISTER[cite: 9] -->
                 <div class="auth-card d-none" id="registerBox">
-                    <h3 class="fw-bold mb-2 text-center" style="color: #1B263B;">Pengajuan Akses</h3>
+                    <h3 class="fw-bold mb-2 text-center">Pengajuan Akses</h3>
                     <p class="text-secondary small mb-4 text-center">Lengkapi profil untuk mendaftarkan akun Admin.</p>
                     
                     <form method="POST" action="{% url 'auth:register_view' %}">
                         {% csrf_token %}
-                        <!-- Baris 1: Nama & Username -->
                         <div class="row g-2 mb-3">
                             <div class="col-6">
                                 <label class="form-label small fw-bold text-secondary ms-1">Nama Lengkap</label>
@@ -257,16 +300,15 @@
                                     <input type="text" name="reg_username" class="form-control" value="{{ form_data.reg_username|default:'' }}" placeholder=" Username" required>
                                 </div>
                             </div>
-                            <div class="mb-3">
+                            <div class="col-12 mt-2">
                                 <label class="form-label small fw-bold text-secondary ms-1">Email Aktif</label>
                                 <div class="position-relative">
                                     <i class="bi bi-envelope input-icon"></i>
-                                    <input type="email" name="email" class="form-control" value="{{ form_data.email|default:'' }}" placeholder="contoh@gmail.com" required>
+                                    <input type="email" name="email" class="form-control" value="{{ form_data.email|default:'' }}" placeholder="contoh@palukota.go.id" required>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Baris 2: NIP & Jabatan -->
                         <div class="row g-2 mb-3">
                             <div class="col-6">
                                 <label class="form-label small fw-bold text-secondary ms-1">NIP</label>
@@ -279,12 +321,11 @@
                                 <label class="form-label small fw-bold text-secondary ms-1">Jabatan</label>
                                 <div class="position-relative">
                                     <i class="bi bi-briefcase input-icon"></i>
-                                    <input type="text" name="jabatan" class="form-control" value="{{ form_data.jabatan|default:'' }}" placeholder="Kepala Bidang Aset">
+                                    <input type="text" name="jabatan" class="form-control" value="{{ form_data.jabatan|default:'' }}" placeholder="Kepala Bidang">
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Baris 3: HP & Peran -->
                         <div class="row g-2 mb-3">
                             <div class="col-6">
                                 <label class="form-label small fw-bold text-secondary ms-1">Nomor HP</label>
@@ -295,7 +336,7 @@
                             </div>
                             <div class="col-6">
                                 <label class="form-label small fw-bold text-secondary ms-1">Peran (Role)</label>
-                                <select name="role" id="roleSelect" class="form-select fw-medium" style="padding-left: 2.8rem;" required>
+                                <select name="role" id="roleSelect" class="form-select fw-medium" required>
                                     <option value="" disabled selected>Pilih akses...</option>
                                     <option value="ADMIN_BPAKD">Admin BPKAD</option>
                                     <option value="OPERATOR_OPD">Operator OPD</option>
@@ -312,7 +353,7 @@
                                     {% for opd in opd_list %}
                                         <option value="{{ opd.id }}">{{ opd.nama_opd }}</option>
                                     {% endfor %}
-                                    <option value="tambah_baru" class="text-primary fw-bold">+ Daftarkan OPD Baru</option>
+                                    <option value="tambah_baru" class="fw-bold link-custom">+ Daftarkan OPD Baru</option>
                                 </select>
                             </div>
                         </div>
@@ -325,11 +366,11 @@
                             </div>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary-custom w-100 shadow-sm mb-3">Kirim Permintaan Akses</button>
+                        <button type="submit" class="btn btn-primary-custom w-100 shadow-sm mb-3">Kirim Permintaan</button>
                     </form>
 
                     <div class="text-center">
-                        <p class="small text-secondary mb-0">Sudah punya akun? <a href="#" id="showLogin" class="text-decoration-none fw-bold" style="color: #0056B3;">Masuk di sini</a></p>
+                        <p class="small text-secondary mb-0">Sudah punya akun? <a href="#" id="showLogin" class="text-decoration-none fw-bold link-custom">Masuk di sini</a></p>
                     </div>
                 </div>
 
@@ -343,8 +384,17 @@
         </div>
     </div>
 
+    <!-- SCRIPT PENGENDALI LOGIKA HALAMAN LOGIN[cite: 9] -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+
+            // Sinkronisasi Perubahan Tema Jika Diganti dari Sistem saat di halaman Login
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                if (!localStorage.getItem('theme')) {
+                    document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+                }
+            });
+
             // Logika Toggle Show/Hide Password
             const togglePassword = document.getElementById('toggleLoginPassword');
             const passwordInput = document.getElementById('loginPassword');
@@ -388,7 +438,7 @@
                 }
             });
 
-            // JURUS REDIRECT: Jika milih "+ Daftarkan OPD Baru", lempar ke halaman input_opd
+            // Redirect Tambah OPD Baru
             const opdSelect = document.getElementById('opdSelect');
             if (opdSelect) {
                 opdSelect.addEventListener('change', function() {

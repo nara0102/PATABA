@@ -6,27 +6,33 @@
         body { overflow: hidden !important; }
         .locked-container { height: calc(100vh - 15px); display: flex; flex-direction: column; padding-bottom: 0 !important; }
         
-        /* PERBAIKAN: Kurangi padding-bottom agar tidak ada space kosong mengambang di bawah */
         .scrollable-pane { flex-grow: 1; overflow-y: auto; padding-right: 15px; padding-bottom: 15px; }
         .scrollable-pane .glass-card { height: max-content !important; flex: 0 0 auto !important; }
         .table-master-container { 
             max-height: 625px !important; 
             overflow-y: auto !important; 
             border: none !important; 
+            background-color: var(--card-light) !important;
         }
         .table-master-container table { height: auto !important; }
         .table-master-container tbody tr { height: 60px !important; }
 
+        /* SCROLLBAR ADAPTIF */
         .scrollable-pane::-webkit-scrollbar { width: 6px; }
         .scrollable-pane::-webkit-scrollbar-track { background: transparent; }
-        .scrollable-pane::-webkit-scrollbar-thumb { background-color: rgba(0, 86, 179, 0.15); border-radius: 10px; }
-        .scrollable-pane:hover::-webkit-scrollbar-thumb { background-color: rgba(0, 86, 179, 0.3); }
+        .scrollable-pane::-webkit-scrollbar-thumb { background-color: var(--border-soft); border-radius: 10px; }
+        .scrollable-pane:hover::-webkit-scrollbar-thumb { background-color: var(--text-muted); }
     }
 
-    /* PAGINATION */
-    .pagination .page-link { color: var(--accent-blue); font-weight: 600; border-color: #E2E8F0; }
-    .pagination .page-link:hover { background-color: #EBF5FF; color: var(--accent-dark); }
+    /* PAGINATION ADAPTIF */
+    .pagination .page-link { color: var(--accent-blue); font-weight: 600; background-color: var(--card-light); border-color: var(--border-soft); }
+    .pagination .page-link:hover { background-color: var(--menu-hover); color: var(--accent-dark); }
     .pagination .page-item.active .page-link { background-color: var(--accent-blue); border-color: var(--accent-blue); color: #FFFFFF; }
+
+    /* CINCIN FOKUS PENCARIAN (Cantik & Elegan) */
+    .input-search-pataba { border: 1px solid var(--border-soft) !important; transition: all 0.3s ease; }
+    .input-search-pataba:focus { border-color: var(--accent-blue) !important; box-shadow: 0 0 0 4px rgba(0, 45, 94, 0.15) !important; background-color: var(--card-light) !important; }
+    [data-theme="dark"] .input-search-pataba:focus { box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.25) !important; }
 </style>
 {% endblock %}
 
@@ -125,17 +131,17 @@
             </div>
 
             <!-- filter -->
-            <div class="glass-card py-2 px-4 mb-3 d-flex justify-content-between align-items-center">
-                <form method="GET" class="position-relative w-50">
+            <div class="glass-card py-3 px-4 mb-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                <form method="GET" class="position-relative w-100" style="max-width: 450px;">
                     {% if request.GET.opd %}<input type="hidden" name="opd" value="{{ request.GET.opd }}">{% endif %}
                     {% if request.GET.status_verifikasi %}<input type="hidden" name="status_verifikasi" value="{{ request.GET.status_verifikasi }}">{% endif %}
                     
-                    <input type="text" name="q" value="{{ request.GET.q|default:'' }}" class="form-control bg-light shadow-none border-0" style="padding-left: 2.5rem !important; border-radius: 50rem !important;" 
-                    placeholder="{% if request.user.profile.role|upper != 'OPERATOR_OPD' %}Cari NIBAR, No. Sertifikat, Kode Barang, OPD, Lokasi...{% else %}Cari NIBAR, No. Sertifikat, Kode Barang, Lokasi...{% endif %}">
+                    <input type="text" name="q" value="{{ request.GET.q|default:'' }}" class="form-control bg-light rounded-pill input-search-pataba" style="padding-left: 2.5rem !important;" 
+                    placeholder="{% if request.user.profile.role|upper != 'OPERATOR_OPD' %}Cari NIBAR, No. Sertifikat, Kode Barang...{% else %}Cari NIBAR, No. Sertifikat...{% endif %}">
                     <i class="bi bi-search position-absolute text-muted" style="top: 50%; left: 15px; transform: translateY(-50%);"></i>
                 </form>
 
-                <button class="btn rounded-pill px-4 shadow-sm fw-bold text-white" style="background-color: #1E293B; transition: all 0.3s ease;" onmouseover="this.style.backgroundColor='#0F172A'" onmouseout="this.style.backgroundColor='#1E293B'" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvasAset" aria-controls="filterOffcanvasAset">
+                <button class="btn btn-bpkad-primary rounded-pill px-4 shadow-sm fw-bold w-100 w-md-auto text-nowrap" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvasAset" aria-controls="filterOffcanvasAset" style="background-color: #1E293B !important; border-color: #1E293B !important;">
                     <i class="bi bi-funnel-fill me-1"></i> Filter Tampilan
                 </button>
             </div>
@@ -143,46 +149,43 @@
             <!-- master tabel -->
             <div class="glass-card p-0" id="table-master">
                 <div class="table-responsive table-master-container mb-0">
-                    <table class="table align-middle table-hover mb-0" style="table-layout: fixed; width: 100%;">
+                    <table class="table align-middle table-hover mb-0" style="min-width: 1100px;">
                         <thead>
                             <tr>
-                                <!-- Lebar proporsional baru -->
-                                <th class="ps-4 py-3" style="width: 14%;">KODE ASET</th>
+                                <th class="ps-4 py-3" style="width: 15%;">KODE ASET</th>
                                 {% if request.user.profile.role|upper != 'OPERATOR_OPD' %}
-                                    <th class="py-3" style="width: 20%;">NAMA ASET & OPD</th>
+                                    <th class="py-3" style="width: 23%;">NAMA ASET & OPD</th>
                                 {% else %}
-                                    <th class="py-3" style="width: 20%;">NAMA ASET</th>
+                                    <th class="py-3" style="width: 23%;">NAMA ASET</th>
                                 {% endif %}
                                 <th class="py-3" style="width: 20%;">LOKASI & FISIK</th>
-                                <th class="py-3" style="width: 18%;">NILAI ASET (Rp)</th>
-                                <th class="py-3" style="width: 9%;">VERIFIKASI</th>
+                                <th class="py-3" style="width: 14%;">NILAI ASET (Rp)</th>
+                                <th class="py-3" style="width: 10%;">VERIFIKASI</th>
                                 <th class="py-3" style="width: 10%;">SERTIFIKAT</th>
-                                <!-- pe-4 DIHAPUS, width dinaikkan jadi 9% agar tombol 2x2 lega dan tepat di tengah -->
-                                <th class="text-center py-3" style="width: 9%;">AKSI</th>
+                                <th class="text-center py-3" style="width: 8%;">AKSI</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white">
                             {% for aset in semua_aset %}
                             <tr>
-                                <!-- Kode aset dibolehkan menjadi 2 baris (wrap) -->
-                                <td class="ps-4 fw-bold" style="color: var(--accent-blue); white-space: normal; word-break: break-word;">
+                                <td class="ps-4 fw-bold" style="color: var(--accent-blue);">
                                     {{ aset.kode_barang|default:"-" }}
                                 </td>
                                 
-                                <td class="text-truncate" title="{{ aset.nama_barang }} {% if aset.opd %}({{ aset.opd.nama_opd }}){% endif %}">
-                                    <div class="fw-bold text-dark text-truncate">{{ aset.nama_barang }}</div>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ aset.nama_barang }}</div>
                                     {% if request.user.profile.role|upper != 'OPERATOR_OPD' %}
-                                        <div class="small text-muted text-truncate"><i class="bi bi-building me-1"></i>{{ aset.opd.nama_opd|default:"-" }}</div>
+                                        <div class="small text-muted"><i class="bi bi-building me-1"></i>{{ aset.opd.nama_opd|default:"-" }}</div>
                                     {% endif %}
                                 </td>
                                 
-                                <td class="text-truncate" title="{{ aset.alamat_lokasi|default:'-' }}">
-                                    <div class="fw-bold text-secondary text-truncate" style="font-size: 0.85rem;">{{ aset.kecamatan_nama|default:"-" }}</div>
-                                    <div class="small text-muted text-truncate">{{ aset.alamat_lokasi|default:"-" }}</div>
-                                    <div class="small fw-bold text-dark mt-1"><i class="bi bi-bounding-box text-primary me-1"></i> Luas: <span class="tampil-luas">{{ aset.luas_m2|default:"0" }}</span></div>
+                                <td>
+                                    <div class="fw-bold text-secondary" style="font-size: 0.85rem;">{{ aset.kecamatan_nama|default:"-" }}</div>
+                                    <div class="small text-muted">{{ aset.alamat_lokasi|default:"-" }}</div>
+                                    <div class="small fw-bold text-dark mt-1"><i class="bi bi-bounding-box text-primary me-1"></i> Luas: <span class="tampil-luas" data-raw="{{ aset.luas_m2|default:'0' }}">{{ aset.luas_m2|default:"0" }}</span></div>
                                 </td>
                                 
-                                <td class="fw-semibold text-success tampil-rupiah text-truncate fs-6" title="Rp {{ aset.nilai_aset|default:'0' }}">{{ aset.nilai_aset|default:"0" }}</td>
+                                <td class="fw-semibold text-success tampil-rupiah fs-6" data-raw="{{ aset.nilai_aset|default:'0' }}">{{ aset.nilai_aset|default:"0" }}</td>
                                 
                                 <td>
                                     {% if aset.status_verifikasi == 'VALID' %}
@@ -204,21 +207,19 @@
                                     {% endif %}
                                 </td>
                                 
-                                <!-- pe-4 DIHAPUS dari td ini, align-middle ditambahkan agar sejajar vertikal -->
                                 <td class="text-center align-middle">
-                                    <!-- max-width dinaikkan sedikit ke 76px agar kotak tombol tidak bertabrakan -->
-                                    <div class="d-grid gap-1 mx-auto" style="grid-template-columns: repeat(2, 1fr); max-width: 76px;">
+                                    <div class="d-flex flex-wrap justify-content-center gap-1" style="max-width: 76px; margin: 0 auto;">
                                         {% if aset.status_verifikasi == 'VALID' and aset.status_sertifikasi == 'BERSERTIFIKAT' %}
-                                            <a href="{% url 'tanah:tambah_sertifikat' aset.id %}" class="btn btn-sm btn-bpkad-outline-primary shadow-sm" title="Tambah Detail Sertifikat"><i class="bi bi-file-earmark-plus"></i></a>
+                                            <a href="{% url 'tanah:tambah_sertifikat' aset.id %}" class="btn btn-sm btn-bpkad-outline-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Tambah Detail Sertifikat"><i class="bi bi-file-earmark-plus"></i></a>
                                         {% else %}
-                                            <button class="btn btn-sm btn-light border shadow-sm text-muted opacity-50" title="Aset belum Valid atau belum Bersertifikat." disabled><i class="bi bi-lock-fill"></i></button>
+                                            <button class="btn btn-sm btn-light border rounded-circle shadow-sm text-muted opacity-50 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Aset belum Valid atau Bersertifikat." disabled><i class="bi bi-lock-fill"></i></button>
                                         {% endif %}
-                                        <a href="{% url 'tanah:detail_aset_tanah' aset.id %}" class="btn btn-sm btn-bpkad-info shadow-sm" title="Lihat Detail Data"><i class="bi bi-eye"></i></a>
-                                        <a href="{% url 'tanah:edit_aset_tanah' aset.id %}" class="btn btn-sm btn-bpkad-warning shadow-sm" title="Tinjau & Validasi Data"><i class="bi bi-pencil"></i></a>
+                                        <a href="{% url 'tanah:detail_aset_tanah' aset.id %}" class="btn btn-sm btn-bpkad-info rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Lihat Detail Data"><i class="bi bi-eye"></i></a>
+                                        <a href="{% url 'tanah:edit_aset_tanah' aset.id %}" class="btn btn-sm btn-bpkad-warning rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Tinjau & Validasi Data"><i class="bi bi-pencil"></i></a>
                                         {% if aset.status_verifikasi == 'VALID' %}
-                                            <a href="{% url 'tanah:delete_aset_tanah' aset.id %}" class="btn btn-sm btn-bpkad-danger shadow-sm" title="Hapus Data" onclick="return confirm('Yakin ingin menghapus aset ini?')"><i class="bi bi-trash"></i></a>
+                                            <a href="{% url 'tanah:delete_aset_tanah' aset.id %}" class="btn btn-sm btn-bpkad-danger rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Hapus Data" onclick="return confirm('Yakin ingin menghapus aset ini?')"><i class="bi bi-trash"></i></a>
                                         {% else %}
-                                            <button class="btn btn-sm btn-light border shadow-sm text-muted opacity-50" title="Aset belum valid." disabled><i class="bi bi-lock-fill"></i></button>
+                                            <button class="btn btn-sm btn-light border rounded-circle shadow-sm text-muted opacity-50 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Aset belum valid." disabled><i class="bi bi-lock-fill"></i></button>
                                         {% endif %}
                                     </div>
                                 </td>

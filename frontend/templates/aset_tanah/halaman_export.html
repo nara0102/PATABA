@@ -1,0 +1,155 @@
+{% extends 'base/base_admin_BPKAD.html' %}
+{% block title %}Konfigurasi Export Laporan - TRANSPARA{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 mb-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1" style="color: var(--text-main);"><i class="bi bi-file-earmark-excel text-success me-2"></i>Pusat Unduh Laporan</h4>
+            <p class="text-muted small mb-0">Saring data dan pilih informasi spesifik yang ingin Anda ekspor ke Excel.</p>
+        </div>
+    </div>
+
+    <form method="POST" action="{% url 'tanah:proses_export_excel' %}">
+        {% csrf_token %}
+        <div class="row g-4">
+            
+            <div class="col-lg-5">
+                <div class="glass-card p-4 h-100">
+                    <h6 class="fw-bold mb-4 border-bottom pb-2" style="color: var(--accent-blue);">1. Saring Data (Filter)</h6>
+                    
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted mb-1">Pencarian Kata Kunci</label>
+                        <input type="text" name="q" class="form-control bg-light border-0" placeholder="Cari nama aset, NIBAR, alamat...">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted mb-1">Pilih Instansi (OPD)</label>
+                        <select name="opd" class="form-select bg-light border-0">
+                            <option value="">-- Semua Instansi --</option>
+                            {% for opd in opd_list %}
+                                <option value="{{ opd.id }}">{{ opd.nama_opd }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted mb-1">Status Sertifikasi</label>
+                        <select name="status_sertifikasi" class="form-select bg-light border-0">
+                            <option value="">-- Semua Status --</option>
+                            <option value="BERSERTIFIKAT">Sudah Bersertifikat</option>
+                            <option value="BELUM_BERSERTIFIKAT">Belum Bersertifikat</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted mb-1">Status Verifikasi Sistem</label>
+                        <select name="status_verifikasi" class="form-select bg-light border-0">
+                            <option value="VALID" selected>Hanya Data Valid (Telah Disetujui)</option>
+                            <option value="ANTREAN">Sedang Dalam Antrean</option>
+                            <option value="PERLU_REVIEW">Perlu Revisi</option>
+                            <option value="SEMUA">Unduh Seluruh Status Data</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="glass-card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+                        <h6 class="fw-bold mb-0" style="color: var(--accent-blue);">2. Pilih Kolom Informasi</h6>
+                        <button type="button" id="btn-select-all" class="btn btn-sm btn-outline-secondary rounded-pill" style="font-size: 0.75rem;">Pilih Semua</button>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="opd" checked>
+                                <label class="form-check-label small">Instansi (OPD)</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="kode_barang" checked>
+                                <label class="form-check-label small">Kode Barang</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="nama_barang" checked>
+                                <label class="form-check-label small">Nama Barang</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="nibar">
+                                <label class="form-check-label small">NIBAR</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="nomor_register">
+                                <label class="form-check-label small">Nomor Register</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="nilai" checked>
+                                <label class="form-check-label small fw-bold text-success">Nilai Aset (Rp)</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="luas">
+                                <label class="form-check-label small">Luas Tanah (m2)</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="alamat" checked>
+                                <label class="form-check-label small">Alamat Lengkap</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="kecamatan">
+                                <label class="form-check-label small">Kecamatan</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="koordinat">
+                                <label class="form-check-label small">Titik Koordinat (Lat, Lng)</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="status_sertif" checked>
+                                <label class="form-check-label small">Status Sertifikasi</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="no_sertif">
+                                <label class="form-check-label small">Nomor Sertifikat/Hak</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="detail_sertif" checked>
+                                <label class="form-check-label small fw-bold text-primary">Kondisi Fisik Sertifikat (Asli/FC)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 text-end mt-4">
+                <button type="submit" class="btn btn-success rounded-pill px-5 py-2 shadow-sm fw-bold">
+                    <i class="bi bi-download me-2"></i> Unduh File Excel Sekarang
+                </button>
+            </div>
+            
+        </div>
+    </form>
+</div>
+
+<script>
+    // Fitur Pilih Semua Checkbox
+    document.getElementById('btn-select-all').addEventListener('click', function() {
+        const checkboxes = document.querySelectorAll('.col-checkbox');
+        let allChecked = true;
+        
+        // Cek apakah semuanya sudah tercentang
+        checkboxes.forEach(cb => { if(!cb.checked) allChecked = false; });
+        
+        // Toggle centang
+        checkboxes.forEach(cb => { cb.checked = !allChecked; });
+        
+        this.textContent = allChecked ? "Pilih Semua" : "Batal Pilih Semua";
+        this.classList.toggle('btn-outline-secondary');
+        this.classList.toggle('btn-secondary');
+        this.classList.toggle('text-white');
+    });
+</script>
+{% endblock %}

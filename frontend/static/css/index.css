@@ -1,0 +1,277 @@
+/* =========================================
+   PATABA PUBLIC CSS (LANDING PAGE)
+   ========================================= */
+
+/* =========================================
+   1. VARIABEL WARNA (Light & Dark Mode)
+   ========================================= */
+:root {
+    --bg-main: #F5F5F7;
+    --bg-alt: #FFFFFF; /* Untuk selang-seling warna section */
+    
+    --text-primary: #1D1D1F;
+    --text-secondary: #515154;
+    
+    /* Navbar Terang */
+    --nav-bg: rgba(255, 255, 255, 0.9);
+    --nav-border: rgba(255, 255, 255, 0.4);
+    --nav-icon: #1D1D1F; /* Warna Ikon Gerigi */
+    
+    --card-bg: #ffffff;
+    --card-border: #E5E5EA;
+    --card-glow: 0 10px 30px rgba(0,0,0,0.05);
+    
+    --footer-bg: #F5F5F7;
+    --footer-border: #D1D1D6;
+    --map-pattern: rgba(0, 45, 94, 0.08); 
+}
+
+/* KETIKA MODE GELAP DIAKTIFKAN */
+[data-theme="dark"] {
+    --bg-main: #1C1C1E; /* Abu-abu Gelap Elegan khas Apple macOS */
+    --bg-alt: #000000;  /* Hitam pekat untuk pemisah seksi */
+    
+    --text-primary: #F5F5F7;
+    --text-secondary: #A1A1A6;
+    
+    /* NAVBAR TERKUNCI: Tetap Kaca Terang agar Logo PATABA & Teks tidak hilang! */
+    --nav-bg: rgba(255, 255, 255, 0.85);
+    --nav-border: rgba(255, 255, 255, 0.3);
+    --nav-icon: #1D1D1F; /* Ikon tetap gelap agar terlihat di navbar terang */
+    
+    --card-bg: #2C2C2E; /* Kotak Card Apple Dark Mode */
+    --card-border: #3A3A3C;
+    --card-glow: 0 10px 30px rgba(0,0,0,0.3);
+    
+    --footer-bg: #1C1C1E;
+    --footer-border: #3A3A3C;
+    --map-pattern: rgba(255, 255, 255, 0.05); 
+}
+
+/* 2. PENGATURAN DASAR & KONEKSI SECTION */
+html { scroll-behavior: smooth; }
+
+body { 
+    background-color: var(--bg-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+    color: var(--text-primary);
+    display: flex; flex-direction: column; min-height: 100vh; margin: 0;
+    animation: smoothPageLoad 0.8s ease-out forwards; opacity: 0;
+    transition: background-color 0.4s ease, color 0.4s ease; 
+}
+
+/* Class Pengikat Warna Background (Jangan Dihapus) */
+.section-main { background-color: var(--bg-main) !important; transition: background-color 0.4s ease; }
+.section-alt { background-color: var(--bg-alt) !important; transition: background-color 0.4s ease; }
+
+@keyframes smoothPageLoad { 0% { opacity: 0; } 100% { opacity: 1; } }
+
+.main-wrapper { flex: 1; }
+
+section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 80px 0; /* Padding atas bawah dinamis */
+}
+
+/* Teks Mulus Mengikuti Mode */
+.text-apple-dark { color: var(--text-primary) !important; transition: color 0.4s ease; }
+.text-apple-muted { color: var(--text-secondary) !important; transition: color 0.4s ease; }
+
+/* =========================================
+   3. TOP BAR & NAVBAR (RESPONSIVE)
+   ========================================= */
+.top-bar-gov {
+    background-color: #002D5E !important; /* Diselaraskan dengan Biru Paten PATABA */
+    color: #d0d0d0 !important;
+    font-size: 0.85rem;
+    padding: 10px 0;
+    position: sticky; 
+    top: 0; 
+    z-index: 10000; 
+    width: 100%;
+}
+
+.navbar-floating-box {
+    background: var(--nav-bg) !important;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 100px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08); 
+    padding: 12px 30px;
+    border: 1px solid var(--nav-border);
+    
+    position: sticky !important; 
+    top: 50px !important; /* Menyesuaikan tinggi top-bar */
+    z-index: 9999 !important;
+    
+    width: 90% !important;
+    max-width: 1200px !important;
+    margin: 15px auto 0 auto !important; 
+    transition: background-color 0.4s ease, border-color 0.4s ease;
+}
+
+/* Tombol Ikon Navbar (Biar warnanya berubah jadi putih saat Dark Mode) */
+.nav-link i { color: #1D1D1F !important; transition: color 0.4s ease; }
+
+/* phone */
+@media (max-width: 991px) {
+    .navbar-floating-box {
+        border-radius: 20px; 
+        padding: 10px 15px; 
+        width: 95% !important;
+        top: 40px !important; 
+        margin-top: 10px !important;
+    }
+    .navbar-collapse {
+        background: var(--nav-bg); 
+        padding: 15px;
+        border-radius: 15px;
+        margin-top: 15px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        border: 1px solid var(--nav-border);
+    }
+    #realtime-clock-container { display: none; }
+
+    /* OBAT POP-UP HP: Dikunci di tengah layar, mustahil terpotong! */
+    .settings-popup {
+        position: fixed !important;
+        top: 100px !important;
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) translateY(10px) !important;
+        width: 90% !important;
+        max-width: 350px !important;
+    }
+    .settings-popup.show {
+        transform: translateX(-50%) translateY(0) !important;
+    }
+}
+
+/* =========================================
+   4. HERO SECTION
+   ========================================= */
+.hero-pataba { /* SUDAH DIUBAH MENJADI PATABA */
+    background-image: url('../images/bg_index.png'); 
+    background-size: cover;
+    background-position: center;
+    color: #ffffff;
+    margin-top: -140px; /* Menarik hero ke atas agar menembus navbar */
+    padding-top: 200px; /* Jarak agar konten hero tidak tertutup navbar */
+    padding-bottom: 80px;
+}
+
+.hero-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(90deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0) 100%);
+    z-index: 1;
+}
+
+.btn-hero-primary { background-color: #002D5E; color: white; border: none; transition: all 0.3s ease; } /* Paten Biru */
+.btn-hero-primary:hover { background-color: #172554; transform: translateY(-2px); color: white;} 
+
+.btn-hero-outline { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: white; backdrop-filter: blur(5px); transition: all 0.3s ease; }
+.btn-hero-outline:hover { background: rgba(255, 255, 255, 0.2); color: white; transform: translateY(-2px); }
+
+/* Tombol Akses (Hover) */
+.btn-login-hover { transition: all 0.3s ease !important; background-color: #002D5E !important;} /* Paten Navy */
+.btn-login-hover:hover { background-color: #172554 !important; 
+    border-color: #172554 !important;
+    transform: translateY(-2px); 
+    box-shadow: 0 8px 15px rgba(30, 58, 138, 0.3) !important;  } 
+
+.btn-email-hover { transition: all 0.3s ease !important; }
+.btn-email-hover:hover { background-color: #002D5E !important; color: #ffffff !important; border-color: #172554 !important; }
+
+/* =========================================
+   5. KARTU (CARDS) - Adaptif Dark Mode
+   ========================================= */
+.card-glow {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--card-border) !important;
+    box-shadow: var(--card-glow) !important;
+    transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+/* Tulisan dalam kartu berubah otomatis di Dark Mode */
+.card-glow h4, .card-glow h6, .card-glow .text-dark { 
+    color: var(--text-primary) !important; 
+    transition: color 0.4s ease;
+}
+
+/* =========================================
+   6. ANIMASI & KOMPONEN VISUAL LAINNYA
+   ========================================= */
+.reveal-left { opacity: 0; transform: translateX(-40px); transition: all 1s cubic-bezier(0.25, 1, 0.5, 1); }
+.reveal-right { opacity: 0; transform: translateX(40px); transition: all 1s cubic-bezier(0.25, 1, 0.5, 1); }
+.reveal-active { opacity: 1; transform: translateX(0); }
+
+/* Lengkungan Transisi */
+.curved-transition { 
+    position: relative; 
+    background-color: var(--bg-main); 
+    padding-top: 100px !important; 
+    transition: background-color 0.4s ease; 
+}
+.curved-transition::before {
+    content: ""; position: absolute; top: -50px; left: 0; width: 100%; height: 100px;
+    background-color: var(--bg-main); border-radius: 50% 50% 0 0 / 100% 100% 0 0; z-index: 10;
+    transition: background-color 0.4s ease;
+}
+
+.zoom-container { overflow: hidden; transition: transform 0.5s ease; }
+.zoom-container img { transition: transform 0.5s ease; }
+.card:hover .zoom-container img { transform: scale(1.08); }
+
+.map-pattern-bg {
+    position: relative; 
+    background-color: var(--card-bg);
+    background-image: 
+        linear-gradient(var(--map-pattern) 1px, transparent 1px), 
+        linear-gradient(90deg, var(--map-pattern) 1px, transparent 1px);
+    background-size: 50px 50px;
+    transition: background-color 0.4s ease;
+}
+.map-pattern-bg > .container { position: relative; z-index: 2; }
+.map-container { border-radius: 24px; overflow: hidden; height: 350px; box-shadow: var(--card-glow); }
+
+/* Pengaturan Pop-up Menu */
+.settings-popup {
+    position: absolute; top: 60px; right: 0; width: 260px; z-index: 10000;
+    background: var(--nav-bg); 
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px; 
+    border: 1px solid var(--nav-border); 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    padding: 20px; display: none; 
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); transform: translateY(10px);
+    color: #1D1D1F !important;
+}
+.settings-popup h6, 
+.settings-popup span { color: #1D1D1F !important; }
+.settings-popup.show { display: block; transform: translateY(0); }
+
+/* Footer */
+.footer-minimalis {
+    background-color: var(--footer-bg); 
+    color: var(--text-secondary); 
+    margin-top: auto;
+    padding: 80px 0 30px 0; 
+    border-top: 1px solid var(--footer-border); 
+    width: 100%;
+    transition: background-color 0.4s ease, border-color 0.4s ease;
+}
+.footer-minimalis h4, .footer-minimalis h6 { 
+    color: var(--text-primary) !important; 
+    transition: color 0.4s ease;
+}
+
+/* =========================================
+   PENJINAK LOGO FOOTER DI MODE GELAP
+   ========================================= */
+[data-theme="dark"] .logo-footer-pataba {
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.85)) !important;
+    transition: filter 0.4s ease;
+}

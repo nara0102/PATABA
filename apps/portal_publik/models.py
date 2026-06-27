@@ -41,8 +41,8 @@ class PublikasiInstansi(models.Model):
     kategori = models.CharField(max_length=20, choices=KATEGORI_CHOICES)
     isi_konten = models.TextField(blank=True, null=True) 
     gambar_utama = models.ImageField(
-        upload_to='publikasi_images/', 
-        storage=PublikasiStorage(),  # <--- INI KUNCINYA
+        upload_to='konten-publik', 
+        storage=PublikasiStorage(),  
         blank=True, null=True
     ) 
     

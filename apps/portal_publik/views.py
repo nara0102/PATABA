@@ -121,7 +121,7 @@ def tambah_publikasi_view(request):
 
     # <-- PENTING! JIKA BUKAN POST (Yaitu saat admin baru pertama kali klik tombol "Tulis Baru")
     # Harus ada perintah render di baris paling bawah ini
-    return render(request, 'aset_tanah/input_publikasi.html')
+    return render(request, 'portal_publik/input_publikasi.html')
 
 # 2 - list
 @login_required(login_url='auth:login')
@@ -135,7 +135,7 @@ def list_publikasi_view(request):
         'pengumuman': semua_publikasi.filter(kategori='PENGUMUMAN'),
         'kegiatan': semua_publikasi.filter(kategori='KEGIATAN'),
     }
-    return render(request, 'aset_tanah/list_publikasi.html', context)
+    return render(request, 'portal_publik/list_publikasi.html', context)
 
 # 3 - Edit Publikasi
 @login_required(login_url='auth:login')
@@ -164,7 +164,7 @@ def edit_publikasi_view(request, pk):
         except Exception as e:
             messages.error(request, f"Gagal memperbarui data: {str(e)}")
             
-    return render(request, 'aset_tanah/input_publikasi.html', {'publikasi': publikasi})
+    return render(request, 'portal_publik/input_publikasi.html', {'publikasi': publikasi})
 
 
 # 4 - Delete Publikasi

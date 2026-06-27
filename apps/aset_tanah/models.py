@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
+from pataba_core.storages import AsetTanahStorage
 
 User = get_user_model()
 
@@ -42,7 +43,7 @@ class AsetTanah(models.Model):
     kode_barang = models.CharField(max_length=50, blank=True, null=True)
     nibar = models.CharField(max_length=50, blank=True, null=True)
     nomor_register = models.CharField(max_length=20, blank=True, null=True)
-
+   
     status_kepemilikan = models.CharField(max_length=50, blank=True, null=True)
     luas_m2 = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
     cara_perolehan = models.CharField(max_length=50, blank=True, null=True)
@@ -59,6 +60,7 @@ class AsetTanah(models.Model):
     status_sertifikasi = models.CharField(max_length=25, choices=STATUS_SERTIFIKASI_CHOICES, default='BELUM_BERSERTIFIKAT')
     nomor_sertifikat = models.CharField(max_length=150, blank=True, null=True)
     status_hak_sementara = models.CharField(max_length=50, blank=True, null=True)
+    nomor_hak = models.CharField(max_length=150, blank=True, null=True)
     keterangan_sertifikasi_lainnya = models.CharField(max_length=255, blank=True, null=True)
 
     kondisi_pemanfaatan = models.CharField(max_length=50, blank=True, null=True)
@@ -82,6 +84,16 @@ class AsetTanah(models.Model):
 
     def __str__(self):
         return f"{self.nama_barang} - {self.kode_barang}"
+    
+# foto 
+class FotoAsetTanah(models.Model):
+    # Hubungkan ke AsetTanah menggunakan ForeignKey
+    aset = models.ForeignKey(AsetTanah, on_delete=models.CASCADE, related_name='koleksi_foto')
+    file_foto = models.ImageField(upload_to='foto-tanah', storage=AsetTanahStorage())
+    diunggah_pada = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'foto_aset_tanah'
 
 
 # Sertifikat Tanah
@@ -104,6 +116,7 @@ class SertifikatTanah(models.Model):
     alamat = models.TextField(blank=True, null=True)
     peruntukan = models.CharField(max_length=255, blank=True, null=True)
     status_hak = models.CharField(max_length=20, choices=STATUS_HAK_CHOICES)
+    nomor_hak = models.CharField(max_length=150, blank=True, null=True)
     
     luas = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
     tanggal_pembuatan = models.DateField(blank=True, null=True)

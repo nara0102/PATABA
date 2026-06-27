@@ -1,0 +1,365 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-27 21:03+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: frontend/templates/portal_publik/index.html:8
+msgid "Portal Aset Tanah Pemerintah Daerah Kota Palu"
+msgstr "Palu City Local Government Land Asset Portal"
+
+#: frontend/templates/portal_publik/index.html:26
+msgid "Jl. Baruga No. 2, Kota Palu, Sulawesi Tengah"
+msgstr "Jl. Baruga No. 2, Palu City, Central Sulawesi"
+
+#: frontend/templates/portal_publik/index.html:30
+msgid "WITA"
+msgstr "WITA"
+
+#: frontend/templates/portal_publik/index.html:50
+msgid "Pengaturan"
+msgstr "Settings"
+
+#: frontend/templates/portal_publik/index.html:52
+msgid "Mode Gelap"
+msgstr "Dark Mode"
+
+#: frontend/templates/portal_publik/index.html:61
+msgid "Pilih Bahasa"
+msgstr "Select Language"
+
+#: frontend/templates/portal_publik/index.html:80
+msgid "Login"
+msgstr "Login"
+
+#: frontend/templates/portal_publik/index.html:89
+msgid "Beranda"
+msgstr "Home"
+
+#: frontend/templates/portal_publik/index.html:90
+#: frontend/templates/portal_publik/index.html:510
+msgid "Data Aset"
+msgstr "Asset Data"
+
+#: frontend/templates/portal_publik/index.html:91
+#: frontend/templates/portal_publik/index.html:511
+msgid "Peta GIS"
+msgstr "GIS Map"
+
+#: frontend/templates/portal_publik/index.html:92
+msgid "Berita"
+msgstr "News"
+
+#: frontend/templates/portal_publik/index.html:93
+msgid "Kontak"
+msgstr "Contact Us"
+
+#: frontend/templates/portal_publik/index.html:107
+msgid "Sistem Manajemen Aset Terpadu"
+msgstr "Integrated Asset Management System"
+
+#: frontend/templates/portal_publik/index.html:111
+msgid "Portal Aset"
+msgstr "Asset Portal"
+
+#: frontend/templates/portal_publik/index.html:111
+msgid "Tanah Pemerintah Daerah"
+msgstr "Local Government Land"
+
+#: frontend/templates/portal_publik/index.html:115
+msgid ""
+"Wujudkan tata kelola pemerintahan yang akuntabel melalui keterbukaan data "
+"aset daerah Kota Palu. Akses informasi tanah, bangunan, dan aset lainnya "
+"secara real-time."
+msgstr ""
+"Realize accountable public governance through the transparency of Palu "
+"City's regional asset data. Access information on land, buildings, and other "
+"assets in real-time."
+
+#: frontend/templates/portal_publik/index.html:120
+msgid "Buka Peta GIS"
+msgstr "Open GIS Map"
+
+#: frontend/templates/portal_publik/index.html:123
+msgid "Berita & Dokumentasi"
+msgstr "News & Documentation"
+
+#: frontend/templates/portal_publik/index.html:135
+msgid "Total Luas Tanah"
+msgstr "Total Land Area"
+
+#: frontend/templates/portal_publik/index.html:136
+msgid "Ha"
+msgstr "Ha"
+
+#: frontend/templates/portal_publik/index.html:146
+msgid "Bangunan Publik"
+msgstr "Public Buildings"
+
+#: frontend/templates/portal_publik/index.html:147
+#: frontend/templates/portal_publik/index.html:158
+#: frontend/templates/portal_publik/index.html:256
+msgid "Unit"
+msgstr "Units"
+
+#: frontend/templates/portal_publik/index.html:157
+msgid "Kendaraan Dinas"
+msgstr "Official Vehicles"
+
+#: frontend/templates/portal_publik/index.html:168
+msgid "Nilai Total Aset"
+msgstr "Total Asset Value"
+
+#: frontend/templates/portal_publik/index.html:169
+msgid "Triliun"
+msgstr "Trillion"
+
+#: frontend/templates/portal_publik/index.html:188
+msgid "Bidang Aset BPKAD Kota Palu"
+msgstr "Asset Division of BPKAD Palu City"
+
+#: frontend/templates/portal_publik/index.html:190
+msgid ""
+"Badan Pengelola Keuangan dan Aset Daerah (BPKAD) Kota Palu melalui Bidang "
+"Aset berkomitmen untuk mengelola kekayaan daerah secara profesional, "
+"transparan, dan akuntabel. Kami memastikan setiap aset daerah tercatat "
+"dengan baik dan dimanfaatkan secara optimal untuk kepentingan masyarakat."
+msgstr ""
+"The Regional Financial and Asset Management Agency (BPKAD) of Palu City, "
+"through the Asset Division, is committed to managing regional wealth "
+"professionally, transparently, and accountably. We ensure every regional "
+"asset is well-recorded and optimally utilized for the benefit of the "
+"community."
+
+#: frontend/templates/portal_publik/index.html:193
+msgid ""
+"Sistem Pataba hadir sebagai jembatan informasi antara pemerintah dan "
+"masyarakat dalam memantau sebaran dan status hukum aset-aset strategis di "
+"wilayah Kota Palu."
+msgstr ""
+"The Pataba System serves as an information bridge between the government "
+"and the community in monitoring the distribution and legal status of "
+"strategic assets in the Palu City area."
+
+#: frontend/templates/portal_publik/index.html:196
+msgid "Kunjungi Portal BPKAD"
+msgstr "Visit BPKAD Portal"
+
+#: frontend/templates/portal_publik/index.html:206
+msgid "Klasifikasi Data Aset"
+msgstr "Asset Data Classification"
+
+#: frontend/templates/portal_publik/index.html:208
+msgid ""
+"Jelajahi berbagai kategori aset daerah yang dikelola oleh Pemerintah Kota "
+"Palu melalui basis data terintegrasi."
+msgstr ""
+"Explore various categories of regional assets managed by the Palu City "
+"Government through an integrated database."
+
+#: frontend/templates/portal_publik/index.html:220
+msgid "Kategori Utama"
+msgstr "Main Category"
+
+#: frontend/templates/portal_publik/index.html:221
+msgid "Tanah Daerah"
+msgstr "Regional Land"
+
+#: frontend/templates/portal_publik/index.html:226
+msgid ""
+"Informasi legalitas, letak geografis, dan peruntukan lahan milik pemerintah "
+"daerah di seluruh kecamatan."
+msgstr ""
+"Information on the legality, geographical location, and land designation "
+"owned by the local government across all sub-districts."
+
+#: frontend/templates/portal_publik/index.html:230
+msgid "Titik Lokasi"
+msgstr "Location Points"
+
+#: frontend/templates/portal_publik/index.html:233
+msgid "Lihat Detail"
+msgstr "View Details"
+
+#: frontend/templates/portal_publik/index.html:246
+msgid "Fasilitas"
+msgstr "Facilities"
+
+#: frontend/templates/portal_publik/index.html:247
+msgid "Gedung & Bangunan"
+msgstr "Buildings & Structures"
+
+#: frontend/templates/portal_publik/index.html:252
+msgid ""
+"Daftar gedung perkantoran, fasilitas kesehatan, sekolah, dan bangunan publik "
+"lainnya di bawah naungan Pemkot."
+msgstr ""
+"List of office buildings, healthcare facilities, schools, and other public "
+"buildings under the auspices of the City Government."
+
+#: frontend/templates/portal_publik/index.html:259
+#: frontend/templates/portal_publik/index.html:285
+msgid "Soon"
+msgstr "Soon"
+
+#: frontend/templates/portal_publik/index.html:272
+msgid "Inventaris"
+msgstr "Inventory"
+
+#: frontend/templates/portal_publik/index.html:273
+msgid "Peralatan & Mesin"
+msgstr "Equipment & Machinery"
+
+#: frontend/templates/portal_publik/index.html:278
+msgid ""
+"Manajemen kendaraan operasional, alat berat, dan peralatan pendukung layanan "
+"administrasi pemerintah."
+msgstr ""
+"Management of operational vehicles, heavy equipment, and supporting "
+"equipment for government administrative services."
+
+#: frontend/templates/portal_publik/index.html:282
+msgid "Item"
+msgstr "Items"
+
+#: frontend/templates/portal_publik/index.html:300
+msgid "Berita & Pengumuman"
+msgstr "News & Announcements"
+
+#: frontend/templates/portal_publik/index.html:301
+msgid "Informasi terkini seputar pengelolaan aset Kota Palu."
+msgstr "Latest information regarding asset management in Palu City."
+
+#: frontend/templates/portal_publik/index.html:305
+msgid "Semua Berita"
+msgstr "All News"
+
+#: frontend/templates/portal_publik/index.html:333
+msgid "Belum ada berita utama."
+msgstr "No headline news available yet."
+
+#: frontend/templates/portal_publik/index.html:362
+msgid "Berita lainnya belum tersedia."
+msgstr "Other news is not yet available."
+
+#: frontend/templates/portal_publik/index.html:387
+msgid "Galeri Kegiatan"
+msgstr "Activity Gallery"
+
+#: frontend/templates/portal_publik/index.html:388
+msgid "Dokumentasi operasional dan pengelolaan aset di lapangan."
+msgstr "Documentation of operations and asset management in the field."
+
+#: frontend/templates/portal_publik/index.html:397
+msgid "Sorotan"
+msgstr "Highlights"
+
+#: frontend/templates/portal_publik/index.html:403
+msgid "Belum ada galeri utama"
+msgstr "No main gallery available yet"
+
+#: frontend/templates/portal_publik/index.html:421
+msgid "Galeri belum tersedia"
+msgstr "Gallery is not yet available"
+
+#: frontend/templates/portal_publik/index.html:436
+msgid "Temukan Aset di Sekitar Anda"
+msgstr "Find Assets Around You"
+
+#: frontend/templates/portal_publik/index.html:438
+msgid ""
+"Gunakan Peta GIS untuk melihat sebaran aset tanah dan bangunan secara "
+"spasial dengan data yang akurat dan transparan."
+msgstr ""
+"Use the GIS Map to view the spatial distribution of land and building assets "
+"with accurate and transparent data."
+
+#: frontend/templates/portal_publik/index.html:441
+msgid "Mulai Eksplorasi Peta"
+msgstr "Start Map Exploration"
+
+#: frontend/templates/portal_publik/index.html:451
+msgid "Lokasi Instansi"
+msgstr "Agency Location"
+
+#: frontend/templates/portal_publik/index.html:453
+msgid "BPAKD Kota Palu"
+msgstr "BPKAD Palu City"
+
+#: frontend/templates/portal_publik/index.html:454
+msgid "Jl. Baruga No. 2, Tanamodindi, Kec. Palu Selatan,"
+msgstr "Jl. Baruga No. 2, Tanamodindi, South Palu District,"
+
+#: frontend/templates/portal_publik/index.html:455
+msgid "Kota Palu, Sulawesi Tengah 94111"
+msgstr "Palu City, Central Sulawesi 94111"
+
+#: frontend/templates/portal_publik/index.html:459
+msgid "Kirim Email"
+msgstr "Send Email"
+
+#: frontend/templates/portal_publik/index.html:494
+msgid ""
+"Portal Aset Tanah Pemerintah Daerah Kota Palu. Dikelola oleh Bidang Aset "
+"Badan Pengelola Keuangan dan Aset Daerah (BPKAD) Pemerintah Kota Palu."
+msgstr ""
+"Palu City Government Land Asset Portal. Managed by the Asset Division of the "
+"Regional Financial and Asset Management Agency (BPKAD) of Palu City "
+"Government."
+
+#: frontend/templates/portal_publik/index.html:508
+msgid "TAUTAN CEPAT"
+msgstr "QUICK LINKS"
+
+#: frontend/templates/portal_publik/index.html:512
+msgid "Berita Terkini"
+msgstr "Latest News"
+
+#: frontend/templates/portal_publik/index.html:513
+msgid "Galeri Dokumentasi"
+msgstr "Documentation Gallery"
+
+#: frontend/templates/portal_publik/index.html:518
+msgid "INFORMASI KONTAK"
+msgstr "CONTACT INFORMATION"
+
+#: frontend/templates/portal_publik/index.html:520
+msgid "Kompleks Kantor Walikota Palu, Lt. 2"
+msgstr "Palu Mayor's Office Complex, 2nd Floor"
+
+#: frontend/templates/portal_publik/index.html:522
+msgid "Senin - Jumat: 08:00 - 16:00"
+msgstr "Monday - Friday: 08:00 - 16:00"
+
+#: frontend/templates/portal_publik/index.html:531
+msgid "© 2026 BPKAD Kota Palu. Hak Cipta Dilindungi Undang-Undang."
+msgstr "© 2026 BPKAD Palu City. All Rights Reserved."
+
+#: frontend/templates/portal_publik/index.html:534
+msgid "Kebijakan Privasi"
+msgstr "Privacy Policy"
+
+#: frontend/templates/portal_publik/index.html:535
+msgid "Syarat & Ketentuan"
+msgstr "Terms & Conditions"
+
+#: pataba_core/settings.py:107
+msgid "Indonesian"
+msgstr "Indonesian"
+
+#: pataba_core/settings.py:108
+msgid "English"
+msgstr "English"

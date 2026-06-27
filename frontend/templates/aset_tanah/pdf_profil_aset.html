@@ -1,0 +1,172 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Profil Aset {{ aset.kode_barang }}</title>
+    <style>
+        @page {
+            /* MENGGUNAKAN UKURAN KERTAS F4 (FOLIO) */
+            size: 21.5cm 33cm portrait; 
+            
+            /* Margin Atas diperbesar jadi 3.5cm agar Judul H1 (24px) tidak menabrak Header */
+            margin: 3.5cm 2cm 2.5cm 2cm; 
+            
+            /* Area Identitas Dokumen (Header Kanan Atas) */
+            @frame header_frame {
+                -pdf-frame-content: header_content;
+                left: 2cm; right: 2cm; top: 1.2cm; height: 2cm;
+            }
+            
+            /* Area Nomor Halaman (Footer ditekan ke paling bawah: 0.5cm) */
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 2cm; right: 2cm; bottom: 0.5cm; height: 1cm;
+            }
+        }
+        
+        body { font-family: Helvetica, sans-serif; font-size: 11px; color: #333; line-height: 1.5; }
+        
+        h1 { font-size: 24px; text-align: center; color: #002D5E; margin-top: 10px; margin-bottom: 2px; text-transform: uppercase; }
+        h2 { font-size: 14px; text-align: center; color: #555; margin-top: 0; margin-bottom: 20px; }
+        
+        /* Baris Judul Bagian */
+        .section-title { 
+            font-size: 12px; 
+            font-weight: bold; 
+            background-color: #002D5E; 
+            color: white; 
+            line-height: 1; 
+            padding-top: 8px;   
+            padding-bottom: 4px; 
+            padding-left: 8px;
+            margin-top: 20px; 
+            margin-bottom: 5px; 
+        }
+        
+        /* Tabel Utama */
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        td { padding: 5px 6px; border-bottom: 1px solid #ddd; vertical-align: top; }
+        .label { font-weight: bold; width: 35%; color: #555; }
+        .value { width: 65%; }
+        
+        /* ttd */
+        .signature-box { width: 100%; margin-top: 90px; page-break-inside: avoid; }
+        .signature-table { width: 100%; border: none; }
+        .signature-table td { border: none; padding: 0; vertical-align: top; }
+        .ttd-right { text-align: center; width: 45%; float: right; }
+    </style>
+</head>
+<body>
+    
+    <div id="header_content">
+        <table style="width: 100%; border: none; margin: 0; padding: 0;">
+            <tr>
+                <!-- KOLOM KIRI (LOGO) -->
+                <td style="width: 50%; text-align: left; border: none; padding: 0; vertical-align: top;">
+                    <img src="{{ logo_path }}" width="65" alt="Logo Pataba">
+                </td>
+                <!-- KOLOM KANAN (TEKS) -->
+                <td style="width: 50%; text-align: right; font-size: 9px; color: #777; line-height: 1.3; border: none; padding: 0; vertical-align: top;">
+                    <strong>DOKUMEN REGISTER:</strong> PATABA-ASET-{{ aset.id }}-{% now "Y" %}<br>
+                    Diunduh pada: {% now "d/m/Y H:i" %} WITA
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <h1>PROFIL LENGKAP ASET TANAH</h1>
+    <h2>Pemerintah Daerah Kota Palu</h2>
+    <hr style="border: 0.5px solid #002D5E; margin-bottom: 15px;">
+
+    <div class="section-title">A. IDENTITAS BARANG</div>
+    <table>
+        <tr><td class="label">Instansi Pengelola (OPD)</td><td class="value">{{ aset.opd.nama_opd|default:"-" }}</td></tr>
+        <tr><td class="label">Nama Barang</td><td class="value">{{ aset.nama_barang|default:"-" }}</td></tr>
+        <tr><td class="label">Kode Barang</td><td class="value">{{ aset.kode_barang|default:"-" }}</td></tr>
+        <tr><td class="label">NIBAR</td><td class="value">{{ aset.nibar|default:"-" }}</td></tr>
+        <tr><td class="label">Nomor Register</td><td class="value">{{ aset.nomor_register|default:"-" }}</td></tr>
+    </table>
+
+    <div class="section-title">B. DATA FISIK & LOKASI</div>
+    <table>
+        <tr><td class="label">Luas Tanah (m2)</td><td class="value">{{ aset.luas_m2|default:"0" }} m²</td></tr>
+        <tr><td class="label">Nilai Aset Terkini</td><td class="value">Rp. {{ aset.nilai_aset|default:"0" }}</td></tr>
+        <tr><td class="label">Cara & Tanggal Perolehan</td><td class="value">{{ aset.cara_perolehan|default:"-" }} / {{ aset.tanggal_perolehan|date:"d F Y"|default:"-" }}</td></tr>
+        <tr><td class="label">Alamat Lengkap</td><td class="value">{{ aset.alamat_lokasi|default:"-" }}</td></tr>
+        <tr><td class="label">Kecamatan / Kelurahan</td><td class="value">{{ aset.kecamatan_nama|default:"-" }} / {{ aset.kelurahan_nama|default:"-" }}</td></tr>
+        <tr><td class="label">Titik Koordinat (Lat, Lng)</td><td class="value">{{ aset.latitude|default:"-" }}, {{ aset.longitude|default:"-" }}</td></tr>
+    </table>
+
+    <div class="section-title">C. STATUS SERTIFIKASI & LEGALITAS</div>
+    <table>
+        <tr><td class="label">Status Kepemilikan</td><td class="value">
+            {% if aset.status_kepemilikan == 'PEMDA' %}Pemerintah Daerah Kota Palu
+            {% elif aset.status_kepemilikan == 'PROVINSI' %}Pemerintah Provinsi Sulawesi Tengah
+            {% elif aset.status_kepemilikan == 'PUSAT' %}Pemerintah Pusat (Kementerian/Lembaga)
+            {% elif aset.status_kepemilikan == 'MASYARAKAT' %}Masyarakat / Pribadi
+            {% else %}Belum Jelas{% endif %}
+        </td></tr>
+        <tr><td class="label">Status Sertifikasi Utama</td><td class="value">
+            {% if aset.status_sertifikasi == 'BERSERTIFIKAT' %}Sudah Bersertifikat{% elif aset.status_sertifikasi == 'BELUM_BERSERTIFIKAT' %}Belum Bersertifikat{% else %}Lainnya{% endif %}
+        </td></tr>
+        
+        {% if aset.status_sertifikasi == 'BERSERTIFIKAT' and sertifikat %}
+            <tr><td class="label">Nomor Sertifikat (BPN)</td><td class="value">{{ sertifikat.nomor_sertifikat|default:"-" }}</td></tr>
+            <tr><td class="label">Status & Nomor Hak</td><td class="value">
+                {% if sertifikat.status_hak == 'HAK_PAKAI' %}Hak Pakai{% else %}Hak Milik{% endif %} 
+                {{ sertifikat.nomor_hak|default:"" }}
+            </td></tr>
+            <tr><td class="label">Kondisi Fisik Dokumen</td><td class="value">
+                {% if sertifikat.keterangan == 'ASLI' %}Dokumen Asli{% else %}Salinan / Fotokopi{% endif %}
+            </td></tr>
+            <tr><td class="label">Atas Nama Kepemilikan</td><td class="value">{{ sertifikat.nama_pemegang_hak|default:"-" }}</td></tr>
+        {% elif aset.status_sertifikasi == 'BELUM_BERSERTIFIKAT' %}
+            <tr><td class="label">Status Hak (Proses)</td><td class="value">
+                {% if aset.status_hak_sementara == 'HAK_PAKAI' %}Hak Pakai
+                {% elif aset.status_hak_sementara == 'HAK_MILIK' %}Hak Milik
+                {% else %}{{ aset.status_hak_sementara|default:"-" }}{% endif %}
+            </td></tr>
+            <tr><td class="label">Nomor Hak</td><td class="value">{{ aset.nomor_hak|default:"-" }}</td></tr>
+        {% elif aset.status_sertifikasi == 'LAINNYA' %}
+            <tr><td class="label">Keterangan Sertifikasi</td><td class="value">{{ aset.keterangan_sertifikasi_lainnya|default:"-" }}</td></tr>
+        {% endif %}
+    </table>
+
+    <div class="section-title">D. PENGGUNAAN & KETERANGAN TAMBAHAN</div>
+    <table>
+        <tr><td class="label">Status Penggunaan</td><td class="value">{{ aset.status_penggunaan|default:"-" }}</td></tr>
+        <tr><td class="label">Kondisi Pemanfaatan</td><td class="value">{{ aset.kondisi_pemanfaatan|default:"-" }}</td></tr>
+        <tr><td class="label">Spesifikasi Nama Barang</td><td class="value">{{ aset.spesifikasi_nama_barang|default:"-" }}</td></tr>
+        <tr><td class="label">Spesifikasi Lainnya</td><td class="value">{{ aset.spesifikasi_lainnya|default:"-" }}</td></tr>
+        <tr><td class="label">Catatan Tambahan</td><td class="value">{{ aset.keterangan|default:"-" }}</td></tr>
+    </table>
+
+    <div style="height: 60px; line-height: 60px;">&nbsp;</div> 
+    <div class="signature-box">
+        <table style="width: 100%; border: none; margin-top: 40px; page-break-inside: avoid;">
+        <tr>
+            <!-- Kolom kosong di kiri sebesar 65% -->
+            <td style="width: 65%; border: none;"></td> 
+            
+            <!-- Kolom TTD di kanan sebesar 35% -->
+            <td style="width: 35%; text-align: left; border: none; padding-left: 10px; line-height: 1.3;">
+                <p style="margin-bottom: 60px;">
+                    Palu, {% now "d F Y" %}<br>
+                    Dicetak Oleh,
+                </p>
+                <p style="margin-bottom: 0;">
+                    <strong><u>{{ user.first_name|default:"Administrator BPKAD" }} {{ user.last_name }}</u></strong><br>
+                    NIP. {{ user.profile.nip|default:"-" }}
+                </p>
+            </td>
+        </tr>
+    </table>
+    </div>
+
+    <div id="footer_content" style="text-align: center; font-size: 9px; color: #999; border-top: 4px solid #ddd; padding-top: 20px;">
+        Dokumen elektronik ini diterbitkan oleh Sistem Portal Aset Daerah (PATABA) BPKAD Kota Palu.<br>
+        Halaman <pdf:pagenumber> dari <pdf:pagecount>
+    </div>
+</body>
+</html>

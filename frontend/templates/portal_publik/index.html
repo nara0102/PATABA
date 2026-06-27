@@ -1,332 +1,35 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRANPARA - Transparansi Aset Pemerintah Daerah Kota Palu</title>
+    <title>PATABA - {% trans "Portal Aset Tanah Pemerintah Daerah Kota Palu" %}</title>
+    <link rel="icon" type="image/png" href="{% static 'images/p-favicon.jpg' %}">
+    <!-- TAMBAHKAN INI UNTUK MENENANGKAN IPHONE/MAC -->
+    <link rel="apple-touch-icon" href="{% static 'images/p-favicon.jpg' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
-    <style>
-        html {
-            scroll-behavior: smooth;
-            scroll-snap-type: y mandatory; /* Mengunci scroll secara vertikal */
-        }
-
-        body { 
-            background-color: #F5F5F7;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            color: #1D1D1F;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh; /* Minimal setinggi layar perangkat */
-            margin: 0;
-        
-            animation: smoothPageLoad 0.8s ease-out forwards; /* Durasi lebih panjang, easing lebih natural */
-            opacity: 0;
-        }
-
-        @keyframes smoothPageLoad {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
-        }
-        .navbar-floating-box, .apple-banner {
-            will-change: transform;
-        }
-
-        .main-wrapper {
-            flex: 1; /* Ini akan mengisi ruang kosong secara otomatis */
-        }
-
-        section {
-            height: 100vh; 
-            scroll-snap-align: start; 
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Gaya Teks Apple */
-        .text-apple-dark { color: #1D1D1F; }
-        .text-apple-muted { color: #515154; }
-
-        .settings-popup {
-            position: absolute;
-            top: 60px; /* Sesuaikan dengan tinggi navbar */
-            right: 0;
-            width: 260px;
-            background: rgba(255, 255, 255, 0.85); /* Transparansi khas Apple */
-            backdrop-filter: blur(20px); /* Efek Blur */
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            padding: 20px;
-            display: none; /* Sembunyi secara default */
-            z-index: 10000;
-            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-            transform: translateY(10px); /* Efek muncul dari bawah */
-        }
-
-        .settings-popup.show {
-            display: block;
-            transform: translateY(0);
-        }
-
-        /* Animasi Storytelling Reveal */
-        .reveal-left {
-            opacity: 0;
-            transform: translateX(-60px);
-            transition: all 1s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-        .reveal-right {
-            opacity: 0;
-            transform: translateX(60px);
-            transition: all 1s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-        .reveal-active {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        /* Gaya Floating Island (Lengkungan Transisi) */
-        .curved-transition {
-            position: relative;
-            background-color: #F5F5F7;
-            padding-top: 150px !important; /* Memberikan ruang ekstra agar konten tidak menabrak lengkungan */
-        }
-        
-        .curved-transition::before {
-            content: "";
-            position: absolute;
-            top: -60px; /* Menarik lengkungan ke atas, menumpuk di atas Hero Section */
-            left: 0;
-            width: 100%;
-            height: 120px;
-            background-color: #F5F5F7;
-            border-radius: 50% 50% 0 0 / 100% 100% 0 0; /* Resep rahasia: Lengkungan oval sempurna di atas */
-            z-index: 10;
-        }
-
-        /* Efek Cinematic Zoom pada Galeri */
-        .zoom-container {
-            overflow: hidden; /* Memastikan zoom tidak keluar dari bingkai */
-            transition: transform 0.5s ease; /* Durasi dan kehalusan animasi */
-        }
-        
-        .zoom-container img {
-            transition: transform 0.5s ease; /* Animasi untuk gambarnya */
-        }
-
-        .card:hover .zoom-container img {
-            transform: scale(1.08); /* Zoom in 8% saat kartu di-hover */
-        }
-
-        /* Gaya Blueprint Grid - Pasang ini di dalam tag <style> */
-        .map-pattern-bg {
-            position: relative;
-            background-color: #ffffff;
-            /* Membuat pola grid kotak-kotak tipis biru muda */
-            background-image: 
-                linear-gradient(rgba(0, 63, 135, 0.08) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 63, 135, 0.08) 1px, transparent 1px);
-            background-size: 50px 50px; /* Ukuran kotak */
-        }
-
-        /* Memastikan konten tetap di atas pola */
-        .map-pattern-bg > .container {
-            position: relative;
-            z-index: 2;
-        }
-
-        /* Tombol Outline Primary */
-        .btn-outline-primary-custom {
-            color: #003F87;
-            border: 2px solid #003F87;
-            background-color: transparent;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-        .btn-outline-primary-custom:hover {
-            background-color: #003F87;
-            color: #ffffff;
-            transform: translateY(-2px);
-        }
-
-        /* Top Bar Biru Tua */
-        .top-bar-gov {
-            background-color: #003F87 !important; 
-            color: #d0d0d0 !important;
-            font-size: 0.85rem;
-            padding: 10px 0;
-            position: sticky; 
-            top: 0; 
-            z-index: 10000; 
-            width: 100%;
-        }
-
-        /* Header */
-        .navbar-floating-box {
-            background: rgba(255, 255, 255, 0.85) !important;
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 100px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08); 
-            padding: 12px 30px;
-            border: 1px solid rgba(255,255,255,0.4);
-            
-            position: sticky !important; 
-            top: 70px !important; /* Turun 55px agar tidak tertutup Top Bar */
-            z-index: 9999 !important;
-            
-            width: 90% !important;
-            max-width: 1200px !important;
-            margin: 15px auto 0 auto !important; 
-            transition: all 0.3s ease;
-        }
-
-        /* Hero Section Baru */
-        .hero-transpara {
-            background-image: url('{% static "images/bg_index.png" %}'); 
-            background-size: cover;
-            background-position: center;
-            color: #ffffff;
-            margin-top: 0px; /* Menarik hero ke atas agar navbar terlihat melayang di dalamnya */
-            padding-top: 120px;
-        }
-
-        .hero-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.2) 100%);
-            z-index: 1;
-        }
-
-        /* Tombol Kustom Hero */
-        .btn-hero-primary {
-            background-color: #0056B3; 
-            color: white;
-            border: none;
-            transition: all 0.3s ease;
-        }
-        .btn-hero-primary:hover {
-            background-color: #004494;
-            transform: translateY(-2px);
-        }
-        
-        .btn-hero-outline {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            backdrop-filter: blur(5px);
-            transition: all 0.3s ease;
-        }
-        .btn-hero-outline:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        /* 1. Hover untuk Tombol Login Staf (Biru ke Biru lebih gelap) */
-        .btn-login-hover {
-            transition: all 0.3s ease !important;
-        }
-        .btn-login-hover:hover {
-            background-color: #002D5E !important; /* Sedikit lebih gelap dari biru aslinya */
-            transform: translateY(-2px); /* Sedikit naik untuk kesan 'klik-able' */
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
-        }
-
-        /* 2. Hover untuk Tombol Kirim Email (Outline hitam pekat) */
-        .btn-email-hover {
-            transition: all 0.3s ease !important;
-        }
-        .btn-email-hover:hover {
-            background-color: #002D5E !important; /* Hitam pekat sesuai keinginanmu */
-            color: #ffffff !important;
-            border-color: #000000 !important;
-        }
-
-        /* Footer & Map */
-        .map-container {
-            border-radius: 24px;
-            overflow: hidden;
-            height: 350px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        }
-
-        /* CSS KHUSUS POP-UP LOGOUT macOS STYLE       */
-        .mac-toast-container {
-            position: fixed;
-            top: 4px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            pointer-events: none; /* Agar tidak memblokir klik di layar belakangnya */
-        }
-        .mac-toast {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border-radius: 100px;
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-family: -apple-system, sans-serif;
-            font-size: 0.9rem;
-            color: #1d1d1f;
-            animation: slideDown 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-        }
-        .mac-toast svg { color: #007aff; } /* Warna ikon biru Apple */
-        
-        @keyframes slideDown {
-            from { top: -50px; opacity: 0; transform: translateY(-10px); }
-            to { top: 0; opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeOutUp {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-20px); }
-        }
-
-        /* Footer akan selalu terdorong ke bawah secara otomatis */
-        .footer-minimalis {
-            scroll-snap-align: start;
-            flex-shrink: 0;
-            background-color: #F5F5F7; 
-            color: #515154; 
-            margin-top: auto;
-            padding: 80px 0 30px 0; 
-            border-top: 1px solid #D1D1D6; 
-            width: 100%;
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
 </head>
 
 <body>
     {% include 'includes/_toast_messages.html' %}
     
-    <!-- 1. TOP BAR GOV (Menempel Paling Atas) -->
     <div class="top-bar-gov">
         <div class="container-fluid px-4 px-md-5 d-flex justify-content-between align-items-center">
             <div class="d-flex gap-4">
-                <span><i class="bi bi-geo-alt me-1"></i> Jl. Baruga No. 2, Kota Palu, Sulawesi Tengah</span>
-                {% comment %} <span><i class="bi bi-envelope me-1"></i> bpkad@palukota.go.id</span> {% endcomment %}
+                <span class="d-none d-md-inline"><i class="bi bi-geo-alt me-1"></i> {% trans "Jl. Baruga No. 2, Kota Palu, Sulawesi Tengah" %}</span>
             </div>
             <div class="d-flex align-items-center text-white" style="font-family: monospace; font-size: 0.9rem; letter-spacing: 1.5px;">
                 <span id="realtime-clock-container"></span> 
-                <span class="ms-2 opacity-75">WITA</span>
+                <span class="ms-2 opacity-75 d-none d-md-inline">{% trans "WITA" %}</span>
             </div>
             <div class="bi bi-envelope me-1" style="letter-spacing: 0.5px;">
                 bpkad@palukota.go.id
@@ -334,143 +37,140 @@
         </div>
     </div>
 
-    <!-- Navbar -->
-   <nav class="navbar navbar-expand-lg navbar-light navbar-floating-box">
+    <nav class="navbar navbar-expand-lg navbar-light navbar-floating-box">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="#">PATABA</a>
-            <div class="collapse navbar-collapse justify-content-center">
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link" href="#home">Beranda</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#data-aset">Data Aset</a></li>
-                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'peta_gis' %}active fw-bold{% endif %}" 
-                        href="{% url 'publik:peta_gis' %}">Peta GIS</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#berita">Berita</a></li>
-                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'kontak' %}active fw-bold{% endif %}" 
-                        href="{% url 'publik:kontak' %}">Kontak</a></li>
-                </ul>
-            </div>
-            <div class="d-flex align-items-center gap-3">
-            <!-- Container Ikon -->
-            <div class="nav-item dropdown-settings position-relative">
-                <!-- Ikon Gear -->
-                <button id="settingsToggle" class="btn btn-link nav-link px-2">
-                    <i class="bi bi-gear" style="font-size: 1.2rem; color: #1d1d1f;"></i>
-                </button>
-
-                <!-- Pop-up Menu -->
-                <div id="settingsPopup" class="settings-popup">
-                    <div class="popup-header mb-3">
-                        <h6 class="fw-bold mb-0">Pengaturan</h6>
-                    </div>
-                    
-                    <!-- Dark Mode Switch -->
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span>Mode Gelap</span>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="darkModeSwitch">
+            
+            <a class="navbar-brand d-flex align-items-center py-0" href="#">
+                <img src="{% static 'images/logo.png' %}" alt="Logo PATABA" height="40" class="me-2">
+                <span class="mb-0 d-none d-sm-block" style="color: #002D5E; font-family: 'Playfair Display', serif; letter-spacing: 1px; font-size: 1.4rem; font-weight: 800;">PATABA</span>
+            </a>
+            
+            <div class="d-flex align-items-center gap-2 gap-lg-3 ms-auto order-lg-last">
+                <div class="nav-item position-relative">
+                    <button id="settingsToggle" class="btn btn-link nav-link p-0 px-1"><i class="bi bi-gear" style="font-size: 1.2rem;"></i></button>
+                    <div id="settingsPopup" class="settings-popup">
+                        <div class="popup-header mb-3"><h6 class="fw-bold mb-0">{% trans "Pengaturan" %}</h6></div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span>{% trans "Mode Gelap" %}</span>
+                            <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="darkModeSwitch"></div>
                         </div>
                     </div>
-
-                    <!-- Font Size Slider -->
-                    <div class="mb-2">
-                        <span>Ukuran Font</span>
-                        <input type="range" class="form-range mt-2" id="fontSizeRange" min="14" max="20" step="1">
-                    </div>
                 </div>
-            </div>
-            <!-- Ikon Globe (Bahasa) -->
-            <div class="nav-item position-relative">
-                <button id="globeToggle" class="btn btn-link nav-link px-2">
-                    <i class="bi bi-globe" style="font-size: 1.2rem; color: #1d1d1f;"></i>
+
+                <div class="nav-item position-relative">
+                    <button id="globeToggle" class="btn btn-link nav-link p-0 px-1"><i class="bi bi-globe" style="font-size: 1.2rem;"></i></button>
+                    <div id="languagePopup" class="settings-popup">
+                    <h6 class="fw-bold mb-3">{% trans "Pilih Bahasa" %} / Language</h6>
+                    
+                    <form action="{% url 'set_language' %}" method="post">
+                        {% csrf_token %}
+                        <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                        
+                        <div class="d-flex flex-column gap-2">
+                            <button type="submit" name="language" value="id" class="btn btn-sm w-100 fw-bold {% if LANGUAGE_CODE == 'id' %}btn-bpkad-primary{% else %}btn-bpkad-outline{% endif %}">
+                                Bahasa Indonesia
+                            </button>
+                            
+                            <button type="submit" name="language" value="en" class="btn btn-sm w-100 fw-bold {% if LANGUAGE_CODE == 'en' %}btn-bpkad-primary{% else %}btn-bpkad-outline{% endif %}">
+                                English
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                </div>
+                
+                <a href="{% url 'auth:login' %}" class="btn rounded-pill px-3 py-1 px-lg-4 py-lg-2 shadow-sm fw-medium text-white btn-login-hover" style="background-color: #002D5E; border: none; font-size: 0.9rem;">{% trans "Login" %}</a>
+                
+                <button class="navbar-toggler border-0 shadow-none p-1 ms-1 d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPublic">
+                    <span class="navbar-toggler-icon" style="width: 1.2em; height: 1.2em;"></span>
                 </button>
+            </div>
 
-                <!-- Pop-up Bahasa -->
-                <div id="languagePopup" class="settings-popup">
-                    <h6 class="fw-bold mb-3">Pilih Bahasa</h6>
-                    <div class="d-flex flex-column gap-2">
-                        <a href="#" class="btn btn-sm btn-outline-primary w-100 active">Bahasa Indonesia</a>
-                        <a href="#" class="btn btn-sm btn-outline-primary w-100">English</a>
-                    </div>
-                </div>
+            <div class="collapse navbar-collapse justify-content-center" id="navbarPublic">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="#home">{% trans "Beranda" %}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#data-aset">{% trans "Data Aset" %}</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'peta_gis' %}active fw-bold{% endif %}" href="{% url 'publik:peta_gis' %}">{% trans "Peta GIS" %}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#berita">{% trans "Berita" %}</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'kontak' %}active fw-bold{% endif %}" href="{% url 'publik:kontak' %}">{% trans "Kontak" %}</a></li>
+                </ul>
             </div>
-                <a href="{% url 'auth:login' %}" class="btn rounded-pill px-4 shadow-sm fw-medium text-white btn-login-hover" style="background-color: #003F87; border: none;">Login</a>
-            </div>
+
         </div>
     </nav>
     
     <main class="main-wrapper">
 
-   <!-- HERO SECTION BARU -->
-        <section id="home" class="hero-transpara">
+        <!-- HERO SECTION -->
+        <section id="home" class="hero-pataba">
             <div class="hero-overlay"></div>
             
-            <!-- Konten Utama Hero -->
             <div class="container position-relative mb-5" style="z-index: 2;">
                 <span class="badge rounded-pill mb-4 py-2 px-3 fw-medium" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); font-size: 0.8rem; backdrop-filter: blur(5px);">
-                    <i class="bi bi-patch-check me-1"></i> Sistem Manajemen Aset Terpadu
+                    <i class="bi bi-patch-check me-1"></i> {% trans "Sistem Manajemen Aset Terpadu" %}
                 </span>
                 
                 <h1 class="display-4 fw-bold mb-4" style="line-height: 1.2;">
-                    PATABA - <span style="color: #82B1FF;">Portal Aset</span><br>Tanah Pemerintah Daerah
+                    <span style="color: #B89047; font-family: 'Playfair Display', serif;">PATABA</span> - <span style="color: #FBDB93;">{% trans "Portal Aset" %}</span><br>{% trans "Tanah Pemerintah Daerah" %}
                 </h1>
                 
                 <p class="mb-5 text-light opacity-75" style="max-width: 600px; font-size: 1.1rem; line-height: 1.6;">
-                    Wujudkan tata kelola pemerintahan yang akuntabel melalui keterbukaan data aset daerah Kota Palu. Akses informasi tanah, bangunan, dan aset lainnya secara real-time.
+                    {% trans "Wujudkan tata kelola pemerintahan yang akuntabel melalui keterbukaan data aset daerah Kota Palu. Akses informasi tanah, bangunan, dan aset lainnya secara real-time." %}
                 </p>
 
                 <div class="d-flex flex-wrap gap-3">
                     <a href="{% url 'publik:peta_gis' %}" class="btn btn-hero-primary rounded-3 px-4 py-3 fw-bold shadow-sm">
-                        <i class="bi bi-map me-2"></i> Buka Peta GIS
+                        <i class="bi bi-map me-2"></i> {% trans "Buka Peta GIS" %}
                     </a>
-                    <a href="#" class="btn btn-hero-outline rounded-3 px-4 py-3 fw-bold">
-                        Berita & Dokumentasi
+                    <a href="#berita" class="btn btn-hero-outline rounded-3 px-4 py-3 fw-bold">
+                        {% trans "Berita & Dokumentasi" %}
                     </a>
                 </div>
             </div>
 
-            <!-- Kartu Statistik Melayang di Bawah -->
+            <!-- 4 KOTAK DEPAN-->
             <div class="container position-relative mt-4" style="z-index: 3;">
                 <div class="row g-3 justify-content-center">
-                    <div class="col-lg-3 col-md-6">
-                        <div class="card card-glow border-0 p-3 h-100">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-light rounded-3 p-3 me-3"><i class="bi bi-pin-map-fill text-primary fs-4"></i></div>
+                    <div class="col-lg-3 col-6">
+                        <div class="card card-glow border-0 p-3 h-100 shadow-sm">
+                            <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start">
+                                <div class="bg-light rounded-3 p-3 mb-2 mb-md-0 me-md-3"><i class="bi bi-pin-map-fill text-primary fs-4"></i></div>
                                 <div>
-                                    <p class="small text-secondary fw-bold mb-0">Total Luas Tanah</p>
-                                    <h4 class="fw-bold mb-0 text-dark">1,240 <span class="fs-6 fw-normal text-secondary">Ha</span></h4>
+                                    <p class="small text-secondary fw-bold mb-0">{% trans "Total Luas Tanah" %}</p>
+                                    <h4 class="fw-bold mb-0 text-dark">1,240 <span class="fs-6 fw-normal text-secondary">{% trans "Ha" %}</span></h4>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="card card-glow border-0 p-3 h-100">
-                            <div class="d-flex align-items-center">
-                                <div class="rounded-3 p-3 me-3" style="background-color: #e8f5e9;"><i class="bi bi-buildings text-success fs-4"></i></div>
+                    <div class="col-lg-3 col-6">
+                        <div class="card card-glow border-0 p-3 h-100 shadow-sm">
+                            <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start">
+                                <div class="rounded-3 p-3 mb-2 mb-md-0 me-md-3" style="background-color: #e8f5e9;"><i class="bi bi-buildings text-success fs-4"></i></div>
                                 <div>
-                                    <p class="small text-secondary fw-bold mb-0">Bangunan Publik</p>
-                                    <h4 class="fw-bold mb-0 text-dark">842 <span class="fs-6 fw-normal text-secondary">Unit</span></h4>
+                                    <p class="small text-secondary fw-bold mb-0">{% trans "Bangunan Publik" %}</p>
+                                    <h4 class="fw-bold mb-0 text-dark">0 <span class="fs-6 fw-normal text-secondary">{% trans "Unit" %}</span></h4>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="card card-glow border-0 p-3 h-100">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-light rounded-3 p-3 me-3"><i class="bi bi-car-front text-secondary fs-4"></i></div>
+                    <div class="col-lg-3 col-6">
+                        <div class="card card-glow border-0 p-3 h-100 shadow-sm">
+                            <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start">
+                                <div class="bg-light rounded-3 p-3 mb-2 mb-md-0 me-md-3"><i class="bi bi-car-front text-secondary fs-4"></i></div>
                                 <div>
-                                    <p class="small text-secondary fw-bold mb-0">Kendaraan Dinas</p>
-                                    <h4 class="fw-bold mb-0 text-dark">1,105 <span class="fs-6 fw-normal text-secondary">Unit</span></h4>
+                                    <p class="small text-secondary fw-bold mb-0">{% trans "Kendaraan Dinas" %}</p>
+                                    <h4 class="fw-bold mb-0 text-dark">0 <span class="fs-6 fw-normal text-secondary">{% trans "Unit" %}</span></h4>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="card card-glow border-0 p-3 h-100">
-                            <div class="d-flex align-items-center">
-                                <div class="rounded-3 p-3 me-3" style="background-color: #ffebee;"><i class="bi bi-bank text-danger fs-4"></i></div>
+                    <div class="col-lg-3 col-6">
+                        <div class="card card-glow border-0 p-3 h-100 shadow-sm">
+                            <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start">
+                                <div class="rounded-3 p-3 mb-2 mb-md-0 me-md-3" style="background-color: #ffebee;"><i class="bi bi-bank text-danger fs-4"></i></div>
                                 <div>
-                                    <p class="small text-secondary fw-bold mb-0">Nilai Total Aset</p>
-                                    <h4 class="fw-bold mb-0 text-dark">3.4 <span class="fs-6 fw-normal text-secondary">Triliun</span></h4>
+                                    <p class="small text-secondary fw-bold mb-0">{% trans "Nilai Total Aset" %}</p>
+                                    <h4 class="fw-bold mb-0 text-dark">3.4 <span class="fs-6 fw-normal text-secondary">{% trans "Triliun" %}</span></h4>
                                 </div>
                             </div>
                         </div>
@@ -479,547 +179,423 @@
             </div>
         </section>
 
-    <!-- PROFIL ASET -->
-    <section id="profil-aset" class="curved-transition" style="padding-bottom: 120px; min-height: auto;">
-    <div class="container position-relative" style="z-index: 11;">
-            <div class="row align-items-center g-5">
-                
-                <!-- Sisi Kiri: Gambar & Ornamen (Meluncur dari Kiri) -->
-                <div class="col-lg-6 position-relative reveal-left">
-                    <!-- Ornamen Kotak Biru Pucat Kiri Atas -->
-                    <div class="position-absolute" style="top: -25px; left: -25px; width: 140px; height: 140px; background-color: #dee7f2; border-radius: 24px; z-index: 0;"></div>
-                    
-                    <!-- Ornamen Kotak Biru Pucat Kanan Bawah -->
-                    <div class="position-absolute" style="bottom: -25px; right: -25px; width: 180px; height: 180px; background-color: #d6eaff; border-radius: 24px; z-index: 0;"></div>
+        <!-- PROFIL -->
+        <section id="profil-aset" class="curved-transition">
+            <div class="container position-relative" style="z-index: 11;">
+                <div class="row align-items-center g-5">
+                    <div class="col-lg-6 position-relative reveal-left">
+                        <div class="position-absolute d-none d-lg-block" style="top: -25px; left: -25px; width: 140px; height: 140px; background-color: #dee7f2; border-radius: 24px; z-index: 0;"></div>
+                        <div class="position-absolute d-none d-lg-block" style="bottom: -25px; right: -25px; width: 180px; height: 180px; background-color: #d6eaff; border-radius: 24px; z-index: 0;"></div>
+                        <img src="{% static 'images/rapat_index.png' %}" alt="Rapat BPKAD Kota Palu" class="img-fluid position-relative shadow" style="border-radius: 24px; z-index: 1;">
+                    </div>
 
-                    <!-- Gambar Utama -->
-                    <img src="{% static 'images/rapat_index.png' %}" alt="Rapat BPKAD Kota Palu" class="img-fluid position-relative shadow" style="border-radius: 24px; z-index: 1;">
+                    <div class="col-lg-6 ps-lg-5 reveal-right text-center text-lg-start">
+                        <h2 class="fw-bold mb-4 text-apple-dark" style="font-size: 2.25rem; letter-spacing: -0.5px;">{% trans "Bidang Aset BPKAD Kota Palu" %}</h2>
+                        <p class="mb-4 text-apple-muted" style="font-size: 1.05rem; line-height: 1.8;">
+                            {% trans "Badan Pengelola Keuangan dan Aset Daerah (BPKAD) Kota Palu melalui Bidang Aset berkomitmen untuk mengelola kekayaan daerah secara profesional, transparan, dan akuntabel. Kami memastikan setiap aset daerah tercatat dengan baik dan dimanfaatkan secara optimal untuk kepentingan masyarakat." %}
+                        </p>
+                        <p class="mb-5 text-apple-muted" style="font-size: 1.05rem; line-height: 1.8;">
+                            {% trans "Sistem Pataba hadir sebagai jembatan informasi antara pemerintah dan masyarakat dalam memantau sebaran dan status hukum aset-aset strategis di wilayah Kota Palu." %}
+                        </p>
+                        <a href="https://bpkad.sultengprov.go.id/" target="_blank" class="btn btn-outline-dark rounded-pill px-2 btn-email-hover w-100 w-md-auto">
+                            {% trans "Kunjungi Portal BPKAD" %} <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                    </div>
                 </div>
+            </div>
+        </section>
 
-                <!-- Sisi Kanan: Teks & Tombol (Meluncur dari Kanan) -->
-                <div class="col-lg-6 ps-lg-5 reveal-right">
-                    <h2 class="fw-bold mb-4 text-apple-dark" style="font-size: 2.25rem; letter-spacing: -0.5px;">
-                        Bidang Aset BPKAD Kota Palu
-                    </h2>
-                    
-                    <p class="mb-4 text-apple-muted" style="font-size: 1.05rem; line-height: 1.8;">
-                        Badan Pengelola Keuangan dan Aset Daerah (BPKAD) Kota Palu melalui Bidang Aset berkomitmen untuk mengelola kekayaan daerah secara profesional, transparan, dan akuntabel. Kami memastikan setiap aset daerah tercatat dengan baik dan dimanfaatkan secara optimal untuk kepentingan masyarakat.
+        <!-- 3 KARTU DATA ASET-->
+        <section id="data-aset" class="section-alt">
+            <div class="container">
+                <div class="text-center mb-5 reveal-left">
+                    <h2 class="fw-bold text-apple-dark mb-3" style="font-size: 2.25rem; letter-spacing: -0.5px;">{% trans "Klasifikasi Data Aset" %}</h2>
+                    <p class="text-apple-muted mx-auto" style="max-width: 700px; font-size: 1.05rem; line-height: 1.6;">
+                        {% trans "Jelajahi berbagai kategori aset daerah yang dikelola oleh Pemerintah Kota Palu melalui basis data terintegrasi." %}
                     </p>
+                </div>
+
+                <div class="row g-4 reveal-right">
                     
-                    <p class="mb-5 text-apple-muted" style="font-size: 1.05rem; line-height: 1.8;">
-                        Sistem Transpara hadir sebagai jembatan informasi antara pemerintah dan masyarakat dalam memantau sebaran dan status hukum aset-aset strategis di wilayah Kota Palu.
-                    </p>
-                    
-                    <a href="https://bpkad.sultengprov.go.id/" target="_blank" class="btn btn-outline-primary-custom fw-bold px-4 py-3 shadow-sm">
-                        Kunjungi Portal BPKAD <i class="bi bi-arrow-right ms-2"></i>
-                    </a>
-                </div>
-                
-            </div>
-        </div>
-    </section>
-
-    <!-- SECTION KLASIFIKASI DATA ASET -->
-    <section id="data-aset" style="background-color: #ffffff; padding: 100px 0;">
-        <div class="container">
-            <!-- Header Section -->
-            <div class="text-center mb-5 reveal-left">
-                <h2 class="fw-bold text-apple-dark mb-3" style="font-size: 2.25rem; letter-spacing: -0.5px;">
-                    Klasifikasi Data Aset
-                </h2>
-                <p class="text-apple-muted mx-auto" style="max-width: 700px; font-size: 1.05rem; line-height: 1.6;">
-                    Jelajahi berbagai kategori aset daerah yang dikelola oleh Pemerintah Kota Palu melalui basis data terintegrasi.
-                </p>
-            </div>
-
-            <!-- Kartu Kategori -->
-            <div class="row g-4 reveal-right">
-                
-                <!-- Kartu 1: Tanah Daerah -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="card h-100 border-0 card-glow rounded-4 overflow-hidden" style="border: 1px solid #E5E5EA !important;">
-                        <!-- Bagian Gambar & Overlay -->
-                        <div class="position-relative" style="height: 220px; background-color: #e9ecef; overflow: hidden;">
-                            <!-- Ganti src dengan gambar aslimu nanti -->
-                            <img src="{% static 'images/tanah.jpg' %}" alt="Tanah Daerah" class="w-100 h-100" style="object-fit: cover;">
-                            <!-- Gradien Gelap di Bawah -->
-                            <div class="position-absolute bottom-0 start-0 w-100 h-50" style="background: linear-gradient(to top, rgba(10,25,47,0.85) 0%, rgba(10,25,47,0) 100%);"></div>
-                            <!-- Teks di Atas Gambar -->
-                            <div class="position-absolute bottom-0 start-0 p-4 w-100 text-white">
-                                <span class="d-block fw-medium mb-1" style="font-size: 0.85rem; opacity: 0.85; letter-spacing: 0.5px;">Kategori Utama</span>
-                                <h4 class="fw-bold mb-0" style="font-size: 1.5rem; letter-spacing: -0.5px;">Tanah Daerah</h4>
-                            </div>
-                        </div>
-                        <!-- Isi Kartu -->
-                        <div class="card-body p-4 d-flex flex-column">
-                            <p class="card-text text-apple-muted mb-4" style="font-size: 0.95rem; line-height: 1.6;">
-                                Informasi legalitas, letak geografis, dan peruntukan lahan milik pemerintah daerah di seluruh kecamatan.
-                            </p>
-                            <!-- Footer Kartu -->
-                            <div class="mt-auto d-flex justify-content-between align-items-center">
-                                <span class="badge rounded-pill fw-semibold px-3 py-2" style="background-color: #F0F4F8; color: #003F87; font-size: 0.8rem;">
-                                    {{ total_aset_tanah|default:"0" }} Titik Lokasi
-                                </span>
-                                <a href="{% url 'publik:data_aset_publik' %}" class="text-decoration-none fw-bold" style="color: #003F87; font-size: 0.9rem;">
-                                    Lihat Detail <i class="bi bi-chevron-right small ms-1"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Kartu 2: Gedung & Bangunan -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="card h-100 border-0 card-glow rounded-4 overflow-hidden" style="border: 1px solid #E5E5EA !important;">
-                        <div class="position-relative" style="height: 220px; background-color: #e9ecef; overflow: hidden;">
-                            <img src="{% static 'images/gedung.jpg' %}" alt="Gedung & Bangunan" class="w-100 h-100" style="object-fit: cover;">
-                            <div class="position-absolute bottom-0 start-0 w-100 h-50" style="background: linear-gradient(to top, rgba(10,25,47,0.85) 0%, rgba(10,25,47,0) 100%);"></div>
-                            <div class="position-absolute bottom-0 start-0 p-4 w-100 text-white">
-                                <span class="d-block fw-medium mb-1" style="font-size: 0.85rem; opacity: 0.85; letter-spacing: 0.5px;">Fasilitas</span>
-                                <h4 class="fw-bold mb-0" style="font-size: 1.5rem; letter-spacing: -0.5px;">Gedung & Bangunan</h4>
-                            </div>
-                        </div>
-                        <div class="card-body p-4 d-flex flex-column">
-                            <p class="card-text text-apple-muted mb-4" style="font-size: 0.95rem; line-height: 1.6;">
-                                Daftar gedung perkantoran, fasilitas kesehatan, sekolah, dan bangunan publik lainnya di bawah naungan Pemkot.
-                            </p>
-                            <div class="mt-auto d-flex justify-content-between align-items-center">
-                                <span class="badge rounded-pill fw-semibold px-3 py-2" style="background-color: #F0F4F8; color: #003F87; font-size: 0.8rem;">
-                                    842 Unit
-                                </span>
-                                <a href="#" class="text-decoration-none fw-bold" style="color: #003F87; font-size: 0.9rem;">
-                                    Lihat Detail <i class="bi bi-chevron-right small ms-1"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Kartu 3: Peralatan & Mesin -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="card h-100 border-0 card-glow rounded-4 overflow-hidden" style="border: 1px solid #E5E5EA !important;">
-                        <div class="position-relative" style="height: 220px; background-color: #e9ecef; overflow: hidden;">
-                            <img src="{% static 'images/kendaraan.jpg' %}" alt="Peralatan & Mesin" class="w-100 h-100" style="object-fit: cover;">
-                            <div class="position-absolute bottom-0 start-0 w-100 h-50" style="background: linear-gradient(to top, rgba(10,25,47,0.85) 0%, rgba(10,25,47,0) 100%);"></div>
-                            <div class="position-absolute bottom-0 start-0 p-4 w-100 text-white">
-                                <span class="d-block fw-medium mb-1" style="font-size: 0.85rem; opacity: 0.85; letter-spacing: 0.5px;">Inventaris</span>
-                                <h4 class="fw-bold mb-0" style="font-size: 1.5rem; letter-spacing: -0.5px;">Peralatan & Mesin</h4>
-                            </div>
-                        </div>
-                        <div class="card-body p-4 d-flex flex-column">
-                            <p class="card-text text-apple-muted mb-4" style="font-size: 0.95rem; line-height: 1.6;">
-                                Manajemen kendaraan operasional, alat berat, dan peralatan pendukung layanan administrasi pemerintah.
-                            </p>
-                            <div class="mt-auto d-flex justify-content-between align-items-center">
-                                <span class="badge rounded-pill fw-semibold px-3 py-2" style="background-color: #F0F4F8; color: #003F87; font-size: 0.8rem;">
-                                    2,415 Item
-                                </span>
-                                <a href="#" class="text-decoration-none fw-bold" style="color: #003F87; font-size: 0.9rem;">
-                                    Lihat Detail <i class="bi bi-chevron-right small ms-1"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- SECTION BERITA & PENGUMUMAN -->
-    <section id="berita" style="padding: 180px 0 100px 0;">
-        <div class="container">
-            <!-- Header Berita -->
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-5 reveal-left">
-                <div class="mb-3 mb-md-0">
-                    <h2 class="fw-bold text-apple-dark mb-2" style="font-size: 2.25rem; letter-spacing: -0.5px;">Berita & Pengumuman</h2>
-                    <p class="text-apple-muted mb-0" style="font-size: 1.05rem;">Informasi terkini seputar pengelolaan aset Kota Palu.</p>
-                </div>
-                <div>
-                    <!-- Link ini akan rapi di kanan pada layar desktop -->
-                    <a href="#" class="text-decoration-none fw-bold" style="color: #003F87; font-size: 1.05rem;">
-                        Semua Berita <i class="bi bi-arrow-right ms-1"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Grid Kartu Berita (Gaya Highlight Reel / Bento Box) -->
-            <div class="row g-4 reveal-right">
-                
-                <div class="col-lg-7">
-                    {% if berita_utama %}
-                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden card-glow position-relative" style="min-height: 450px;">
-                        <img src="{% if berita_utama.gambar_utama %}{{ berita_utama.gambar_utama.url }}{% else %}{% static 'images/konten/berita1.jpg' %}{% endif %}" alt="{{ berita_utama.judul }}" class="w-100 h-100 position-absolute top-0 start-0" style="object-fit: cover;">
-                        
-                        <div class="position-absolute bottom-0 start-0 w-100 p-4 p-lg-5" style="background: linear-gradient(to top, rgba(10,25,47,0.95) 0%, rgba(10,25,47,0.4) 70%, transparent 100%); z-index: 1;">
-                            <span class="badge mb-3 px-3 py-2 text-uppercase" style="background-color: #003F87; font-size: 0.75rem; letter-spacing: 1px;">
-                                {{ berita_utama.get_kategori_display }}
-                            </span>
-                            <h3 class="fw-bold text-white mb-3" style="font-size: 1.8rem; line-height: 1.3;">
-                                {{ berita_utama.judul }}
-                            </h3>
-                            <p class="text-light opacity-75 d-none d-md-block mb-4" style="font-size: 1rem; line-height: 1.6; max-width: 90%;">
-                                {{ berita_utama.isi_konten|truncatechars:120 }}
-                            </p>
-                            <div class="text-white-50 small fw-medium">
-                                <i class="bi bi-calendar3 me-1"></i> {{ berita_utama.tanggal_upload|date:"d F Y" }}
-                            </div>
-                        </div>
-                    </div>
-                    {% else %}
-                    <div class="card h-100 border-0 shadow-sm rounded-4 d-flex justify-content-center align-items-center bg-light" style="min-height: 450px;">
-                        <p class="text-muted">Belum ada berita utama.</p>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <div class="col-lg-5">
-                    <div class="d-flex flex-column gap-3 h-100 justify-content-start">
-                        {% for item in list_berita %}
-                        <div class="card border-0 shadow-sm rounded-4 card-glow overflow-hidden text-decoration-none" style="height: 130px;">
-                            <div class="row g-0 h-100 align-items-center">
-                                <div class="col-4 h-100">
-                                    <img src="{% if item.gambar_utama %}{{ item.gambar_utama.url }}{% else %}{% static 'images/konten/berita2.jpg' %}{% endif %}" class="w-100 h-100" style="object-fit: cover;" alt="{{ item.judul }}">
+                    <!-- KARTU 1: TANAH DAERAH -->
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 border-0 card-glow rounded-4 overflow-hidden" style="border: 1px solid #E5E5EA !important;">
+                            <div class="position-relative" style="height: 220px; background-color: #e9ecef; overflow: hidden;">
+                                <img src="{% static 'images/tanah.jpg' %}" alt="Tanah Daerah" class="w-100 h-100" style="object-fit: cover;">
+                                <div class="position-absolute bottom-0 start-0 w-100 h-50" style="background: linear-gradient(to top, rgba(10,25,47,0.85) 0%, rgba(10,25,47,0) 100%);"></div>
+                                <div class="position-absolute bottom-0 start-0 p-4 w-100">
+                                    <!-- KUNCI MUTLAK WARNA PUTIH -->
+                                    <span class="d-block fw-medium mb-1" style="color: #ffffff !important; font-size: 0.85rem; opacity: 0.9; letter-spacing: 0.5px;">{% trans "Kategori Utama" %}</span>
+                                    <h4 class="fw-bold mb-0" style="color: #ffffff !important; font-size: 1.5rem; letter-spacing: -0.5px;">{% trans "Tanah Daerah" %}</h4>
                                 </div>
-                                <div class="col-8">
-                                    <div class="card-body py-2 pe-3 ps-4">
-                                        <span class="text-uppercase fw-bold mb-1 d-block" style="color: #003F87; font-size: 0.7rem; letter-spacing: 0.5px;">{{ item.get_kategori_display }}</span>
-                                        <h6 class="fw-bold text-apple-dark mb-2" style="font-size: 0.95rem; line-height: 1.3;">{{ item.judul|truncatechars:50 }}</h6>
-                                        <span class="text-apple-muted small"><i class="bi bi-clock me-1"></i> {{ item.tanggal_upload|date:"d M Y" }}</span>
-                                    </div>
+                            </div>
+                            <div class="card-body p-4 d-flex flex-column">
+                                <p class="card-text text-apple-muted mb-4" style="font-size: 0.95rem; line-height: 1.6;">
+                                    {% trans "Informasi legalitas, letak geografis, dan peruntukan lahan milik pemerintah daerah di seluruh kecamatan." %}
+                                </p>
+                                <div class="mt-auto d-flex justify-content-between align-items-center">
+                                    <span class="badge rounded-pill fw-semibold px-3 py-2" style="background-color: #F0F4F8; color: #003F87; font-size: 0.8rem;">
+                                        {{ total_aset_tanah|default:"0" }} {% trans "Titik Lokasi" %}
+                                    </span>
+                                    <a href="{% url 'publik:data_aset_publik' %}" class="text-decoration-none fw-bold" style="color: #003F87; font-size: 0.9rem;">
+                                        {% trans "Lihat Detail" %} <i class="bi bi-chevron-right small ms-1"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
-                        {% empty %}
-                        <div class="text-center text-muted mt-5"><i class="bi bi-newspaper fs-3"></i><br><small>Berita lainnya belum tersedia.</small></div>
-                        {% endfor %}
                     </div>
-                </div>
-                
-            </div>
-        </div>
-    </section>
 
-    <!-- SECTION GALERI KEGIATAN (DARK MODE) -->
-    <section id="galeri-kegiatan" style="background-color: #161618; padding: 100px 0;">
-        <div class="container">
-            <!-- Header -->
-            <div class="mb-5 reveal-left">
-                <h2 class="fw-bold text-white mb-2" style="font-size: 2.25rem; letter-spacing: -0.5px;">Galeri Kegiatan</h2>
-                <p class="mb-0" style="color: #A1A1A6; font-size: 1.05rem;">Dokumentasi operasional dan pengelolaan aset di lapangan.</p>
-            </div>
-
-            <!-- Grid Bento Box -->
-            <div class="row g-4 reveal-right">
-                
-                <div class="col-lg-8">
-                    {% if galeri_utama %}
-                    <div class="card border-0 rounded-4 overflow-hidden position-relative h-100 zoom-container" style="min-height: 400px; background-color: #2C2C2E;">
-                        <img src="{% if galeri_utama.gambar_utama %}{{ galeri_utama.gambar_utama.url }}{% else %}{% static 'images/konten/galeri-utama.jpg' %}{% endif %}" alt="{{ galeri_utama.judul }}" class="w-100 h-100 position-absolute top-0 start-0" style="object-fit: cover;">
-                        <div class="position-absolute bottom-0 start-0 w-100 p-4" style="background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, transparent 100%); z-index: 1;">
-                            <span class="badge mb-2 px-3 py-2 text-uppercase" style="background-color: #0056B3; font-size: 0.75rem; font-weight: 600;">Sorotan</span>
-                            <h4 class="fw-bold text-white mb-0" style="font-size: 1.4rem; letter-spacing: 0.5px;">
-                                {{ galeri_utama.judul }}
-                            </h4>
-                        </div>
-                    </div>
-                    {% else %}
-                    <div class="card border-0 rounded-4 d-flex justify-content-center align-items-center" style="min-height: 400px; background-color: #2C2C2E; color: #A1A1A6;">
-                        <p>Belum ada galeri utama</p>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <div class="col-lg-4">
-                    <div class="d-flex flex-column gap-4 h-100">
-                        {% for foto in list_galeri %}
-                        <div class="card border-0 rounded-4 overflow-hidden position-relative flex-fill zoom-container" style="min-height: 190px; background-color: #2C2C2E;">
-                            <img src="{% if foto.gambar_utama %}{{ foto.gambar_utama.url }}{% else %}{% static 'images/konten/galeri-rapat.jpg' %}{% endif %}" alt="{{ foto.judul }}" class="w-100 h-100 position-absolute top-0 start-0" style="object-fit: cover;">
-                            <div class="position-absolute bottom-0 start-0 w-100 p-3" style="background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%); z-index: 1;">
-                                <h6 class="fw-bold text-white mb-0" style="font-size: 1rem;">{{ foto.judul|truncatechars:40 }}</h6>
+                    <!-- KARTU 2: GEDUNG & BANGUNAN -->
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 border-0 card-glow rounded-4 overflow-hidden" style="border: 1px solid #E5E5EA !important;">
+                            <div class="position-relative" style="height: 220px; background-color: #e9ecef; overflow: hidden;">
+                                <img src="{% static 'images/gedung.jpg' %}" alt="Gedung & Bangunan" class="w-100 h-100" style="object-fit: cover;">
+                                <div class="position-absolute bottom-0 start-0 w-100 h-50" style="background: linear-gradient(to top, rgba(10,25,47,0.85) 0%, rgba(10,25,47,0) 100%);"></div>
+                                <div class="position-absolute bottom-0 start-0 p-4 w-100">
+                                    <!-- KUNCI MUTLAK WARNA PUTIH -->
+                                    <span class="d-block fw-medium mb-1" style="color: #ffffff !important; font-size: 0.85rem; opacity: 0.9; letter-spacing: 0.5px;">{% trans "Fasilitas" %}</span>
+                                    <h4 class="fw-bold mb-0" style="color: #ffffff !important; font-size: 1.5rem; letter-spacing: -0.5px;">{% trans "Gedung & Bangunan" %}</h4>
+                                </div>
+                            </div>
+                            <div class="card-body p-4 d-flex flex-column">
+                                <p class="card-text text-apple-muted mb-4" style="font-size: 0.95rem; line-height: 1.6;">
+                                    {% trans "Daftar gedung perkantoran, fasilitas kesehatan, sekolah, dan bangunan publik lainnya di bawah naungan Pemkot." %}
+                                </p>
+                                <div class="mt-auto d-flex justify-content-between align-items-center">
+                                    <span class="badge rounded-pill fw-semibold px-3 py-2" style="background-color: #F0F4F8; color: #003F87; font-size: 0.8rem;">
+                                        0 {% trans "Unit" %}
+                                    </span>
+                                    <a href="#" class="text-decoration-none fw-bold" style="color: #003F87; font-size: 0.9rem;">
+                                        {% trans "Soon" %} <i class="bi bi-chevron-right small ms-1"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                        {% endfor %}
-                        
-                        {% if list_galeri|length == 0 %}
-                            <div class="card border-0 rounded-4 d-flex justify-content-center align-items-center flex-fill" style="min-height: 190px; background-color: #2C2C2E; color: #A1A1A6;"><small>Galeri 2 belum tersedia</small></div>
-                            <div class="card border-0 rounded-4 d-flex justify-content-center align-items-center flex-fill" style="min-height: 190px; background-color: #2C2C2E; color: #A1A1A6;"><small>Galeri 3 belum tersedia</small></div>
-                        {% elif list_galeri|length == 1 %}
-                            <div class="card border-0 rounded-4 d-flex justify-content-center align-items-center flex-fill" style="min-height: 190px; background-color: #2C2C2E; color: #A1A1A6;"><small>Galeri 3 belum tersedia</small></div>
+                    </div>
+
+                    <!-- KARTU 3: PERALATAN & MESIN -->
+                    <div class="col-lg-4 col-md-6 mx-auto">
+                        <div class="card h-100 border-0 card-glow rounded-4 overflow-hidden" style="border: 1px solid #E5E5EA !important;">
+                            <div class="position-relative" style="height: 220px; background-color: #e9ecef; overflow: hidden;">
+                                <img src="{% static 'images/kendaraan.jpg' %}" alt="Peralatan & Mesin" class="w-100 h-100" style="object-fit: cover;">
+                                <div class="position-absolute bottom-0 start-0 w-100 h-50" style="background: linear-gradient(to top, rgba(10,25,47,0.85) 0%, rgba(10,25,47,0) 100%);"></div>
+                                <div class="position-absolute bottom-0 start-0 p-4 w-100">
+                                    <!-- KUNCI MUTLAK WARNA PUTIH -->
+                                    <span class="d-block fw-medium mb-1" style="color: #ffffff !important; font-size: 0.85rem; opacity: 0.9; letter-spacing: 0.5px;">{% trans "Inventaris" %}</span>
+                                    <h4 class="fw-bold mb-0" style="color: #ffffff !important; font-size: 1.5rem; letter-spacing: -0.5px;">{% trans "Peralatan & Mesin" %}</h4>
+                                </div>
+                            </div>
+                            <div class="card-body p-4 d-flex flex-column">
+                                <p class="card-text text-apple-muted mb-4" style="font-size: 0.95rem; line-height: 1.6;">
+                                    {% trans "Manajemen kendaraan operasional, alat berat, dan peralatan pendukung layanan administrasi pemerintah." %}
+                                </p>
+                                <div class="mt-auto d-flex justify-content-between align-items-center">
+                                    <span class="badge rounded-pill fw-semibold px-3 py-2" style="background-color: #F0F4F8; color: #003F87; font-size: 0.8rem;">
+                                        0 {% trans "Item" %}
+                                    </span>
+                                    <a href="#" class="text-decoration-none fw-bold" style="color: #003F87; font-size: 0.9rem;">
+                                        {% trans "Soon" %} <i class="bi bi-chevron-right small ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="berita" class="section-main">
+            <div class="container">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center align-items-md-end mb-5 reveal-left text-center text-md-start">
+                    <div class="mb-3 mb-md-0">
+                        <h2 class="fw-bold text-apple-dark mb-2" style="font-size: 2.25rem; letter-spacing: -0.5px;">{% trans "Berita & Pengumuman" %}</h2>
+                        <p class="text-apple-muted mb-0" style="font-size: 1.05rem;">{% trans "Informasi terkini seputar pengelolaan aset Kota Palu." %}</p>
+                    </div>
+                    <div>
+                        <a href="#" class="text-decoration-none fw-bold" style="color: #003F87; font-size: 1.05rem;">
+                            {% trans "Semua Berita" %} <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="row g-4 reveal-right">
+                    <div class="col-lg-7">
+                        {% if berita_utama %}
+                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden card-glow position-relative" style="min-height: 450px;">
+                            <img src="{% if berita_utama.gambar_utama %}{{ berita_utama.gambar_utama.url }}{% else %}{% static 'images/konten/berita1.jpg' %}{% endif %}" alt="{{ berita_utama.judul }}" class="w-100 h-100 position-absolute top-0 start-0" style="object-fit: cover;">
+                            
+                            <div class="position-absolute bottom-0 start-0 w-100 p-4 p-lg-5" style="background: linear-gradient(to top, rgba(10,25,47,0.95) 0%, rgba(10,25,47,0.4) 70%, transparent 100%); z-index: 1;">
+                                <span class="badge mb-3 px-3 py-2 text-uppercase" style="background-color: #003F87; font-size: 0.75rem; letter-spacing: 1px;">
+                                    {{ berita_utama.get_kategori_display }}
+                                </span>
+                                <h3 class="fw-bold text-white mb-3" style="font-size: 1.8rem; line-height: 1.3;">
+                                    {{ berita_utama.judul }}
+                                </h3>
+                                <p class="text-light opacity-75 d-none d-md-block mb-4" style="font-size: 1rem; line-height: 1.6; max-width: 90%;">
+                                    {{ berita_utama.isi_konten|truncatechars:120 }}
+                                </p>
+                                <div class="text-white-50 small fw-medium">
+                                    <i class="bi bi-calendar3 me-1"></i> {{ berita_utama.tanggal_upload|date:"d F Y" }}
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="card h-100 border-0 shadow-sm rounded-4 d-flex justify-content-center align-items-center bg-light" style="min-height: 450px;">
+                            <p class="text-muted">{% trans "Belum ada berita utama." %}</p>
+                        </div>
                         {% endif %}
                     </div>
+
+                    <!-- Sisi Kanan: Daftar Berita Lainnya -->
+                    <div class="col-lg-5">
+                        <div class="d-flex flex-column gap-3 h-100 justify-content-start">
+                            {% for item in list_berita %}
+                            <a href="#" class="card card-glow border-0 shadow-sm rounded-4 overflow-hidden text-decoration-none" style="height: 130px; border: 1px solid var(--border-soft) !important;">
+                                <div class="row g-0 h-100 align-items-center">
+                                    <div class="col-4 h-100">
+                                        <img src="{% if item.gambar_utama %}{{ item.gambar_utama.url }}{% else %}{% static 'images/konten/berita2.jpg' %}{% endif %}" class="w-100 h-100" style="object-fit: cover; border-right: 1px solid var(--border-soft);" alt="{{ item.judul }}">
+                                    </div>
+                                    <div class="col-8">
+                                        <div class="card-body py-2 pe-3 ps-4">
+                                            <span class="text-uppercase fw-bold mb-1 d-block" style="color: var(--accent-blue); font-size: 0.7rem; letter-spacing: 0.5px;">{{ item.get_kategori_display }}</span>
+                                            <h6 class="fw-bold text-apple-dark mb-2" style="font-size: 0.95rem; line-height: 1.3;">{{ item.judul|truncatechars:50 }}</h6>
+                                            <span class="text-apple-muted small"><i class="bi bi-clock me-1"></i> {{ item.tanggal_upload|date:"d M Y" }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                            
+                            <!-- JIKA KOSONG, TAMPILKAN 3 KOTAK PLACEHOLDER AGAR RATA DENGAN KIRI -->
+                            {% empty %}
+                            <div class="card border-0 rounded-4 d-flex justify-content-center align-items-center w-100" style="height: 130px; border: 2px dashed var(--border-soft) !important; background-color: transparent;">
+                                <div class="text-center text-apple-muted opacity-50">
+                                    <i class="bi bi-newspaper fs-4 d-block mb-1"></i>
+                                    <small class="fw-medium">{% trans "Berita lainnya belum tersedia." %}</small>
+                                </div>
+                            </div>
+                            
+                            <div class="card border-0 rounded-4 d-flex justify-content-center align-items-center w-100" style="height: 130px; border: 2px dashed var(--border-soft) !important; background-color: transparent;">
+                                <div class="text-center text-apple-muted opacity-25">
+                                    <i class="bi bi-image fs-4 d-block mb-1"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="card border-0 rounded-4 d-flex justify-content-center align-items-center w-100" style="height: 130px; border: 2px dashed var(--border-soft) !important; background-color: transparent;">
+                                <div class="text-center text-apple-muted opacity-25">
+                                    <i class="bi bi-image fs-4 d-block mb-1"></i>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- SECTION CTA PETA GIS -->
-    <section id="cta-peta" class="map-pattern-bg" style="padding: 120px 0;">
-        <div class="container text-center">
-            
-            <!-- Ikon dengan efek sedikit 'timbul' -->
-            <div class="mx-auto mb-4 d-flex align-items-center justify-content-center reveal-left" 
-                style="width: 80px; height: 80px; background-color: #003F87; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,63,135,0.2);">
-                <i class="bi bi-crosshair text-white" style="font-size: 2rem;"></i>
+        <section id="galeri-kegiatan" class="section-alt">
+            <div class="container">
+                <div class="mb-5 reveal-left text-center text-md-start">
+                    <h2 class="fw-bold text-apple-dark mb-2" style="font-size: 2.25rem; letter-spacing: -0.5px;">{% trans "Galeri Kegiatan" %}</h2>
+                    <p class="mb-0 text-apple-muted" style="font-size: 1.05rem;">{% trans "Dokumentasi operasional dan pengelolaan aset di lapangan." %}</p>
+                </div>
+
+                <div class="row g-4 reveal-right">
+                    <div class="col-lg-8">
+                        {% if galeri_utama %}
+                        <div class="card card-glow border-0 rounded-4 overflow-hidden position-relative h-100 zoom-container" style="min-height: 400px;">
+                            <img src="{% if galeri_utama.gambar_utama %}{{ galeri_utama.gambar_utama.url }}{% else %}{% static 'images/konten/galeri-utama.jpg' %}{% endif %}" alt="{{ galeri_utama.judul }}" class="w-100 h-100 position-absolute top-0 start-0" style="object-fit: cover;">
+                            <div class="position-absolute bottom-0 start-0 w-100 p-4" style="background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, transparent 100%); z-index: 1;">
+                                <span class="badge mb-2 px-3 py-2 text-uppercase" style="background-color: #0056B3; font-size: 0.75rem; font-weight: 600;">{% trans "Sorotan" %}</span>
+                                <h4 class="fw-bold text-white mb-0" style="font-size: 1.4rem; letter-spacing: 0.5px;">{{ galeri_utama.judul }}</h4>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="card card-glow border-0 rounded-4 d-flex justify-content-center align-items-center" style="min-height: 400px;">
+                            <p class="text-apple-muted">{% trans "Belum ada galeri utama" %}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="d-flex flex-column gap-4 h-100">
+                            {% for foto in list_galeri %}
+                            <div class="card card-glow border-0 rounded-4 overflow-hidden position-relative flex-fill zoom-container" style="min-height: 190px;">
+                                <img src="{% if foto.gambar_utama %}{{ foto.gambar_utama.url }}{% else %}{% static 'images/konten/galeri-rapat.jpg' %}{% endif %}" alt="{{ foto.judul }}" class="w-100 h-100 position-absolute top-0 start-0" style="object-fit: cover;">
+                                <div class="position-absolute bottom-0 start-0 w-100 p-3" style="background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%); z-index: 1;">
+                                    <h6 class="fw-bold text-white mb-0" style="font-size: 1rem;">{{ foto.judul|truncatechars:40 }}</h6>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            
+                            {% if list_galeri|length == 0 %}
+                                <div class="card card-glow border-0 rounded-4 d-flex justify-content-center align-items-center flex-fill" style="min-height: 190px;">
+                                    <small class="text-apple-muted">{% trans "Galeri belum tersedia" %}</small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
+        </section>
 
-            <!-- Teks Utama dengan efek Storytelling -->
-            <div class="reveal-right">
-                <h2 class="fw-bold text-apple-dark mb-3" style="font-size: 2.25rem; letter-spacing: -0.5px;">
-                    Temukan Aset di Sekitar Anda
-                </h2>
-                <p class="text-apple-muted mx-auto mb-5" style="max-width: 600px; font-size: 1.1rem; line-height: 1.7;">
-                    Gunakan Peta GIS untuk melihat sebaran aset tanah dan bangunan secara spasial dengan data yang akurat dan transparan.
-                </p>
-
-                <!-- Tombol Utama dengan efek hover -->
-                <a href="#" class="btn btn-primary px-5 py-3 fw-semibold shadow-sm" 
-                style="background-color: #003F87; border: none; border-radius: 8px; font-size: 1rem; transition: all 0.3s ease;">
-                    Mulai Eksplorasi Peta <i class="bi bi-arrow-right ms-2"></i>
-                </a>
+        <section id="cta-peta" class="map-pattern-bg">
+            <div class="container text-center">
+                <div class="mx-auto mb-4 d-flex align-items-center justify-content-center reveal-left" style="width: 80px; height: 80px; background-color: #003F87; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,63,135,0.2);">
+                    <i class="bi bi-crosshair text-white" style="font-size: 2rem;"></i>
+                </div>
+                <div class="reveal-right">
+                    <h2 class="fw-bold text-apple-dark mb-3" style="font-size: 2.25rem; letter-spacing: -0.5px;">{% trans "Temukan Aset di Sekitar Anda" %}</h2>
+                    <p class="text-apple-muted mx-auto mb-5" style="max-width: 600px; font-size: 1.1rem; line-height: 1.7;">
+                        {% trans "Gunakan Peta GIS untuk melihat sebaran aset tanah dan bangunan secara spasial dengan data yang akurat dan transparan." %}
+                    </p>
+                    <a href="{% url 'publik:peta_gis' %}" class="btn px-5 py-3 fw-semibold shadow-sm text-white" style="background-color: #003F87; border-radius: 8px; font-size: 1rem; transition: all 0.3s ease;">
+                        {% trans "Mulai Eksplorasi Peta" %} <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+
+        <section id="kontak">
+            <div class="container">
+                <div class="row align-items-center g-4">
+                    <div class="col-md-5 text-center text-md-start">
+                        <h2 class="fw-bold mb-4">{% trans "Lokasi Instansi" %}</h2>
+                        <p class="fs-5 text-secondary">
+                            <strong>{% trans "BPAKD Kota Palu" %}</strong><br>
+                            {% trans "Jl. Baruga No. 2, Tanamodindi, Kec. Palu Selatan," %}<br> 
+                            {% trans "Kota Palu, Sulawesi Tengah 94111" %}
+                        </p>
+                        <div class="mt-4">
+                            <a href="mailto:bpkad@palukota.go.id" class="btn btn-outline-dark rounded-pill px-2 btn-email-hover w-100 w-md-auto">
+                                <i class="bi bi-envelope me-2"></i> {% trans "Kirim Email" %}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="map-container shadow-sm" style="border-radius: 24px; overflow: hidden; height: 450px; position: relative;">
+                            <iframe 
+                                src="https://maps.google.com/maps?q=Kantor%20Walikota%20Palu&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                                width="100%" 
+                                height="100%" 
+                                style="border:0; position: absolute; top: 0; left: 0;" 
+                                allowfullscreen="" 
+                                loading="lazy" 
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
     </main>
 
-    <!-- SECTION KONTAK -->
-    <section id="kontak">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-5">
-                    <h2 class="fw-bold mb-4">Lokasi Instansi</h2>
-                    <p class="fs-5 text-secondary">
-                        <strong>BPAKD Kota Palu</strong><br>
-                        Jl. Baruga No. 2, Tanamodindi, Kec. Palu Selatan,<br> 
-                        Kota Palu, Sulawesi Tengah 94111
-                    </p>
-                    <div class="mt-4">
-                        <a href="mailto:bpkad@palukota.go.id" class="btn btn-outline-dark rounded-pill px-4 btn-email-hover">
-                            <i class="bi bi-envelope me-2"></i> Kirim Email</a>
-                    </div>
-                </div>
-                <div class="col-md-7">
-                    <div class="map-container shadow-sm" style="border-radius: 24px; overflow: hidden; height: 450px; position: relative;">
-                        <iframe 
-                            src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d498.66587877174663!2d119.8909941!3d-0.899155!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2d8bef006618977f%3A0x335d46c0294e87d5!2sBPKAD%20KOTA%20PALU!5e0!3m2!1sid!2sid!4v1778767204939!5m2!1sid!2sid"
-                            width="100%" 
-                            height="100%" 
-                            style="border:0; position: absolute; top: 0; left: 0;" 
-                            allowfullscreen="" 
-                            loading="lazy" 
-                            referrerpolicy="no-referrer-when-downgrade">
-                        </iframe>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- BANNER LOGOUT APPLE -->
-    <style>
-        .apple-banner {
-            position: fixed;
-            top: -50px; /* Mulai dari sedikit di atas layar */
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 11000;
-            opacity: 0; /* Mulai dalam keadaan tembus pandang */
-            visibility: hidden;
-            /* Ini adalah resep rahasia Apple: efek meluncur dan memantul halus */
-            transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); 
-            width: 350px;
-            max-width: 90%;
-        }
-        .apple-banner.show { 
-            top: 90px; /* Posisi akhir saat meluncur turun */
-            opacity: 1; /* Menjadi jelas 100% */
-            visibility: visible;
-        }
-        .apple-banner-content {
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 22px;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white;
-        }
-    </style>
-
-    <div id="logoutBannerApple" class="apple-banner">
-        <div class="apple-banner-content">
-            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 30px; height: 30px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.42-6.447a.015.015 0 0 1 0-.01z"/></svg>
-            </div>
-            <div class="fw-bold small">Berhasil keluar dari Ruang Admin</div>
-        </div>
-    </div>
-
-    <script>
-        // Mengambil elemen-elemennya
-        const gearToggle = document.getElementById('settingsToggle');
-        const globeToggle = document.getElementById('globeToggle');
-        const gearPopup = document.getElementById('settingsPopup');
-        const globePopup = document.getElementById('languagePopup');
-
-        // Fungsi Toggle Gear
-        gearToggle.addEventListener('click', function(e) {
-            e.stopPropagation(); // Mencegah klik tombol langsung ditutup oleh document listener
-            gearPopup.classList.toggle('show');
-            globePopup.classList.remove('show'); // Tutup yang lain kalau buka ini
-        });
-
-        // Fungsi Toggle Globe
-        globeToggle.addEventListener('click', function(e) {
-            e.stopPropagation();
-            globePopup.classList.toggle('show');
-            gearPopup.classList.remove('show'); // Tutup yang lain kalau buka ini
-        });
-
-        // Menutup pop-up jika klik di mana saja di luar area
-        document.addEventListener('click', function() {
-            gearPopup.classList.remove('show');
-            globePopup.classList.remove('show');
-        });
-
-        document.addEventListener("DOMContentLoaded", function() {
-            // Cek apakah user baru saja logout dari dashboard?
-            if (sessionStorage.getItem("baruLogout")) {
-                
-                // Langsung hapus memori agar aman
-                sessionStorage.removeItem("baruLogout"); 
-
-                // Beri jeda 0.5 detik agar halaman ter-render sempurna dulu
-                setTimeout(() => {
-                    const banner = document.getElementById('logoutBannerApple');
-                    
-                    // Trik rahasia: Memaksa browser menyadari posisi awal banner
-                    banner.getBoundingClientRect(); 
-                    
-                    // Mulai animasi meluncur!
-                    banner.classList.add('show');
-                    
-                    // Tarik kembali ke atas setelah tampil 3.5 detik
-                    setTimeout(() => { 
-                        banner.classList.remove('show'); 
-                    }, 3500);
-                }, 1500); 
-            }
-        });
-    </script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Pengamat cerdas untuk efek Storytelling Reveal
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    // Jika elemen masuk ke dalam layar
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('reveal-active');
-                    }
-                });
-            }, { 
-                threshold: 0.2 // Animasi terpicu saat 20% elemen terlihat di layar
-            });
-
-            // Cari semua elemen yang punya efek meluncur
-            const revealElements = document.querySelectorAll('.reveal-left, .reveal-right');
-            revealElements.forEach((el) => observer.observe(el));
-        });
-    </script>
-
-    <!-- FOOTER GLOBAL TRANSPARA -->
+    <!-- FOOTER -->
     <footer class="footer-minimalis">
         <div class="container">
-            <!-- Bagian Atas -->
-            <div class="row g-5 mb-5">
-                <!-- Kolom 1: Profil -->
+            <div class="row g-5 mb-5 text-center text-lg-start">
                 <div class="col-lg-4">
-                    <h4 class="fw-bold mb-4" style="color: #1d1d1f;">Transpara</h4>
-                    <p style="line-height: 1.7; font-size: 0.95rem; color: #86868b;">
-                        Sistem Informasi Transparansi Aset Daerah Kota Palu. Dikelola oleh Bidang Aset Badan Pengelola Keuangan dan Aset Daerah (BPKAD) Pemerintah Kota Palu.
+                    <!-- Menambahkan Logo & Menggunakan Variabel Dark Mode -->
+                    <div class="d-flex align-items-center mb-3 justify-content-center justify-content-lg-start">
+                        <img src="{% static 'images/logo.png' %}" alt="Logo PATABA" height="35" class="me-2 logo-footer-pataba" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
+                        <h4 class="fw-bold mb-0" style="color: var(--text-main); font-family: 'Playfair Display', serif; letter-spacing: 1px;">PATABA</h4>
+                    </div>
+                    
+                    <p style="line-height: 1.7; font-size: 0.95rem; color: var(--text-muted);">
+                        {% trans "Portal Aset Tanah Pemerintah Daerah Kota Palu. Dikelola oleh Bidang Aset Badan Pengelola Keuangan dan Aset Daerah (BPKAD) Pemerintah Kota Palu." %}
                     </p>
-                    <div class="d-flex gap-3 mt-4">
-                        <a href="#" class="text-decoration-none" style="color: #515154; font-size: 1.2rem;"><i class="bi bi-globe"></i></a>
-                        <a href="#" class="text-decoration-none" style="color: #515154; font-size: 1.2rem;"><i class="bi bi-share"></i></a>
-                        <a href="#" class="text-decoration-none" style="color: #515154; font-size: 1.2rem;"><i class="bi bi-envelope"></i></a>
+                    
+                    <div class="d-flex gap-3 mt-4 justify-content-center justify-content-lg-start">
+                        <!-- Globe diganti Instagram -->
+                        <a href="https://instagram.com/bpkadpalu" target="_blank" class="text-decoration-none footer-icon" style="color: var(--text-muted); font-size: 1.2rem; transition: color 0.3s ease;"><i class="bi bi-instagram"></i></a>
+                        <!-- Ikon Share Fungsional -->
+                        <a href="javascript:void(0);" onclick="shareWebsite()" class="text-decoration-none footer-icon" style="color: var(--text-muted); font-size: 1.2rem; transition: color 0.3s ease;"><i class="bi bi-share"></i></a>
+                        <!-- Ikon Email -->
+                        <a href="mailto:bpkad@palukota.go.id" class="text-decoration-none footer-icon" style="color: var(--text-muted); font-size: 1.2rem; transition: color 0.3s ease;"><i class="bi bi-envelope"></i></a>
                     </div>
                 </div>
 
-                <!-- Kolom 2: Tautan Cepat -->
                 <div class="col-lg-4">
-                    <h6 class="fw-bold mb-4" style="color: #1d1d1f; letter-spacing: 0.5px;">TAUTAN CEPAT</h6>
+                    <h6 class="fw-bold mb-4" style="color: #1d1d1f; letter-spacing: 0.5px;">{% trans "TAUTAN CEPAT" %}</h6>
                     <ul class="list-unstyled d-flex flex-column gap-3" style="color: #86868b;">
-                        <li><a href="#" class="text-decoration-none" style="color: #86868b;">Data Aset</a></li>
-                        <li><a href="#" class="text-decoration-none" style="color: #86868b;">Peta GIS</a></li>
-                        <li><a href="#" class="text-decoration-none" style="color: #86868b;">Berita Terkini</a></li>
-                        <li><a href="#" class="text-decoration-none" style="color: #86868b;">Galeri Dokumentasi</a></li>
+                        <li><a href="#data-aset" class="text-decoration-none" style="color: #86868b;">{% trans "Data Aset" %}</a></li>
+                        <li><a href="{% url 'publik:peta_gis' %}" class="text-decoration-none" style="color: #86868b;">{% trans "Peta GIS" %}</a></li>
+                        <li><a href="#berita" class="text-decoration-none" style="color: #86868b;">{% trans "Berita Terkini" %}</a></li>
+                        <li><a href="#galeri-kegiatan" class="text-decoration-none" style="color: #86868b;">{% trans "Galeri Dokumentasi" %}</a></li>
                     </ul>
                 </div>
 
-                <!-- Kolom 3: Informasi Kontak -->
                 <div class="col-lg-4">
-                    <h6 class="fw-bold mb-4" style="color: #1d1d1f; letter-spacing: 0.5px;">INFORMASI KONTAK</h6>
+                    <h6 class="fw-bold mb-4" style="color: #1d1d1f; letter-spacing: 0.5px;">{% trans "INFORMASI KONTAK" %}</h6>
                     <ul class="list-unstyled d-flex flex-column gap-3" style="color: #86868b;">
-                        <li class="d-flex gap-3"><i class="bi bi-geo-alt"></i> <span>Kompleks Kantor Walikota Palu, Blok B, Lt. 2</span></li>
-                        <li class="d-flex gap-3"><i class="bi bi-telephone"></i> <span>(0451) 421001</span></li>
-                        <li class="d-flex gap-3"><i class="bi bi-clock"></i> <span>Senin - Jumat: 08:00 - 16:00</span></li>
+                        <li class="d-flex gap-3 justify-content-center justify-content-lg-start"><i class="bi bi-geo-alt"></i> <span>{% trans "Kompleks Kantor Walikota Palu, Lt. 2" %}</span></li>
+                        <li class="d-flex gap-3 justify-content-center justify-content-lg-start"><i class="bi bi-telephone"></i> <span>(0451) 421001</span></li>
+                        <li class="d-flex gap-3 justify-content-center justify-content-lg-start"><i class="bi bi-clock"></i> <span>{% trans "Senin - Jumat: 08:00 - 16:00" %}</span></li>
                     </ul>
                 </div>
             </div>
 
-            <!-- Garis Pembatas -->
             <hr style="border-color: #D1D1D6; margin-bottom: 30px;">
 
-            <!-- Footer Bawah -->
             <div class="row align-items-center" style="font-size: 0.8rem; color: #86868b;">
-                <div class="col-md-6 text-center text-md-start">
-                    &copy; 2024 BPKAD Kota Palu. Hak Cipta Dilindungi Undang-Undang.
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    {% trans "© 2026 BPKAD Kota Palu. Hak Cipta Dilindungi Undang-Undang." %}
                 </div>
                 <div class="col-md-6 text-center text-md-end d-flex gap-4 justify-content-center justify-content-md-end">
-                    <a href="#" class="text-decoration-none" style="color: #86868b;">Kebijakan Privasi</a>
-                    <a href="#" class="text-decoration-none" style="color: #86868b;">Syarat & Ketentuan</a>
-                    <a href="#" class="text-decoration-none" style="color: #86868b;">Aksesibilitas</a>
+                    <a href="#" class="text-decoration-none" style="color: #86868b;">{% trans "Kebijakan Privasi" %}</a>
+                    <a href="#" class="text-decoration-none" style="color: #86868b;">{% trans "Syarat & Ketentuan" %}</a>
                 </div>
             </div>
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="{% static 'js/pataba_theme.js' %}"></script>
     <script>
     function updateClock() {
         const now = new Date();
+        const date = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        let time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        time = time.replace(/:/g, '.'); 
         
-        // Format Tanggal (dd/mm/yy)
-        const date = now.toLocaleDateString('id-ID', { 
-            day: '2-digit', month: '2-digit', year: 'numeric' 
-        });
-
-        // Format Waktu (hh.mm.ss)
-        let time = now.toLocaleTimeString('id-ID', { 
-            hour: '2-digit', minute: '2-digit', second: '2-digit' 
-        });
-        time = time.replace(/:/g, '.'); // Mengubah pemisah usus buntu (:) menjadi titik (.)
-        
-        // Rakit HTML dengan dua ikon yang benar
         const clockContainer = document.getElementById('realtime-clock-container');
         if (clockContainer) {
-            clockContainer.innerHTML = `
-                <i class="bi bi-calendar-event me-1 opacity-75"></i> ${date}
-                <span class="mx-2 opacity-50">|</span>
-                <i class="bi bi-clock me-1 opacity-75"></i> ${time} 
-                 
-                
-            `;
+            clockContainer.innerHTML = `<i class="bi bi-calendar-event me-1 opacity-75"></i> ${date} <span class="mx-2 opacity-50">|</span> <i class="bi bi-clock me-1 opacity-75"></i> ${time}`;
         }
     }
-    // Jalankan setiap 1 detik
     setInterval(updateClock, 1000);
-    updateClock(); // Panggil langsung agar tidak menunggu 1 detik saat muat
-</script>
+    updateClock(); 
 
+    document.addEventListener("DOMContentLoaded", function() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('reveal-active');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        const revealElements = document.querySelectorAll('.reveal-left, .reveal-right');
+        revealElements.forEach((el) => observer.observe(el));
+    });
+    </script>
+
+    <script>
+    // Fitur Share canggih ala Mobile/YouTube
+    function shareWebsite() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'PATABA - BPKAD Kota Palu',
+                text: 'Kunjungi Portal Aset Tanah Pemerintah Daerah Kota Palu untuk transparansi data aset daerah.',
+                url: window.location.href,
+            }).catch(console.error);
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            alert('Tautan website berhasil disalin ke clipboard!');
+        }
+    }
+    </script>
 </body>
 </html>

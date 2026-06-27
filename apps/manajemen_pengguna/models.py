@@ -18,7 +18,7 @@ class UserProfile(models.Model):
     
     # --- TAMBAHAN BARU: Kolom Foto Profil ---
     foto_profil = models.ImageField(
-        upload_to='profiles/', 
+        upload_to='foto-profil', 
         storage=ProfileStorage(),    # <--- INI KUNCINYA
         blank=True, null=True
     ) 

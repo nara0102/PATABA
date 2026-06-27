@@ -3,33 +3,57 @@
    UI/UX: Apple Minimalist Modern (BPKAD)
    ========================================= */
 
-
 :root { 
-    /* Latar Belakang & Kartu */
+    /* Latar Belakang & Kartu (Light Mode) */
     --bg-light: #F4F6F9; 
     --card-light: #FFFFFF; 
     --bg-input: #F8FAFC;
     
-    /* Warna Teks */
-    --text-main: #1E293B;   /* Slate 800 - Heading */
-    --text-body: #334155;   /* Slate 700 - Body */
-    --text-muted: #64748B;  /* Slate 500 - Label/Hint */
+    /* Warna Teks (Light Mode) */
+    --text-main: #1E293B;   
+    --text-body: #334155;   
+    --text-muted: #64748B;  
     
-    /* Warna Aksen BPKAD */
-    --accent-blue: #0056B3; 
-    --accent-dark: #003F87; 
+    /* Warna Aksen PATABA */
+    --accent-blue: #002D5E; /* Biru Dongker untuk mode terang */
+    --accent-dark: #001A3B; 
     --accent-green: #30D158;
     --accent-warning: #FF9F0A;
     --accent-danger: #FF453A;
     
-    /* Border & Shadow */
-    --border-glow: rgba(0, 86, 179, 0.1); 
+    /* Border, Kaca & Shadow */
+    --border-glow: rgba(0, 45, 94, 0.1); 
     --border-soft: #E2E8F0;
     --shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.03);
+    
+    --nav-glass: rgba(255, 255, 255, 0.85);
+    --menu-hover: #EBF5FF;
+}
+
+/* DEKLARASI DARK MODE MUTLAK (PALET TRUE APPLE MACOS) */
+[data-theme="dark"] {
+    --bg-light: #1C1C1E; /* Arang lembut, bukan hitam pekat */
+    --card-light: #2C2C2E; /* Kotak sedikit lebih terang dari background */
+    --bg-input: #3A3A3C; /* Warna form input macOS */
+    
+    --text-main: #F5F5F7;   
+    --text-body: #D1D1D6;   
+    --text-muted: #8E8E93;  
+    
+    /* SIHIR TRANSISI WARNA: Biru Dongker otomatis menjadi Biru Terang (Cyan/Blue) agar tidak tenggelam! */
+    --accent-blue: #0A84FF; 
+    --accent-dark: #64D2FF; 
+    
+    --border-glow: rgba(255, 255, 255, 0.05); 
+    --border-soft: #48484A;
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.4);
+    
+    --nav-glass: rgba(44, 44, 46, 0.85); /* Kaca gelap transparan */
+    --menu-hover: #3A3A3C;
 }
 
 /* =========================================
-   1. GLOBAL LAYOUT & FONT
+   1. GLOBAL LAYOUT, FONT & SYSTEM OVERRIDES
    ========================================= */
 body, input, select, textarea, button, table {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -40,28 +64,125 @@ body {
     background-color: var(--bg-light); 
     color: var(--text-body); 
     overflow-x: hidden;
+    transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-.main-wrapper { transition: all 0.3s ease; }
+/* Transisi Halus untuk Semua Elemen Utama */
+.glass-card, .stat-card-transpara, .summary-card, .form-control, .form-select, .table-master-container, .glass-nav {
+    transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease, color 0.4s ease;
+}
 
-@media (min-width: 768px) {
-    /* Menarik konten ke atas di layar Laptop (Desktop) */
-    .main-wrapper { padding-top: 20px !important; }
-}
-@media (max-width: 767px) {
-    /* Memberi ruang untuk header di layar HP (Mobile) */
-    .main-wrapper { padding-top: 80px !important; }
-}
+.menu-item:hover { background-color: var(--menu-hover); color: var(--accent-dark); }
 
 /* =========================================
-   2. NAVBAR & SIDEBAR (NAVIGASI UTAMA)
+   2. PENJINAK BOOTSTRAP & INLINE STYLE (HACKER MODE)
    ========================================= */
+
+/* A. Penjinak Teks Bootstrap (Agar tidak hilang di mode gelap) */
+[data-theme="dark"] .text-dark { color: var(--text-main) !important; }
+[data-theme="dark"] .text-secondary { color: var(--text-body) !important; }
+[data-theme="dark"] .text-muted { color: var(--text-muted) !important; }
+[data-theme="dark"] .text-primary { color: var(--accent-blue) !important; }
+[data-theme="dark"] .text-success { color: #32D74B !important; }
+[data-theme="dark"] .text-danger { color: #FF453A !important; }
+[data-theme="dark"] .text-warning { color: #FFD60A !important; }
+
+/* B. Penjinak Background Bootstrap */
+[data-theme="dark"] .bg-white { background-color: var(--card-light) !important; color: var(--text-main) !important; }
+[data-theme="dark"] .bg-light { background-color: var(--bg-input) !important; color: var(--text-main) !important; border-color: var(--border-soft) !important; }
+
+/* C. Penjinak Form Input (Mencegah input menjadi putih saat diklik) */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] textarea {
+    background-color: var(--bg-input) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-soft) !important;
+}
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus,
+[data-theme="dark"] textarea:focus {
+    background-color: #48484A !important;
+    border-color: var(--accent-blue) !important;
+    color: var(--text-main) !important;
+    box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.25) !important;
+}
+[data-theme="dark"] .input-group-text {
+    background-color: var(--card-light) !important;
+    border-color: var(--border-soft) !important;
+    color: var(--text-muted) !important;
+}
+
+/* D. Penjinak Warna Pastel (Subtle) & Inline Styles HTML */
+/* Meretas warna hardcoded langsung dari HTML tanpa mengubah HTML-nya! */
+[data-theme="dark"] [style*="#ffffff"],
+[data-theme="dark"] [style*="#FFFFFF"],
+[data-theme="dark"] [style*="#FAFAFA"],
+[data-theme="dark"] [style*="#F8FAFC"] { background-color: var(--card-light) !important; }
+
+[data-theme="dark"] [style*="#FEF2F2"],
+[data-theme="dark"] .bg-danger-subtle { background-color: rgba(255, 69, 58, 0.15) !important; border-color: rgba(255, 69, 58, 0.3) !important; color: #FF453A !important; }
+
+[data-theme="dark"] [style*="#F0FDF4"],
+[data-theme="dark"] .bg-success-subtle { background-color: rgba(50, 215, 75, 0.15) !important; border-color: rgba(50, 215, 75, 0.3) !important; color: #32D74B !important; }
+
+[data-theme="dark"] [style*="#FFFDF3"],
+[data-theme="dark"] [style*="#fff5f5"],
+[data-theme="dark"] .bg-warning-subtle { background-color: rgba(255, 159, 10, 0.15) !important; border-color: rgba(255, 159, 10, 0.3) !important; color: #FFD60A !important; }
+
+[data-theme="dark"] .bg-primary-subtle,
+[data-theme="dark"] .bg-info-subtle { background-color: rgba(10, 132, 255, 0.15) !important; border-color: rgba(10, 132, 255, 0.3) !important; color: #64D2FF !important; }
+
+/* E. Paksa Tabel Mengikuti Tema */
+.table { color: var(--text-body) !important; }
+.table>:not(caption)>*>* {
+    background-color: transparent !important;
+    color: var(--text-main) !important;
+    border-bottom-color: var(--border-soft) !important;
+}
+.table-hover tbody tr:hover>* { background-color: var(--menu-hover) !important; color: var(--text-main) !important; }
+
+/* F. Paksa Pop-up ApexCharts (Bagan) Menjadi Gelap */
+[data-theme="dark"] .apexcharts-tooltip,
+[data-theme="dark"] .apexcharts-menu {
+    background: var(--card-light) !important;
+    border: 1px solid var(--border-soft) !important;
+    color: var(--text-main) !important;
+    box-shadow: var(--shadow-soft) !important;
+}
+[data-theme="dark"] .apexcharts-tooltip-title { background: var(--bg-input) !important; border-bottom: 1px solid var(--border-soft) !important; }
+[data-theme="dark"] .apexcharts-text tspan,
+[data-theme="dark"] .apexcharts-legend-text { fill: var(--text-main) !important; color: var(--text-main) !important; }
+
+/* =========================================
+   3. STRUKTUR MENU & KARTU LAINNYA
+   ========================================= */
+.main-wrapper { transition: all 0.3s ease; }
+@media (min-width: 768px) { .main-wrapper { padding-top: 20px !important; } }
+@media (max-width: 767px) { .main-wrapper { padding-top: 80px !important; } }
+
 .glass-nav { 
-    position: fixed; top: 20px; left: 50%; transform: translateX(-50%); 
-    width: 96%; max-width: 1400px; z-index: 1050; 
-    background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(25px); 
-    border: 1px solid var(--border-glow); border-radius: 40px; 
-    padding: 12px 30px; box-shadow: 0 10px 30px rgba(0, 86, 179, 0.05); 
+    position: fixed; 
+    top: 15px; 
+    left: 0; 
+    right: 0; 
+    margin: 0 auto; 
+    width: 95%; /* Sedikit lebih ramping agar tidak mentok di iPhone */
+    max-width: 1400px; 
+    z-index: 1050; 
+    background: var(--nav-glass); 
+    backdrop-filter: blur(25px); 
+    border: 1px solid var(--border-glow); 
+    border-radius: 40px; 
+    /* Padding dinamis: 30px di Mac, 15px di iPhone */
+    padding: 12px 30px; 
+    box-shadow: 0 10px 30px rgba(0, 86, 179, 0.05); 
+}
+@media (max-width: 767px) {
+    .glass-nav { 
+        padding: 8px 16px !important; /* Padding lebih kecil biar gak kepotong */
+        width: 95% !important; /* Kurangi padding di iPhone agar konten tidak terpotong */
+    }
 }
 
 .sidebar-menu { 
@@ -84,53 +205,58 @@ body {
     font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; 
     transition: all 0.3s ease; 
 }
-.menu-item:hover { background-color: #EBF5FF; color: var(--accent-dark); }
-.menu-item.active { 
-    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-dark) 100%); 
-    color: #ffffff !important; box-shadow: 0 4px 15px rgba(0, 86, 179, 0.2); 
+
+/* Warna saat di-hover (Biru terang lembut) */
+.menu-item:hover { 
+    background-color: var(--menu-hover); 
+    color: #0056B3 !important; 
+}
+[data-theme="dark"] .menu-item:hover {
+    color: #64D2FF !important;
 }
 
-/* =========================================
-   3. KARTU & KOMPONEN VISUAL (DASHBOARD & DETAIL)
-   ========================================= */
+.menu-item.active { 
+    background: linear-gradient(135deg, #1E3A8A 0%, #4FA3FF 100%); 
+    color: #ffffff !important; 
+    box-shadow: 0 4px 15px rgba(30, 58, 138, 0.25); 
+}
+[data-theme="dark"] .menu-item.active {
+    background: linear-gradient(135deg, #0A84FF 0%, #00449E 100%); 
+    box-shadow: 0 4px 15px rgba(10, 132, 255, 0.2);
+}
+
 .glass-card, .stat-card-transpara { 
     background: var(--card-light); border-radius: 20px; 
-    border: 1px solid rgba(255,255,255,0.8); box-shadow: var(--shadow-soft); 
+    border: 1px solid var(--border-glow); box-shadow: var(--shadow-soft); 
     overflow: hidden; height: 100%;
 }
 .stat-card-transpara { padding: 20px; transition: all 0.3s ease; }
 .stat-card-transpara:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0, 86, 179, 0.08); }
 
 .summary-card {
-    background: #FFFFFF; border-radius: 20px; border: 1px solid var(--border-glow);
+    background: var(--card-light); border-radius: 20px; border: 1px solid var(--border-glow);
     padding: 20px; height: 100%; box-shadow: var(--shadow-soft); transition: transform 0.3s ease;
 }
 .summary-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0, 86, 179, 0.08); }
 
 .summary-title, .form-section-title { 
     font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; 
-    margin-bottom: 15px; border-bottom: 1px solid #F0F0F2; padding-bottom: 8px; 
+    margin-bottom: 15px; border-bottom: 1px solid var(--border-soft); padding-bottom: 8px; 
 }
 .form-section-title { font-size: 0.8rem; color: var(--accent-blue); margin-bottom: 25px; padding-bottom: 10px; }
 
-/* Item Teks, Value, Detail & Log Aktivitas */
 .data-point { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.85rem; }
 .data-label, .detail-label { font-weight: 600; color: var(--text-muted); }
 .detail-label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
 .data-value, .detail-value { font-weight: 800; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
-.detail-value { font-size: 0.95rem; font-weight: 700; white-space: normal; } /* Pengecualian halaman detail agar bisa multilines */
+.detail-value { font-size: 0.95rem; font-weight: 700; white-space: normal; }
 
-/* Daftar Log / Rows */
-.log-item, .notif-item, .detail-row { border-bottom: 1px dashed #E2E8F0; padding-bottom: 12px; margin-bottom: 12px; }
+.log-item, .notif-item, .detail-row { border-bottom: 1px dashed var(--border-soft); padding-bottom: 12px; margin-bottom: 12px; }
 .log-item:last-child, .notif-item:last-child, .detail-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 
-/* Judul Khusus Detail Aset */
 .detail-section { margin-bottom: 30px; }
 .detail-section-title { font-size: 1.1rem; font-weight: 800; color: var(--accent-blue); text-transform: uppercase; border-bottom: 2px solid var(--accent-blue); padding-bottom: 10px; margin-bottom: 15px; }
 
-/* =========================================
-   4. FORM & TABEL
-   ========================================= */
 label.small { margin-bottom: 6px !important; display: block; color: var(--text-muted); font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
 .form-control, .form-select {
     border-radius: 12px !important; padding: 0.7rem 1rem !important;
@@ -138,71 +264,54 @@ label.small { margin-bottom: 6px !important; display: block; color: var(--text-m
     color: var(--text-main) !important; font-size: 0.85rem !important; font-weight: 500;
     transition: all 0.2s ease !important;
 }
-.form-control:focus, .form-select:focus { background: #FFFFFF !important; border-color: var(--accent-blue) !important; box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.15) !important; }
 .form-control::placeholder, .form-select::placeholder { color: #94A3B8 !important; font-weight: 400; }
-.input-group-text { background-color: #F1F5F9; border: 1px solid var(--border-soft); color: var(--text-muted); font-weight: 700; font-size: 0.85rem; }
+.input-group-text { background-color: var(--card-light); border: 1px solid var(--border-soft); color: var(--text-muted); font-weight: 700; font-size: 0.85rem; }
 
-.table-master-container { max-height: 550px; overflow-y: auto; border-radius: 12px; border: 1px solid #E2E8F0; }
+.table-master-container { max-height: 550px; overflow-y: auto; border-radius: 12px; border: 1px solid var(--border-soft); }
 .table thead th {
     background-color: var(--bg-input) !important; border-bottom: 2px solid var(--border-soft) !important;
     text-transform: uppercase; font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;
     position: sticky; top: 0; z-index: 10;
 }
 
-/* =========================================
-   5. MODAL & OFFCANVAS (EFEK BLUR LEMBUT)
-   ========================================= */
-/* Efek Blur Latar Belakang */
-.modal-backdrop.show, .offcanvas-backdrop.show { 
-    backdrop-filter: blur(2px) !important; /* efek blur */
-    background-color: rgba(15, 23, 42, 0.8) !important; /* warnanya */
-}
+.modal-backdrop.show, .offcanvas-backdrop.show { backdrop-filter: blur(2px) !important; background-color: rgba(15, 23, 42, 0.8) !important; }
+.apple-modal { border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3); overflow: hidden; background: var(--card-light); }
+.apple-modal-header { background: var(--card-light); padding: 20px 24px; border-bottom: 1px solid var(--border-soft); }
+.apple-modal-body { background: var(--bg-light); padding: 24px; }
 
-/* Apple Style Modal */
-.apple-modal { border-radius: 24px; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 25px 50px rgba(0, 45, 94, 0.15); overflow: hidden; background: #FFFFFF; }
-.apple-modal-header { background: #FFFFFF; padding: 20px 24px; border-bottom: 1px solid #F0F0F2; }
-.apple-modal-body { background: #F8FAFC; padding: 24px; }
-
-/* Filter Offcanvas */
-/* GANTI KODE .offcanvas-filter LAMA MENJADI INI */
 @media (min-width: 992px) {
-    /* Tampilan Filter di Laptop (Melayang di kanan atas) */
     .offcanvas-filter {
-        top: 20px !important; 
-        right: 20px !important; 
-        bottom: auto !important;
-        height: max-content !important; 
-        max-height: calc(100vh - 40px) !important; 
-        border-radius: 24px !important; 
-        width: 380px !important;
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15) !important; 
-        border: 1px solid var(--border-soft) !important;
-        
-        /* INI OBATNYA: Memotong paksa sudut header yang tajam agar ikut melengkung */
+        top: 20px !important; right: 20px !important; bottom: auto !important;
+        height: max-content !important; max-height: calc(100vh - 40px) !important; 
+        border-radius: 24px !important; width: 380px !important;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15) !important; border: 1px solid var(--border-soft) !important;
         overflow: hidden !important; 
     }
 }
-
 @media (max-width: 991px) {
-    /* Tampilan Filter di HP (Muncul dari bawah seperti aplikasi Gojek/Apple) */
     .offcanvas-filter {
-        top: auto !important;
-        bottom: 0 !important;
-        right: 0 !important;
-        width: 100% !important;
-        height: 80vh !important;
-        border-radius: 24px 24px 0 0 !important; 
-        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15) !important;
-        
-        /* Tambahkan di sini juga untuk jaga-jaga di HP */
-        overflow: hidden !important; 
+        top: auto !important; bottom: 0 !important; right: 0 !important; width: 100% !important;
+        height: 80vh !important; border-radius: 24px 24px 0 0 !important; 
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15) !important; overflow: hidden !important; 
     }
 }
 .offcanvas-backdrop { z-index: 1039 !important; }
 .filter-label { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); margin-bottom: 8px; display: block; text-transform: uppercase; }
 
-/* Animasi & Highlight Utilities */
 .dynamic-panel { display: none; animation: fadeInDown 0.3s ease; }
 @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-.asset-highlight { background: linear-gradient(135deg, #E6F0FA 0%, #FFFFFF 100%); border-left: 5px solid var(--accent-blue); border-radius: 16px; padding: 20px; margin-bottom: 25px; }
 
+/* =========================================
+   PERBAIKAN SIDEBAR MOBILE (Anti-Tabrak & Melengkung)
+   ========================================= */
+#mobileSidebarMenu {
+    border-radius: 0 24px 24px 0 !important; /* Melengkung kanan */
+    margin-top: 85px !important;            /* Turunkan agar tidak nabrak navbar */
+    height: calc(100vh - 85px) !important;  /* Sesuaikan tinggi */
+    box-shadow: 10px 0 30px rgba(0,0,0,0.15) !important;
+}
+
+/* Biar pas di Dark Mode */
+[data-theme="dark"] #mobileSidebarMenu {
+    border-right: 1px solid var(--border-soft) !important;
+}

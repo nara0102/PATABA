@@ -1,6 +1,6 @@
 {% extends 'base/base_admin_BPKAD.html' %}
 
-{% block title %}Manajemen Publikasi - TRANSPARA{% endblock %}
+{% block title %}Manajemen Publikasi - PATABA{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -53,7 +53,7 @@
             <h4 class="fw-bold text-dark mb-1">Manajemen Publikasi Konten</h4>
             <p class="small text-muted mb-0">Kelola semua berita, pengumuman, dan galeri kegiatan yang tampil di portal publik.</p>
         </div>
-        <a href="{% url 'tanah:tambah_publikasi' %}" class="btn btn-bpkad-primary rounded-pill px-4 shadow-sm">
+        <a href="{% url 'publik:tambah_publikasi' %}" class="btn btn-bpkad-primary rounded-pill px-4 shadow-sm">
             <i class="bi bi-plus-lg me-1"></i> Tulis Baru
         </a>
     </div>

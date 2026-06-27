@@ -6,7 +6,8 @@ from django.conf.urls.static import static
 from apps.aset_tanah import views as tanah_views
 
 urlpatterns = [
-    path('admin-django/', admin.site.urls), 
+    path('admin-django/', admin.site.urls),
+    path('i18n/', include('django.conf.urls.i18n')), # language 
     path('', include('apps.portal_publik.urls')),
     path('auth/', include('apps.manajemen_pengguna.urls')),
     path('tanah/', include('apps.aset_tanah.urls')),

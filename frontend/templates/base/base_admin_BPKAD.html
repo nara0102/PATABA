@@ -1,10 +1,15 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Admin Workspace - TRANSPARA{% endblock %}</title>
+    <title>{% block title %}Ruang Kendali - PATABA{% endblock %}</title>
+
+    <link rel="icon" type="image/png" href="{% static 'images/p-favicon.jpg' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/p-favicon.jpg' %}">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -12,22 +17,48 @@
 
     <link rel="stylesheet" href="{% static 'css/transpara_style.css' %}">
     <link rel="stylesheet" href="{% static 'css/transpara_buttons.css' %}">
+    
+    <script>
+        (function() {
+            const currentTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (currentTheme === 'dark' || (!currentTheme && systemPrefersDark)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
     {% block extra_css %}{% endblock %}
 </head>
 
 <body>
 {% include 'includes/_toast_messages.html' %}
 
-    <div class="glass-nav d-flex justify-content-between align-items-center d-md-none" style="position: sticky; top: 0; z-index: 1030;">
-        <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-bank fs-2" style="color: var(--accent-blue);"></i>
-            <div>
-                <h6 class="fw-bold mb-0 text-truncate" style="max-width: 150px;">
+    <!-- NAVIGASI MOBILE (GLASS NAV) -->
+    <div class="glass-nav d-flex justify-content-between align-items-center d-md-none" >
+        <div class="d-flex align-items-center gap-2" style="max-width: 60%;">
+            <a href="#" data-bs-toggle="modal" data-bs-target="#idCardModal" class="text-decoration-none flex-shrink-0">
+                {% if request.user.profile.foto_profil %}
+                    <img src="{{ request.user.profile.foto_profil.url }}" alt="Profile" class="rounded-circle shadow-sm" style="width: 32px; height: 32px; object-fit: cover; border: 2px solid var(--accent-blue);">
+                {% else %}
+                    <div class="rounded-circle d-flex justify-content-center align-items-center shadow-sm text-white fw-bold fs-6" style="width: 32px; height: 32px; background-color: var(--accent-blue);">
+                        {{ request.user.first_name|first }}
+                    </div>
+                {% endif %}
+            </a>
+            <div class="overflow-hidden">
+                <h6 class="fw-bold mb-0 text-truncate" style="color: var(--text-main); font-size: 0.85rem;">
                     {% if profile.role|upper == 'OPERATOR_OPD' %}{{ profile.opd.nama_opd }}{% else %}BPKAD Kota Palu{% endif %}
                 </h6>
             </div>
         </div>
-        <button class="btn btn-sm btn-bpkad-glow rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#logoutModal">Keluar</button>
+        <div class="d-flex align-items-center gap-1 flex-shrink-0">
+            <button id="settingsToggleMobile" class="btn btn-link nav-link p-0 px-1 settings-trigger"><i class="bi bi-gear" style="font-size: 1.1rem; color: var(--text-main);"></i></button>
+            <button class="btn btn-link nav-link p-0 px-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebarMenu">
+                <i class="bi bi-list" style="font-size: 1.4rem; color: var(--text-main);"></i>
+            </button>
+        </div>
     </div>
 
     <div class="main-wrapper container-fluid px-4 pt-3 pt-md-4">
@@ -37,9 +68,15 @@
                 <div class="sidebar-menu d-flex flex-column" style="height: calc(100vh - 40px); position: sticky; top: 20px;">
                     
                     <div class="sidebar-profile mb-4 text-center pb-3 border-bottom border-secondary-subtle">
-                        <div class="bg-light rounded-circle d-flex justify-content-center align-items-center shadow-sm mx-auto mb-2" style="width: 60px; height: 60px; border: 2px solid var(--accent-blue);">
-                            <i class="bi bi-bank fs-3" style="color: var(--accent-blue);"></i>
-                        </div>
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#idCardModal" class="d-inline-block text-decoration-none">
+                            {% if request.user.profile.foto_profil %}
+                                <img src="{{ request.user.profile.foto_profil.url }}" alt="Profile" class="rounded-circle shadow-sm mx-auto mb-2" style="width: 60px; height: 60px; object-fit: cover; border: 2px solid var(--accent-blue); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                            {% else %}
+                                <div class="rounded-circle d-flex justify-content-center align-items-center shadow-sm mx-auto mb-2 text-white fw-bold fs-4" style="width: 60px; height: 60px; background-color: var(--accent-blue); border: 2px solid #fff; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                                    {{ request.user.first_name|first }}
+                                </div>
+                            {% endif %}
+                        </a>
                         {% if profile and profile.role|upper == 'OPERATOR_OPD' %}
                             <h6 class="fw-bold mb-0 text-truncate" style="color: var(--text-main);" title="{{ profile.opd.nama_opd }}">{{ profile.opd.nama_opd }}</h6>
                             <small class="fw-bold" style="color: var(--accent-blue);">Operator OPD</small>
@@ -83,124 +120,278 @@
                             </div>
                         </div>
 
-                        <a data-bs-toggle="collapse" href="#collapseSertifikasi" role="button" class="menu-item d-flex justify-content-between align-items-center {% if 'sertifikat' in request.resolver_match.url_name or 'proses' in request.resolver_match.url_name %}active{% endif %}">
-                            <div><i class="bi bi-shield-check me-1"></i> Sertifikasi</div>
-                            <i class="bi bi-chevron-down" style="font-size: 0.8rem; color: var(--text-muted);"></i>
-                        </a>
-                        <div class="collapse {% if 'sertifikat' in request.resolver_match.url_name or 'proses' in request.resolver_match.url_name %}show{% endif %}" id="collapseSertifikasi">
-                            <div class="mb-2 ms-4 ps-2 border-start border-2" style="border-color: var(--border-glow) !important;">
-                                <a href="{% url 'tanah:list_sertifikat' %}" class="menu-item py-1 my-1 {% if request.resolver_match.url_name == 'list_sertifikat' %}active{% endif %}" style="font-size: 0.85rem;">
-                                    Daftar Sertifikat
-                                </a>
-                                <a href="{% url 'tanah:list_pembebasan_lahan' %}" class="menu-item py-1 my-1 {% if request.resolver_match.url_name == 'list_pembebasan_lahan' %}active{% endif %}" style="font-size: 0.85rem;">
-                                    Pembebasan Lahan
-                                </a>
-                            </div>
-                        </div>
-
                         {% if profile.role|upper != 'OPERATOR_OPD' %}
+
+                            <a data-bs-toggle="collapse" href="#collapseSertifikasi" role="button" class="menu-item d-flex justify-content-between align-items-center {% if 'sertifikat' in request.resolver_match.url_name or 'proses' in request.resolver_match.url_name %}active{% endif %}">
+                                <div><i class="bi bi-shield-check me-1"></i> Sertifikasi</div>
+                                <i class="bi bi-chevron-down" style="font-size: 0.8rem; color: var(--text-muted);"></i>
+                            </a>
+                            <div class="collapse {% if 'sertifikat' in request.resolver_match.url_name or 'proses' in request.resolver_match.url_name %}show{% endif %}" id="collapseSertifikasi">
+                                <div class="mb-2 ms-4 ps-2 border-start border-2" style="border-color: var(--border-glow) !important;">
+                                    <a href="{% url 'tanah:list_sertifikat' %}" class="menu-item py-1 my-1 {% if request.resolver_match.url_name == 'list_sertifikat' %}active{% endif %}" style="font-size: 0.85rem;">
+                                        <i class="bi bi-journals me-2"></i>Daftar Sertifikat
+                                    </a>
+                                    <a href="{% url 'tanah:list_pembebasan_lahan' %}" class="menu-item py-1 my-1 {% if request.resolver_match.url_name == 'list_pembebasan_lahan' %}active{% endif %}" style="font-size: 0.85rem;">
+                                        <i class="bi bi-file-text me-2"></i>Pembebasan Lahan
+                                    </a>
+                                </div>
+                            </div>
+
                             <div class="menu-label">Pengelolaan Konten</div>
                             <a href="{% url 'publik:list_publikasi' %}" class="menu-item {% if 'publikasi' in request.resolver_match.url_name %}active{% endif %}">
-                                <i class="bi bi-megaphone-fill"></i> Manajemen Publikasi
+                                <i class="bi bi-megaphone-fill"></i> Publikasi
                             </a>
 
-                            <div class="menu-label">Administrasi</div>
-                            <a href="#" class="menu-item"><i class="bi bi-file-earmark-spreadsheet-fill"></i> Import Excel</a>
-                            <a href="{% url 'tanah:export_excel_aset' %}?q={{ request.GET.q }}&opd={{ request.GET.opd }}&kecamatan={{ request.GET.kecamatan }}&status_sertifikasi={{ request.GET.status_sertifikasi }}" class="btn btn-success w-100 my-2">
-                                <i class="bi bi-file-earmark-excel"></i> Export Excel
+                            <div class="menu-label">Administrasi & Laporan</div>
+                            <a href="#" class="menu-item"><i class="bi bi-cloud-upload-fill text-primary"></i> Import Data Excel</a>
+                            <a href="{% url 'tanah:halaman_export' %}" class="menu-item {% if 'export' in request.resolver_match.url_name %}active{% endif %}">
+                                <i class="bi bi-file-earmark-excel-fill text-success"></i> Export Excel
+                            </a>
+                            <a href="#" class="menu-item">
+                                <i class="bi bi-file-earmark-pdf-fill text-danger"></i> Export PDF <span class="badge bg-secondary ms-auto" style="font-size: 0.6rem;">Segera</span>
                             </a>
                         {% endif %}
                         
                         <div class="menu-label">Lainnya</div>
                         <a href="{% url 'publik:bantuan' %}" class="menu-item"><i class="bi bi-question-circle"></i> Pusat Bantuan</a>
-                        
                         <a href="{% url 'auth:pengaturan_profil' %}" class="menu-item {% if 'pengaturan' in request.resolver_match.url_name %}active{% endif %}">
-                            <i class="bi bi-gear-fill"></i> Pengaturan
+                            <i class="bi bi-person-circle"></i> Akun
                         </a>
                     </div>
                     
-                    <div class="sidebar-footer mt-auto pt-3 border-top border-secondary-subtle text-center">
-                        <button class="btn btn-bpkad-glow rounded-pill px-4 py-2 small fw-bold" data-bs-toggle="modal" data-bs-target="#logoutModal">
-                            <i class="bi bi-box-arrow-left me-2"></i> Keluar
+                    <div class="sidebar-footer mt-auto pt-3 border-top border-secondary-subtle d-flex justify-content-between align-items-center">
+                        <button id="settingsToggleDesktop" class="btn btn-link text-decoration-none settings-trigger"><i class="bi bi-gear-fill" style="font-size: 1.2rem; color: var(--text-muted);"></i></button>
+                        <button class="btn btn-bpkad-glow rounded-pill px-4 py-1 small fw-bold" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                            <i class="bi bi-box-arrow-left me-1"></i> Keluar
                         </button>
                     </div>
 
                 </div> 
             </div>
         
-            <div class="col-lg-10 col-md-9" id="main-content">
+            <div class="col-lg-10 col-md-9 pb-5" id="main-content">
                 {% block content %}{% endblock %}
             </div>
         </div>
     </div>
 
+    <div id="settingsPopup" class="settings-popup shadow-lg" style="position: fixed; top: 80px; left: 20px; width: 260px; background: var(--nav-glass); backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid var(--border-glow); padding: 20px; display: none; z-index: 1050; color: var(--text-main);">
+        <div class="popup-header mb-3"><h6 class="fw-bold mb-0">Tampilan Sistem</h6></div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="small fw-medium">Mode Gelap</span>
+            <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" id="darkModeSwitch"></div>
+        </div>
+        <hr style="border-color: var(--border-soft);">
+        <div class="d-flex flex-column gap-2">
+            <span class="small fw-medium mb-1">Pilih Bahasa / Language</span>
+            
+            <form action="{% url 'set_language' %}" method="post" style="margin: 0;">
+                {% csrf_token %}
+                
+                <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                
+                <div class="d-flex flex-column gap-2">
+                    <button type="submit" name="language" value="id" class="btn btn-sm w-100 fw-bold {% if LANGUAGE_CODE == 'id' %}btn-bpkad-primary{% else %}btn-bpkad-outline{% endif %}">
+                        Bahasa Indonesia
+                    </button>
+                    
+                    <button type="submit" name="language" value="en" class="btn btn-sm w-100 fw-bold {% if LANGUAGE_CODE == 'en' %}btn-bpkad-primary{% else %}btn-bpkad-outline{% endif %}">
+                        English
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="border-radius: 20px;">
+            <div class="modal-content" style="border-radius: 20px; background-color: var(--card-light); border: 1px solid var(--border-soft);">
                 <div class="modal-body text-center p-5">
-                    <i class="bi bi-box-arrow-right text-primary fs-1 mb-3"></i>
-                    <h5>Konfirmasi Keluar</h5>
+                    <i class="bi bi-box-arrow-right fs-1 mb-3" style="color: var(--accent-danger);"></i>
+                    <h5 style="color: var(--text-main);">Konfirmasi Keluar</h5>
                     <div class="d-flex justify-content-center gap-3 mt-4">
-                        <button class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Batal</button>
-                        <a href="{% url 'publik:home' %}" class="btn btn-bpkad-primary rounded-pill px-4">Ya, Keluar</a>
+                        <button class="btn btn-bpkad-outline rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Batal</button>
+                        <a href="{% url 'publik:home' %}" class="btn btn-bpkad-primary rounded-pill px-4" style="background-color: var(--accent-danger) !important; border-color: var(--accent-danger) !important;">Ya, Keluar</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="modal fade" id="idCardModal" tabindex="-1" aria-labelledby="idCardModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content bg-transparent border-0">
+                <div class="modal-body p-0">
+                    <div class="card border-0 shadow-lg" style="background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.5);">
+                        <div class="text-center p-4 position-relative" style="background: linear-gradient(135deg, var(--accent-blue), #5bc0de);">
+                            <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <div class="position-relative d-inline-block mt-2">
+                                {% if request.user.profile.foto_profil %}
+                                    <img src="{{ request.user.profile.foto_profil.url }}" alt="Foto Pegawai" class="rounded-circle shadow" style="width: 100px; height: 100px; object-fit: cover; border: 4px solid white;">
+                                {% else %}
+                                    <div class="bg-white rounded-circle d-flex justify-content-center align-items-center shadow fw-bold" style="width: 100px; height: 100px; border: 4px solid white; font-size: 3.5rem; color: var(--accent-blue);">
+                                        {{ request.user.first_name|first }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-body text-center pt-3 pb-4 px-4">
+                            <h5 class="fw-bold mb-0 text-dark">{{ request.user.first_name }} {{ request.user.last_name }}</h5>
+                            <p class="text-muted small mb-3">@{{ request.user.username }}</p>
+                            <div class="bg-white bg-opacity-75 rounded-3 p-3 text-start shadow-sm border border-white mb-3">
+                                <div class="mb-2">
+                                    <small class="text-muted d-block" style="font-size: 0.7rem;">Nomor Induk Pegawai</small>
+                                    <span class="fw-bold text-dark" style="font-size: 0.9rem;">{{ request.user.profile.nip|default:"-" }}</span>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted d-block" style="font-size: 0.7rem;">Jabatan Akses</small>
+                                    <span class="badge bg-primary-subtle text-primary rounded-pill">{{ request.user.profile.get_role_display|default:request.user.profile.role }}</span>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block" style="font-size: 0.7rem;">Instansi</small>
+                                    <span class="fw-bold text-dark" style="font-size: 0.85rem;">
+                                        {% if request.user.profile.opd %}{{ request.user.profile.opd.nama_opd }}{% else %}Pemerintah Kota Palu{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'auth:pengaturan_profil' %}" class="btn btn-bpkad-primary rounded-pill btn-sm fw-bold">
+                                    <i class="bi bi-gear-fill me-1"></i> Pengaturan Akun
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const tombolBatal = document.getElementById('btn-batal-batal');
-            const mainContent = document.getElementById('main-content');
+    <!-- OFFCANVAS SIDEBAR KHUSUS MOBILE -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebarMenu" style="width: 280px; background-color: var(--bg-light);">
+        <div class="offcanvas-header border-bottom border-secondary-subtle">
+            <div class="d-flex align-items-center">
+                <img src="{% static 'images/logo.png' %}" alt="Logo" height="30" class="me-2" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
+                <h6 class="fw-bold mb-0" style="color: var(--text-main); font-family: 'Playfair Display', serif; letter-spacing: 1px;">PATABA</h6>
+            </div>
+            <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        
+        <div class="offcanvas-body p-3" style="overflow-y: auto;">
+            <div class="menu-label mt-0">Pusat Kendali</div>
+            {% if profile.role|upper == 'OPERATOR_OPD' %}
+                <a href="{% url 'auth:dashboard_opd' %}" class="menu-item {% if request.resolver_match.url_name == 'dashboard_opd' %}active{% endif %}">
+                    <i class="bi bi-grid-1x2-fill"></i> Tinjauan Utama
+                </a>
+            {% else %}
+                <a href="{% url 'auth:dashboard_bpkad' %}" class="menu-item menu-utama-bpkad {% if request.resolver_match.url_name == 'dashboard_bpkad' %}active{% endif %}">
+                    <i class="bi bi-grid-1x2-fill"></i> Tinjauan Utama
+                </a>
+                <a href="{% url 'auth:dashboard_bpkad' %}#antrean-verifikasi-section" class="menu-item menu-antrean-bpkad" data-bs-dismiss="offcanvas">
+                    <i class="bi bi-clipboard-check-fill"></i> Antrean Verifikasi
+                </a>
+                <a href="{% url 'auth:dashboard_bpkad' %}#daftar-aset-section" class="menu-item menu-daftar-bpkad" data-bs-dismiss="offcanvas">
+                    <i class="bi bi-collection-fill"></i> Daftar Aset
+                </a>
+            {% endif %}
 
-            if (tombolBatal) {
-                tombolBatal.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    if (mainContent) {
-                        mainContent.classList.add('slide-out-right');
-                        setTimeout(function() { window.history.back(); }, 400);
-                    } else {
-                        window.history.back();
-                    }
-                });
-            }
-        });
-    </script>
+            <div class="menu-label">Pengelolaan Data</div>
+            <a data-bs-toggle="collapse" href="#collapseAsetMobile" role="button" class="menu-item d-flex justify-content-between align-items-center {% if 'aset_tanah' in request.resolver_match.url_name or 'aset_kendaraan' in request.resolver_match.url_name %}active{% endif %}">
+                <div><i class="bi bi-box-seam me-1"></i> Kelola Aset</div>
+                <i class="bi bi-chevron-down" style="font-size: 0.8rem; color: var(--text-muted);"></i>
+            </a>
+            <div class="collapse {% if 'aset_tanah' in request.resolver_match.url_name or 'aset_kendaraan' in request.resolver_match.url_name %}show{% endif %}" id="collapseAsetMobile">
+                <div class="mb-2 ms-4 ps-2 border-start border-2" style="border-color: var(--border-glow) !important;">
+                    <a href="{% url 'tanah:list_aset_tanah' %}" class="menu-item py-1 my-1 {% if 'tanah' in request.resolver_match.url_name %}active{% endif %}" style="font-size: 0.85rem;">
+                        <i class="bi bi-map me-2"></i> Aset Tanah
+                    </a>
+                    <a href="{% url 'publik:coming_soon_kendaraan' %}" class="menu-item py-1 my-1 {% if request.resolver_match.url_name == 'coming_soon_kendaraan' %}active{% endif %}" style="font-size: 0.85rem;">
+                        <i class="bi bi-car-front-fill me-2"></i> Aset Kendaraan
+                    </a>
+                </div>
+            </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            function setActiveMenuBPKAD() {
-                const hash = window.location.hash;
-                const menuUtama = document.querySelector('.menu-utama-bpkad');
-                const menuAntrean = document.querySelector('.menu-antrean-bpkad');
-                const menuDaftar = document.querySelector('.menu-daftar-bpkad');
-
-                // Hanya jalan di URL dashboard_bpkad
-                if (window.location.pathname === "{% url 'auth:dashboard_bpkad' %}") {
-                    if(menuUtama) menuUtama.classList.remove('active');
-                    if(menuAntrean) menuAntrean.classList.remove('active');
-                    if(menuDaftar) menuDaftar.classList.remove('active');
-
-                    if (hash === '#antrean-verifikasi-section') {
-                        if(menuAntrean) menuAntrean.classList.add('active');
-                    } else if (hash === '#daftar-aset-section') {
-                        if(menuDaftar) menuDaftar.classList.add('active');
-                    } else {
-                        if(menuUtama) menuUtama.classList.add('active');
-                    }
-                }
-            }
+            {% if profile.role|upper != 'OPERATOR_OPD' %}
             
-            setActiveMenuBPKAD();
-            window.addEventListener('hashchange', setActiveMenuBPKAD);
+                <a data-bs-toggle="collapse" href="#collapseSertifikasiMobile" role="button" class="menu-item d-flex justify-content-between align-items-center {% if 'sertifikat' in request.resolver_match.url_name or 'proses' in request.resolver_match.url_name %}active{% endif %}">
+                    <div><i class="bi bi-shield-check me-1"></i> Sertifikasi</div>
+                    <i class="bi bi-chevron-down" style="font-size: 0.8rem; color: var(--text-muted);"></i>
+                </a>
+                <div class="collapse {% if 'sertifikat' in request.resolver_match.url_name or 'proses' in request.resolver_match.url_name %}show{% endif %}" id="collapseSertifikasiMobile">
+                    <div class="mb-2 ms-4 ps-2 border-start border-2" style="border-color: var(--border-glow) !important;">
+                        <a href="{% url 'tanah:list_sertifikat' %}" class="menu-item py-1 my-1 {% if request.resolver_match.url_name == 'list_sertifikat' %}active{% endif %}" style="font-size: 0.85rem;">
+                            <i class="bi bi-journals me-2"></i>Daftar Sertifikat
+                        </a>
+                        <a href="{% url 'tanah:list_pembebasan_lahan' %}" class="menu-item py-1 my-1 {% if request.resolver_match.url_name == 'list_pembebasan_lahan' %}active{% endif %}" style="font-size: 0.85rem;">
+                            <i class="bi bi-file-text me-2"></i>Pembebasan Lahan
+                        </a>
+                    </div>
+                </div>
+
+                <div class="menu-label">Pengelolaan Konten</div>
+                <a href="{% url 'publik:list_publikasi' %}" class="menu-item {% if 'publikasi' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-megaphone-fill"></i> Publikasi
+                </a>
+
+                <div class="menu-label">Administrasi & Laporan</div>
+                <a href="#" class="menu-item"><i class="bi bi-cloud-upload-fill text-primary"></i> Import Data Excel</a>
+                <a href="{% url 'tanah:halaman_export' %}" class="menu-item {% if 'export' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-file-earmark-excel-fill text-success"></i> Export Excel
+                </a>
+                <a href="#" class="menu-item">
+                    <i class="bi bi-file-earmark-pdf-fill text-danger"></i> Export PDF <span class="badge bg-secondary ms-auto" style="font-size: 0.6rem;">Segera</span>
+                </a>
+                
+            {% endif %}
+            
+            <div class="menu-label">Lainnya</div>
+            <a href="{% url 'publik:bantuan' %}" class="menu-item"><i class="bi bi-question-circle"></i> Pusat Bantuan</a>
+            <a href="{% url 'auth:pengaturan_profil' %}" class="menu-item {% if 'pengaturan' in request.resolver_match.url_name %}active{% endif %}">
+                <i class="bi bi-gear-fill"></i> Pengaturan
+            </a>
+            
+            <div class="mt-4 pt-3 border-top border-secondary-subtle">
+                <button class="btn btn-bpkad-danger rounded-pill px-4 py-2 w-100 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#logoutModal" data-bs-dismiss="offcanvas">
+                    <i class="bi bi-box-arrow-left me-2"></i> Keluar Sistem
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/pataba_theme.js' %}"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const triggers = document.querySelectorAll('.settings-trigger');
+            const popup = document.getElementById('settingsPopup');
+            
+            triggers.forEach(trigger => {
+                trigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const rect = this.getBoundingClientRect();
+                    
+                    // Otomatis menempatkan popup di dekat tombol yang diklik (Desktop vs Mobile)
+                    if (window.innerWidth > 768) {
+                        popup.style.top = (rect.top - 180) + 'px'; // Muncul di atas tombol keluar Desktop
+                        popup.style.left = (rect.right + 15) + 'px';
+                    } else {
+                        popup.style.top = '70px'; // Muncul di bawah header kaca Mobile
+                        popup.style.left = 'auto';
+                        popup.style.right = '20px';
+                    }
+                    
+                    popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+                });
+            });
+
+            document.addEventListener('click', function(e) {
+                if (popup && !popup.contains(e.target)) {
+                    popup.style.display = 'none';
+                }
+            });
         });
     </script>
-
-<!-- Script Global Sistem PATABA -->
-<script src="{% static 'js/main.js' %}"></script>
-
+    
 </body>
 </html>
