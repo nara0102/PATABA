@@ -96,3 +96,22 @@
     background: linear-gradient(135deg, rgba(255, 69, 58, 0.1) 0%, rgba(255, 214, 10, 0.05) 100%) !important;
     border-color: rgba(255, 214, 10, 0.2) !important;
 }
+
+/* Custom Button Unduh (Old Money Green) */
+.btn-unduh {
+    background-color: #009051; 
+    color: #F5F5F7; /* Putih tulang */
+    border: 1px solid #143A2E;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-unduh:hover {
+    background-color: #008F00; 
+    color: #F5F5F7; 
+    box-shadow: 0 4px 12px rgba(27, 77, 62, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-unduh i {
+    color: #EBEBEB; 
+}

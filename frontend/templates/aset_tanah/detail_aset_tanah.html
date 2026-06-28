@@ -163,29 +163,43 @@
                         </div>
                     </div>
 
-                    {% if aset.status_sertifikasi == 'BERSERTIFIKAT' and sertifikat %}
+                    {% if aset.status_sertifikasi == 'BERSERTIFIKAT' %}
                         <div class="col-sm-12 detail-row">
                             <div class="data-label text-success">Nomor Sertifikat (BPN)</div>
-                            <div class="data-value fs-5 font-monospace text-dark">{{ sertifikat.nomor_sertifikat|default:"-" }}</div>
+                            <div class="data-value fs-5 font-monospace text-dark">{{ sertifikat.nomor_sertifikat|default:aset.nomor_sertifikat|default:"-" }}</div>
                         </div>
                         <div class="col-sm-4 detail-row">
                             <div class="data-label">Status & Nomor Hak</div>
                             <div class="data-value fw-bold">
-                                {% if sertifikat.status_hak == 'HAK_PAKAI' %}Hak Pakai{% else %}Hak Milik{% endif %} 
-                                {{ sertifikat.nomor_hak|default:"" }}
+                                {% if sertifikat %}
+                                    {% if sertifikat.status_hak == 'HAK_PAKAI' %}Hak Pakai{% else %}Hak Milik{% endif %} 
+                                    {{ sertifikat.nomor_hak|default:"" }}
+                                {% else %}
+                                    <span class="text-muted fst-italic fw-normal">Menunggu input detail sertifikat</span>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="col-sm-4 detail-row">
                             <div class="data-label">Atas Nama Kepemilikan</div>
-                            <div class="data-value fw-bold text-dark">{{ sertifikat.nama_pemegang_hak|default:"-" }}</div>
+                            <div class="data-value fw-bold text-dark">{{ sertifikat.nama_pemegang_hak|default:aset.nama_pemegang_hak|default:"-" }}</div>
                         </div>
                         <div class="col-sm-4 detail-row">
                             <div class="data-label">Bukti Fisik Dokumen</div>
                             <div class="data-value">
-                                {% if sertifikat.keterangan == 'ASLI' %}
-                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle"><i class="bi bi-file-earmark-check me-1"></i> Dokumen Asli</span>
+                                {% if sertifikat %}
+                                    {% if sertifikat.keterangan == 'ASLI' %}
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle"><i class="bi bi-file-earmark-check me-1"></i> Dokumen Asli</span>
+                                    {% else %}
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"><i class="bi bi-files me-1"></i> Salinan / Foto Kopi</span>
+                                    {% endif %}
                                 {% else %}
-                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"><i class="bi bi-files me-1"></i> Salinan / Foto Kopi</span>
+                                    {% if 'ASLI' in aset.keterangan_sertifikasi_lainnya|default:'' %}
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle"><i class="bi bi-file-earmark-check me-1"></i> Dokumen Asli</span>
+                                    {% elif 'FOTOKOPI' in aset.keterangan_sertifikasi_lainnya|default:'' %}
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"><i class="bi bi-files me-1"></i> Salinan / Foto Kopi</span>
+                                    {% else %}
+                                        -
+                                    {% endif %}
                                 {% endif %}
                             </div>
                         </div>

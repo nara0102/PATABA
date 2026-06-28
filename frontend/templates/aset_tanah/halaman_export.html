@@ -15,7 +15,7 @@
         {% csrf_token %}
         <div class="row g-4">
             
-            <div class="col-lg-5">
+            <div class="col-lg-4">
                 <div class="glass-card p-4 h-100">
                     <h6 class="fw-bold mb-4 border-bottom pb-2" style="color: var(--accent-blue);">1. Saring Data (Filter)</h6>
                     
@@ -34,8 +34,8 @@
                         </select>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="small fw-bold text-muted mb-1">Status Sertifikasi</label>
+                    <div class="mb-3 border-top pt-3 mt-3">
+                        <label class="small fw-bold text-muted mb-1">Status Sertifikasi Utama</label>
                         <select name="status_sertifikasi" class="form-select bg-light border-0">
                             <option value="">-- Semua Status --</option>
                             <option value="BERSERTIFIKAT">Sudah Bersertifikat</option>
@@ -43,11 +43,30 @@
                         </select>
                     </div>
 
-                    <div class="mb-3">
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="small fw-bold text-muted mb-1">Bukti Fisik</label>
+                            <select name="bukti_fisik" class="form-select bg-light border-0">
+                                <option value="">Semua</option>
+                                <option value="ASLI">Dokumen Asli</option>
+                                <option value="FOTOKOPI">Hanya Fotokopi</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="small fw-bold text-muted mb-1">Pemegang Hak</label>
+                            <select name="pemegang_hak" class="form-select bg-light border-0">
+                                <option value="">Semua</option>
+                                <option value="PEMKOT">Pemkot Palu</option>
+                                <option value="LAINNYA">Lainnya (Pribadi/Instansi)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 border-top pt-3 mt-3">
                         <label class="small fw-bold text-muted mb-1">Status Verifikasi Sistem</label>
                         <select name="status_verifikasi" class="form-select bg-light border-0">
-                            <option value="VALID" selected>Hanya Data Valid (Telah Disetujui)</option>
-                            <option value="ANTREAN">Sedang Dalam Antrean</option>
+                            <option value="VALID" selected>Hanya Data Valid (Disetujui)</option>
+                            <option value="BELUM_DIVERIFIKASI">Sedang Dalam Antrean</option>
                             <option value="PERLU_REVIEW">Perlu Revisi</option>
                             <option value="SEMUA">Unduh Seluruh Status Data</option>
                         </select>
@@ -55,15 +74,16 @@
                 </div>
             </div>
 
-            <div class="col-lg-7">
+            <div class="col-lg-8">
                 <div class="glass-card p-4 h-100">
-                    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
                         <h6 class="fw-bold mb-0" style="color: var(--accent-blue);">2. Pilih Kolom Informasi</h6>
-                        <button type="button" id="btn-select-all" class="btn btn-sm btn-outline-secondary rounded-pill" style="font-size: 0.75rem;">Pilih Semua</button>
+                        <button type="button" id="btn-select-all" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 shadow-sm">Pilih Semua</button>
                     </div>
 
-                    <div class="row g-3">
-                        <div class="col-md-6">
+                    <div class="row g-4 mt-2">
+                        <div class="col-md-4">
+                            <h6 class="small fw-bold text-muted mb-3"><i class="bi bi-box-seam me-1"></i> Identitas & Nilai</h6>
                             <div class="form-check mb-2">
                                 <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="opd" checked>
                                 <label class="form-check-label small">Instansi (OPD)</label>
@@ -84,17 +104,18 @@
                                 <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="nomor_register">
                                 <label class="form-check-label small">Nomor Register</label>
                             </div>
+                            <div class="form-check mb-2 mt-3 pt-2 border-top">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="luas">
+                                <label class="form-check-label small">Luas Tanah (m2)</label>
+                            </div>
                             <div class="form-check mb-2">
                                 <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="nilai" checked>
                                 <label class="form-check-label small fw-bold text-success">Nilai Aset (Rp)</label>
                             </div>
                         </div>
 
-                        <div class="col-md-6">
-                            <div class="form-check mb-2">
-                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="luas">
-                                <label class="form-check-label small">Luas Tanah (m2)</label>
-                            </div>
+                        <div class="col-md-4">
+                            <h6 class="small fw-bold text-muted mb-3"><i class="bi bi-geo-alt me-1"></i> Lokasi & Keadaan</h6>
                             <div class="form-check mb-2">
                                 <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="alamat" checked>
                                 <label class="form-check-label small">Alamat Lengkap</label>
@@ -104,20 +125,48 @@
                                 <label class="form-check-label small">Kecamatan</label>
                             </div>
                             <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="kelurahan">
+                                <label class="form-check-label small">Kelurahan</label>
+                            </div>
+                            <div class="form-check mb-2">
                                 <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="koordinat">
                                 <label class="form-check-label small">Titik Koordinat (Lat, Lng)</label>
                             </div>
+                            <div class="form-check mb-2 mt-3 pt-2 border-top">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="cara_perolehan">
+                                <label class="form-check-label small">Cara Perolehan</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="kondisi">
+                                <label class="form-check-label small">Kondisi Pemanfaatan</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <h6 class="small fw-bold text-muted mb-3"><i class="bi bi-bank me-1"></i> Legalitas & Hukum</h6>
                             <div class="form-check mb-2">
                                 <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="status_sertif" checked>
                                 <label class="form-check-label small">Status Sertifikasi</label>
                             </div>
                             <div class="form-check mb-2">
-                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="no_sertif">
-                                <label class="form-check-label small">Nomor Sertifikat/Hak</label>
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="no_sertif" checked>
+                                <label class="form-check-label small fw-bold text-dark">Nomor Sertifikat (BPN)</label>
                             </div>
                             <div class="form-check mb-2">
-                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="detail_sertif" checked>
-                                <label class="form-check-label small fw-bold text-primary">Kondisi Fisik Sertifikat (Asli/FC)</label>
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="status_hak_sementara">
+                                <label class="form-check-label small">Status Hak (Proses)</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="no_hak">
+                                <label class="form-check-label small fw-bold text-dark">Nomor Hak</label>
+                            </div>
+                            <div class="form-check mb-2 mt-3 pt-2 border-top">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="nama_pemilik" checked>
+                                <label class="form-check-label small text-primary">Nama Pemegang Hak</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="bukti_fisik" checked>
+                                <label class="form-check-label small text-primary">Kondisi Fisik (Asli/FC)</label>
                             </div>
                         </div>
                     </div>
@@ -125,8 +174,8 @@
             </div>
 
             <div class="col-12 text-end mt-4">
-                <button type="submit" class="btn btn-success rounded-pill px-5 py-2 shadow-sm fw-bold">
-                    <i class="bi bi-download me-2"></i> Unduh File Excel Sekarang
+                <button type="submit" class="btn btn-unduh rounded-pill px-5 py-3 shadow-sm fw-bold">
+                    <i class="bi bi-download me-2"></i> Ekspor File
                 </button>
             </div>
             

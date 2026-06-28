@@ -107,8 +107,7 @@
                             <label class="small fw-bold">Nilai Aset / Harga <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text fw-bold border-0 shadow-sm" style="background: #E2E8F0; border-radius: 14px 0 0 14px;">Rp.</span>
-                                <input type="text" name="nilai_aset" class="form-control format-ribuan fw-bold bg-light border-0" style="border-radius: 0 !important;" value="{{ aset.nilai_aset|floatformat:0|default:'' }}" required placeholder="0">
-                                <span class="input-group-text fw-bold border-0 shadow-sm" style="background: #E2E8F0; border-radius: 0 14px 14px 0;">,00</span>   
+                                <input type="text" name="nilai_aset" class="form-control format-ribuan fw-bold bg-light border-0" style="border-radius: 0 !important;" value="{{ aset.nilai_aset|floatformat:0|default:'' }}" required placeholder="0">  
                             </div>
                             <small class="text-muted ms-3 d-block" style="font-size: 0.75rem; font-style: italic;">tanpa titik</small>
                         </div>
@@ -121,7 +120,6 @@
                                     <option value="PEMBELIAN" {% if aset.cara_perolehan == 'PEMBELIAN' %}selected{% endif %}>Pembelian</option>
                                     <option value="PENYERAHAN" {% if aset.cara_perolehan == 'PENYERAHAN' %}selected{% endif %}>Penyerahan</option>
                                     <option value="GANTI_RUGI" {% if aset.cara_perolehan == 'GANTI_RUGI' %}selected{% endif %}>Ganti Rugi</option>
-                                    <option value="LAINNYA" {% if aset.cara_perolehan == 'LAINNYA' %}selected{% endif %}>Lainnya</option>
                                 </select>
                                 <i class="bi bi-chevron-down position-absolute" style="right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #86868B;"></i>
                             </div>
@@ -250,7 +248,7 @@
                                 </div>
                                 <div class="col-md-12" id="kotak_pemilik_lainnya" style="display: none;">
                                     <label class="small fw-bold">Tuliskan Atas Nama Pemilik<span class="text-danger">*</span></label>
-                                    <input type="text" name="pemilik_lainnya" id="ui_pemilik_teks" class="form-control bg-light border-0 shadow-none auto-title-case" placeholder="Sebutkan Nama Pemegang HAK">
+                                    <input type="text" name="nama_pemegang_hak" id="ui_pemilik_teks" class="form-control bg-light border-0 shadow-none auto-title-case" placeholder="Sebutkan Nama Pemegang HAK" value="{{ aset.nama_pemegang_hak|default:'' }}">
                                 </div>
                             </div>
                             <input type="hidden" name="keterangan_sertifikasi_lainnya" id="db_keterangan_lainnya" value="{{ aset.keterangan_sertifikasi_lainnya|default:'' }}" required>
@@ -436,12 +434,21 @@
     document.addEventListener("DOMContentLoaded", toggleSertifikasi);
 
     document.getElementById('formAsetTanah').addEventListener('submit', function() {
-        numberInputs.forEach(function(input) { input.value = input.value.replace(/\./g, ''); });
+        numberInputs.forEach(function(input) { 
+            let nilai = input.value;
+            nilai = nilai.replace(/\./g, ''); // 1. Hapus titik ribuan (12.500,89 -> 12500,89)
+            nilai = nilai.replace(/,/g, '.'); // 2. Ubah koma desimal jadi titik Python (12500,89 -> 12500.89)
+            input.value = nilai;
+        });
 
         if (selectSertifikasi.value === 'BERSERTIFIKAT') {
             dbKeteranganLainnya.value = uiBuktiFisik.value + "_" + uiKepemilikan.value;
+            if (uiKepemilikan.value === 'PEMKOT') {
+                uiPemilikTeks.value = 'Pemerintah Kota Palu';
+            }
         } else {
             dbKeteranganLainnya.value = "";
+            uiPemilikTeks.value = "";
         }
     });
 

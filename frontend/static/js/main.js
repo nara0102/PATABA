@@ -35,8 +35,14 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         return split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
     }
+    
     numberInputs.forEach(function(input) {
-        if(input.value) { input.value = formatNumber(input.value); }
+        if(input.value) {
+            if (input.value.includes('.') && !input.value.includes(',')) {
+                input.value = input.value.replace(/\./g, ',');
+            }
+            input.value = formatNumber(input.value); 
+        }
         input.addEventListener('keyup', function(e) { this.value = formatNumber(this.value); });
     });
 

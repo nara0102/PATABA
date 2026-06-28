@@ -10,10 +10,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Sum, Q
+from django.db import transaction
 from django.contrib.auth.decorators import login_required, user_passes_test
 
 # 1. Impor Model Milik Aset Tanah Sendiri
-from .models import AsetTanah, RefKelurahan, RefKecamatan, SertifikatTanah, MasterOPD
+from .models import AsetTanah, FotoAsetTanah, RefKelurahan, RefKecamatan, SertifikatTanah, MasterOPD
 
 # 2. Impor Hak Akses & Perekam Jejak dari Manajemen Pengguna
 from apps.manajemen_pengguna.views import role_required, is_admin_bpkad, is_operator, catat_aktivitas
@@ -28,7 +29,7 @@ from pataba_core.constants import ROLE_OPERATOR, ROLE_ADMIN, STATUS_PENDING
 # CRUD ASET TANAH
 # - - - - -
 
-# 1 - Input Aset Tanah Baru (SOP VALIDASI KETAT & PING-PONG)
+# 1. Input Aset Tanah Baru (SOP VALIDASI KETAT & PING-PONG)
 @login_required(login_url='auth:login')
 @role_required(allowed_roles=['ADMIN_BPKAD', 'OPERATOR_OPD'])
 def input_aset_tanah(request):
@@ -62,13 +63,16 @@ def input_aset_tanah(request):
         # c. PENYESUAIAN FIELD SERTIFIKAT (Menghindari Bentrok JS vs Python)
         status_sertifikasi = request.POST.get('status_sertifikasi') or 'BELUM_BERSERTIFIKAT'
         status_hak_sementara = request.POST.get('status_hak_sementara', '')
+        keterangan_sertifikasi_lainnya = request.POST.get('keterangan_sertifikasi_lainnya', '')
+        nama_pemegang_hak = request.POST.get('nama_pemegang_hak')
         
-        if status_sertifikasi == 'BELUM_BERSERTIFIKAT':
-            # Jika belum sertifikat, ambil nilai dari UI 'nomor_hak_sementara'
-            # Jika kosong, isi dengan 'Dalam Proses' agar lolos validasi database
-            ket_lainnya = request.POST.get('nomor_hak_sementara') or 'Dalam Proses Pembuatan'
-        else:
-            ket_lainnya = request.POST.get('keterangan_sertifikasi_lainnya', '')
+        # PENGAMAN LAPIS DUA (Backend): Memastikan data Pemkot tidak bocor jika JS gagal mengirim
+        if status_sertifikasi == 'BERSERTIFIKAT':
+            if 'PEMKOT' in keterangan_sertifikasi_lainnya:
+                nama_pemegang_hak = 'Pemerintah Kota Palu'
+        elif status_sertifikasi == 'BELUM_BERSERTIFIKAT':
+            keterangan_sertifikasi_lainnya = request.POST.get('nomor_hak_sementara') or 'Dalam Proses Pembuatan'
+            nama_pemegang_hak = '' # Kosongkan mutlak
 
         # d. INSTANCE LOKAL (Belum ter-save ke database)
         aset_baru = AsetTanah(
@@ -79,7 +83,6 @@ def input_aset_tanah(request):
             nama_barang=request.POST.get('nama_barang'),
             kode_barang=request.POST.get('kode_barang'),
             nibar=request.POST.get('nibar'),
-            
             nomor_register=request.POST.get('nomor_register'),
             status_kepemilikan=request.POST.get('status_kepemilikan') or 'BELUM_JELAS',
             luas_m2=luas_bersih,
@@ -91,11 +94,13 @@ def input_aset_tanah(request):
             latitude=float(request.POST.get('latitude') or 0),
             longitude=float(request.POST.get('longitude') or 0),
             
+            # --- Field Sertifikasi yang Sudah Disinkronkan ---
             status_sertifikasi=status_sertifikasi,
             nomor_sertifikat=request.POST.get('nomor_sertifikat'),
             status_hak_sementara=status_hak_sementara,
-            nomor_hak = request.POST.get('nomor_hak'),
-            keterangan_sertifikasi_lainnya=ket_lainnya, # Variabel aman dari bentrok JS
+            nomor_hak=request.POST.get('nomor_hak'),
+            keterangan_sertifikasi_lainnya=keterangan_sertifikasi_lainnya,
+            nama_pemegang_hak=nama_pemegang_hak,
             
             kondisi_pemanfaatan=request.POST.get('kondisi_pemanfaatan'),
             status_penggunaan=request.POST.get('status_penggunaan'),
@@ -104,7 +109,7 @@ def input_aset_tanah(request):
             keterangan=request.POST.get('keterangan'),
             
             status_verifikasi=target_status,
-            catatan_revisi=catatan_revisi, # Masukkan variabel catatan revisi untuk Ping-Pong
+            catatan_revisi=catatan_revisi, 
             created_by_id=request.user.id
         )
 
@@ -133,13 +138,14 @@ def input_aset_tanah(request):
 
         # f. SAVE KE DATABASE KALAU VALID
         try:
-            aset_baru.save()
-            
-            # --- LOGIKA TANGKAP BANYAK FOTO ---
-            # "foto_aset_multiple" adalah nama input di HTML nanti
-            daftar_foto = request.FILES.getlist('foto_aset_multiple') 
-            for file in daftar_foto:
-                FotoAsetTanah.objects.create(aset=aset_baru, file_foto=file)
+            with transaction.atomic(): # <--- KUNCI ATOMISITAS (Mencegah Data Hantu)
+                aset_baru.save()
+                
+                # --- LOGIKA TANGKAP BANYAK FOTO ---
+                daftar_foto = request.FILES.getlist('foto_aset_multiple') 
+                if daftar_foto: # Pastikan foto ada sebelum di-looping
+                    for file in daftar_foto:
+                        FotoAsetTanah.objects.create(aset=aset_baru, file_foto=file)
             
             # (Pastikan fungsi catat_aktivitas sudah ada di luar fungsi ini)
             try:
@@ -175,7 +181,7 @@ def input_aset_tanah(request):
         'kelurahan_list': RefKelurahan.objects.all(),
     })
 
-# 2 - Daftar Aset Tanah
+# 2. Daftar Aset Tanah
 @login_required(login_url='auth:login')
 def list_aset_tanah(request):
     profile = request.user.profile
@@ -233,7 +239,6 @@ def list_aset_tanah(request):
     
     bersertifikat = queryset_valid.filter(status_sertifikasi='BERSERTIFIKAT').count()
     belum_sertifikat = queryset_valid.filter(status_sertifikasi='BELUM_BERSERTIFIKAT').count()
-    sertifikat_lainnya = queryset_valid.filter(status_sertifikasi='LAINNYA').count()
     persen_bersertifikat = (bersertifikat / total * 100) if total > 0 else 0
     
     ada_koordinat = queryset_valid.exclude(latitude=0).exclude(latitude__isnull=True).count()
@@ -278,7 +283,6 @@ def list_aset_tanah(request):
         'total_nilai': total_nilai,
         'aset_bersertifikat': bersertifikat,
         'aset_belum_sertifikat': belum_sertifikat,
-        'aset_sertifikat_lainnya': sertifikat_lainnya,
         'persen_bersertifikat': persen_bersertifikat,
         'aset_ada_koordinat': ada_koordinat,
         'aset_tanpa_koordinat': tanpa_koordinat,
@@ -345,15 +349,27 @@ def edit_aset_tanah(request, pk):
         
         # PENYESUAIAN LOGIKA SERTIFIKAT (SINKRON DENGAN FUNGSI INPUT) 
         status_sertif = request.POST.get('status_sertifikasi') or 'BELUM_BERSERTIFIKAT'
+        keterangan_sertifikasi_lainnya = request.POST.get('keterangan_sertifikasi_lainnya', '')
+        nama_pemegang_hak = request.POST.get('nama_pemegang_hak')
+        
         aset.status_sertifikasi = status_sertif
         aset.nomor_sertifikat = request.POST.get('nomor_sertifikat')
         aset.status_hak_sementara = request.POST.get('status_hak_sementara', '')
         aset.nomor_hak = request.POST.get('nomor_hak')
         
-        if status_sertif == 'BELUM_BERSERTIFIKAT':
+        # PENGAMAN LAPIS DUA (Backend) untuk proses Edit
+        if status_sertif == 'BERSERTIFIKAT':
+            aset.keterangan_sertifikasi_lainnya = keterangan_sertifikasi_lainnya
+            if 'PEMKOT' in keterangan_sertifikasi_lainnya:
+                aset.nama_pemegang_hak = 'Pemerintah Kota Palu'
+            else:
+                aset.nama_pemegang_hak = nama_pemegang_hak
+        elif status_sertif == 'BELUM_BERSERTIFIKAT':
             aset.keterangan_sertifikasi_lainnya = request.POST.get('nomor_hak_sementara') or 'Dalam Proses Pembuatan'
+            aset.nama_pemegang_hak = ''
         else:
-            aset.keterangan_sertifikasi_lainnya = request.POST.get('keterangan_sertifikasi_lainnya', '')
+            aset.keterangan_sertifikasi_lainnya = keterangan_sertifikasi_lainnya
+            aset.nama_pemegang_hak = ''
         
         aset.kondisi_pemanfaatan = request.POST.get('kondisi_pemanfaatan')
         aset.status_penggunaan = request.POST.get('status_penggunaan')
@@ -395,14 +411,14 @@ def edit_aset_tanah(request, pk):
 
         # EKSEKUSI SAVE DATABASE JIKA LOLOS VALIDASI 
         try:
-            aset.save()
-            
-            # bagian foto
-            daftar_foto_baru = request.FILES.getlist('foto_aset_multiple') 
-            
-            if daftar_foto_baru:
-                for file in daftar_foto_baru:
-                    FotoAsetTanah.objects.create(aset=aset, file_foto=file)
+            with transaction.atomic(): # <--- KUNCI ATOMISITAS
+                aset.save()
+                
+                # bagian foto
+                daftar_foto_baru = request.FILES.getlist('foto_aset_multiple') 
+                if daftar_foto_baru:
+                    for file in daftar_foto_baru:
+                        FotoAsetTanah.objects.create(aset=aset, file_foto=file)
             
             try:
                 if role_user == 'ADMIN_BPKAD' or request.user.is_superuser:
@@ -456,7 +472,7 @@ def delete_aset_tanah(request, pk):
     aset.delete()
     catat_aktivitas(request.user, "Menghapus Data Aset", nama_aset_terhapus, request)
     messages.success(request, "Aset berhasil dihapus.")
-    return redirect('aset_tanah:list_aset_tanah')
+    return redirect('tanah:list_aset_tanah')
 
 
 # - - - - -
@@ -521,6 +537,9 @@ def tambah_sertifikat(request, aset_id):
             # Otomatis ubah status aset master menjadi BERSERTIFIKAT
             aset.status_sertifikasi = 'BERSERTIFIKAT'
             aset.nomor_sertifikat = sertifikat_baru.nomor_sertifikat
+            aset.nama_pemegang_hak = sertifikat_baru.nama_pemegang_hak
+            aset.status_hak_sementara = sertifikat_baru.status_hak 
+            aset.nomor_hak = sertifikat_baru.nomor_hak
             
             # Menyiapkan keterangan turunan untuk master aset
             kriteria_fisik = "ASLI" if sertifikat_baru.keterangan == 'ASLI' else "FOTOKOPI"
@@ -537,7 +556,6 @@ def tambah_sertifikat(request, aset_id):
             return render(request, 'aset_tanah/input_sertifikat.html', {'sertifikat': sertifikat_baru, 'aset': aset, 'opd_list': MasterOPD.objects.filter(is_active=1)})
         
     return render(request, 'aset_tanah/input_sertifikat.html', {'aset': aset, 'opd_list': MasterOPD.objects.filter(is_active=1)})
-
 
 # 2. Edit Sertifikat
 @login_required(login_url='auth:login')
@@ -583,8 +601,17 @@ def edit_sertifikat(request, sertifikat_id):
             sertifikat.save()
             
             # Sinkronisasi nomor sertifikat ke aset tanah jika berubah
-            if aset.nomor_sertifikat != sertifikat.nomor_sertifikat:
+            if aset.nomor_sertifikat != sertifikat.nomor_sertifikat or aset.nama_pemegang_hak != sertifikat.nama_pemegang_hak:
                 aset.nomor_sertifikat = sertifikat.nomor_sertifikat
+                aset.nama_pemegang_hak = sertifikat.nama_pemegang_hak
+                aset.status_hak_sementara = sertifikat.status_hak
+                aset.nomor_hak = sertifikat.nomor_hak
+                
+                # Update juga keterangan fisiknya
+                kriteria_fisik = "ASLI" if sertifikat.keterangan == 'ASLI' else "FOTOKOPI"
+                kriteria_pemilik = "PEMKOT" if sertifikat.nama_pemegang_hak == 'Pemerintah Kota Palu' else "NON_PEMKOT"
+                aset.keterangan_sertifikasi_lainnya = f"{kriteria_fisik}_{kriteria_pemilik}"
+                
                 aset.save()
 
             catat_aktivitas(request.user, "Mengedit Data Sertifikat", f"{sertifikat.nomor_sertifikat} ({aset.nama_barang})", request)
@@ -731,10 +758,10 @@ def list_pembebasan_lahan(request):
 
 
 # - - - - -
-# Exel
+# Document
 # - - - - -
 
-# 1. Tampilkan Halaman Konfigurasi Export
+# 1. Tampilkan Halaman Konfigurasi Export Excel 
 @login_required(login_url='auth:login')
 def halaman_export_view(request):
     opd_list = MasterOPD.objects.filter(is_active=1)
@@ -747,6 +774,7 @@ def halaman_export_view(request):
 
 # 2. Mesin Pembuat Excel Dinamis (Berdasarkan Centang)
 @login_required(login_url='auth:login')
+@role_required(allowed_roles=['ADMIN_BPKAD', 'SUPERADMIN'])
 def proses_export_excel(request):
     if request.method == 'POST':
         # --- A. Tangkap Parameter Filter ---
@@ -754,25 +782,22 @@ def proses_export_excel(request):
         opd_id = request.POST.get('opd', '')
         kecamatan_id = request.POST.get('kecamatan', '')
         status_sertif = request.POST.get('status_sertifikasi', '')
-        status_verifikasi = request.POST.get('status_verifikasi', 'VALID') # Default hanya valid
+        status_verifikasi = request.POST.get('status_verifikasi', 'VALID') 
+        
+        # Tangkapan Filter Baru (Logika Sertifikat)
+        bukti_fisik = request.POST.get('bukti_fisik', '')
+        pemegang_hak = request.POST.get('pemegang_hak', '')
 
         # --- B. Tangkap Kolom yang Dicentang ---
         kolom_pilihan = request.POST.getlist('kolom_export')
-        def get_detail_fisik_sertifikat(aset):
-            if aset.status_sertifikasi == 'BERSERTIFIKAT':
-                # Tarik data dari tabel SertifikatTanah menggunakan related_name 'data_sertifikat'
-                sertifikat = aset.data_sertifikat.first() 
-                if sertifikat:
-                    fisik = "Asli" if sertifikat.keterangan == 'ASLI' else "Fotokopi"
-                    pemilik = "Pemkot" if sertifikat.nama_pemegang_hak == 'Pemerintah Kota Palu' else f"Non-Pemkot ({sertifikat.nama_pemegang_hak})"
-                    return f"{fisik} {pemilik}"
-                return "Data Fisik Belum Diinput"
-            elif aset.status_sertifikasi == 'BELUM_BERSERTIFIKAT':
-                return f"Proses: {aset.status_hak_sementara or '-'}"
-            else:
-                return aset.keterangan_sertifikasi_lainnya or "-"
-            
-        # Peta Logika Kolom (Format: 'Kunci_HTML': ('Nama Header Excel', fungsi_pengambil_data))
+        
+        def get_kondisi_fisik(a):
+            if a.status_sertifikasi == 'BERSERTIFIKAT' and a.keterangan_sertifikasi_lainnya:
+                if 'ASLI' in a.keterangan_sertifikasi_lainnya: return 'Dokumen Asli'
+                if 'FOTOKOPI' in a.keterangan_sertifikasi_lainnya: return 'Hanya Fotokopi'
+            return "-"
+
+        # Peta Logika Kolom (Semua Data Dipecah Sesuai Permintaan)
         PETA_KOLOM = {
             'opd': ('Instansi (OPD)', lambda a: a.opd.nama_opd if a.opd else "-"),
             'kode_barang': ('Kode Barang', lambda a: a.kode_barang or "-"),
@@ -780,24 +805,29 @@ def proses_export_excel(request):
             'nibar': ('NIBAR', lambda a: a.nibar or "-"),
             'nomor_register': ('Nomor Register', lambda a: a.nomor_register or "-"),
             'luas': ('Luas (m2)', lambda a: a.luas_m2 or 0),
+            'nilai': ('Nilai Aset (Rp)', lambda a: a.nilai_aset or 0),
             'alamat': ('Alamat Lokasi', lambda a: a.alamat_lokasi or "-"),
             'kecamatan': ('Kecamatan', lambda a: a.kecamatan_nama or "-"),
+            'kelurahan': ('Kelurahan', lambda a: a.kelurahan_nama or "-"),
             'koordinat': ('Titik Koordinat', lambda a: f"{a.latitude}, {a.longitude}" if a.latitude and a.longitude else "-"),
-            'nilai': ('Nilai Aset (Rp)', lambda a: a.nilai_aset or 0),
-            'status_sertif': ('Status Sertifikasi', lambda a: a.get_status_sertifikasi_display() or "-"),
-            'no_sertif': ('Nomor Sertifikat/Hak', lambda a: a.nomor_sertifikat or a.keterangan_sertifikasi_lainnya or "-"),
-            'detail_sertif': ('Kondisi Fisik Sertifikat', get_detail_fisik_sertifikat),
             'cara_perolehan': ('Cara Perolehan', lambda a: a.cara_perolehan or "-"),
             'tgl_perolehan': ('Tanggal Perolehan', lambda a: a.tanggal_perolehan.strftime("%d-%m-%Y") if a.tanggal_perolehan else "-"),
             'status_guna': ('Status Penggunaan', lambda a: a.status_penggunaan or "-"),
             'kondisi': ('Kondisi Pemanfaatan', lambda a: a.kondisi_pemanfaatan or "-"),
+            
+            # Kolom Spesifik Sertifikasi
+            'status_sertif': ('Status Sertifikasi', lambda a: a.get_status_sertifikasi_display() or "-"),
+            'status_hak_sementara': ('Status Hak (Proses)', lambda a: a.get_status_hak_sementara_display() or "-"),
+            'no_hak': ('Nomor Hak', lambda a: a.nomor_hak or "-"),
+            'no_sertif': ('Nomor Sertifikat (BPN)', lambda a: a.nomor_sertifikat or "-"),
+            'nama_pemilik': ('Nama Pemegang Hak', lambda a: a.nama_pemegang_hak or "-"),
+            'bukti_fisik': ('Kondisi Fisik Sertifikat', get_kondisi_fisik),
         }
 
-        # Jika user tidak mencentang apa-apa, pakai default 4 kolom utama
+        # Jika user tidak mencentang apa-apa, pakai default
         if not kolom_pilihan:
             kolom_pilihan = ['opd', 'kode_barang', 'nama_barang', 'nilai']
 
-        # Siapkan Header berdasarkan pilihan
         headers = ['No'] + [PETA_KOLOM[k][0] for k in kolom_pilihan if k in PETA_KOLOM]
 
         # --- C. Terapkan Filter Query ---
@@ -813,6 +843,17 @@ def proses_export_excel(request):
             aset_data = aset_data.filter(kelurahan__kecamatan_id=kecamatan_id)
         if status_sertif:
             aset_data = aset_data.filter(status_sertifikasi=status_sertif)
+            
+        # Logika Pencarian String Cerdas untuk Filter Bukti Fisik & Kepemilikan
+        if bukti_fisik == 'ASLI':
+            aset_data = aset_data.filter(keterangan_sertifikasi_lainnya__startswith='ASLI')
+        elif bukti_fisik == 'FOTOKOPI':
+            aset_data = aset_data.filter(keterangan_sertifikasi_lainnya__startswith='FOTOKOPI')
+            
+        if pemegang_hak == 'PEMKOT':
+            aset_data = aset_data.filter(keterangan_sertifikasi_lainnya__endswith='PEMKOT')
+        elif pemegang_hak == 'LAINNYA':
+            aset_data = aset_data.filter(keterangan_sertifikasi_lainnya__endswith='NON_PEMKOT')
 
         aset_data = aset_data.order_by('-created_at')
 
@@ -824,7 +865,7 @@ def proses_export_excel(request):
         worksheet.title = 'Data Aset'
 
         # Styling Header
-        header_fill = PatternFill(start_color="002D5E", end_color="002D5E", fill_type="solid") # Warna Biru Gelap
+        header_fill = PatternFill(start_color="002D5E", end_color="002D5E", fill_type="solid")
         header_font = Font(color="FFFFFF", bold=True)
         for col_num, header_title in enumerate(headers, 1):
             cell = worksheet.cell(row=1, column=col_num, value=header_title)
@@ -834,9 +875,7 @@ def proses_export_excel(request):
 
         # Masukkan Data Dinamis
         for row_num, aset in enumerate(aset_data, 2):
-            # No urut di awal
             row_data = [row_num - 1] 
-            # Tarik data berdasarkan fungsi lambda di PETA_KOLOM
             for k in kolom_pilihan:
                 if k in PETA_KOLOM:
                     row_data.append(PETA_KOLOM[k][1](aset))
@@ -860,6 +899,112 @@ def proses_export_excel(request):
         return response
 
     return redirect('tanah:halaman_export')
+
+# 3. Import Excel
+@login_required(login_url='auth:login')
+@role_required(allowed_roles=['ADMIN_BPKAD', 'SUPERADMIN'])
+def halaman_import_view(request):
+    # Hanya bertugas membuka halaman utama import
+    return render(request, 'aset_tanah/halaman_import.html')
+
+# 4. Template file excel
+@login_required(login_url='auth:login')
+@role_required(allowed_roles=['ADMIN_BPKAD', 'SUPERADMIN'])
+def unduh_template_import(request):
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.title = 'Template_Import_Aset'
+
+    # 1. HEADER DIBERI PERINGATAN AGAR MELIHAT SHEET 2
+    headers = [
+        'ID OPD (Angka)', 'Nama Barang', 'Kode Barang', 'NIBAR', 'Nomor Register', 
+        'Status Kepemilikan (Cek Sheet 2)', 'Luas (tanpa titik dan m2)', 'Cara Perolehan (Cek Sheet 2)', 'Tanggal Perolehan (YYYY-MM-DD)', 
+        'Nilai Aset (Tanpa Titik)', 'Latitude', 'Longitude', 'Nama Kecamatan', 'Nama Kelurahan', 
+        'Alamat Lokasi', 'Status Sertifikasi Utama (Cek Sheet 2)', 'Nomor Sertifikat', 'Kondisi Pemanfaatan (Cek Sheet 2)', 
+        'Status Penggunaan', 'Status Verifikasi (Isi: VALID)', 'Spesifikasi Nama Barang', 'Spesifikasi Lainnya',
+        'Status Hak Sementara (Cek Sheet 2)', 'Nomor Hak', 'Nama Pemegang Hak', 'Keterangan Sertifikasi Khusus (Cek Sheet 2)'
+    ]
+
+    dummy_data = [
+        '18', 'Tanah Bangunan Kantor Pemerintah', '1.3.1.01.01.04.001', '7271199550201001001131010104001000001', '0001',
+        'PEMDA', '1563', 'HIBAH', '1995-12-31', 
+        '2910306000', '-0.8917', '119.8707', 'Mantikulore', 'Tanamodindi',
+        'Jl. Baruga', 'BERSERTIFIKAT', '19.05.08.06.4.00076 AAH 951892', 'DIMANFAATKAN',
+        'Badan Pengelola Keuangan Dan Aset Daerah 5.02.01.001.001', 'VALID', 'Tanah Bangunan Kantor Pemerintah', 'Kantor Badan Pengelola Keuangan dan Aset Daerah',
+        'HAK_PAKAI', 'No. 00076', 'Pemerintah Kota Palu', 'ASLI_PEMKOT'
+    ]
+
+    # Styling Header Sheet 1
+    header_fill = PatternFill(start_color="002D5E", end_color="002D5E", fill_type="solid")
+    header_font = Font(color="FFFFFF", bold=True)
+    
+    for col_num, header_title in enumerate(headers, 1):
+        cell = worksheet.cell(row=1, column=col_num, value=header_title)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal='center', vertical='center')
+        
+    for col_num, cell_value in enumerate(dummy_data, 1):
+        cell = worksheet.cell(row=2, column=col_num, value=cell_value)
+        cell.font = Font(color="808080", italic=True) 
+        
+    for row in range(1, 2005): # Mengunci hingga 2000 baris ke bawah
+        worksheet.cell(row=row, column=5).number_format = '@'
+
+    for col in worksheet.columns:
+        worksheet.column_dimensions[col[0].column_letter].width = 25
+
+    # ==============================================================
+    # 2. SHEET KEDUA: KAMUS REFERENSI LENGKAP
+    # ==============================================================
+    ws_ref = workbook.create_sheet(title="Kamus Referensi Pilihan")
+    
+    # --- BAGIAN A: KAMUS OPD ---
+    ws_ref.cell(row=1, column=1, value="DAFTAR ID INSTANSI (OPD)").font = Font(bold=True, color="002D5E")
+    ws_ref.cell(row=2, column=1, value="ID OPD").font = Font(bold=True)
+    ws_ref.cell(row=2, column=2, value="NAMA INSTANSI").font = Font(bold=True)
+    
+    opd_list = MasterOPD.objects.filter(is_active=1).order_by('nama_opd')
+    for index, opd in enumerate(opd_list, start=3):
+        ws_ref.cell(row=index, column=1, value=opd.id).alignment = Alignment(horizontal='center')
+        ws_ref.cell(row=index, column=2, value=opd.nama_opd)
+        
+    ws_ref.column_dimensions['A'].width = 15
+    ws_ref.column_dimensions['B'].width = 50
+
+    # --- BAGIAN B: KAMUS PILIHAN CHOICES ---
+    ws_ref.cell(row=1, column=4, value="DAFTAR PILIHAN BAKU (pastikan mengisi data sesuai dengan format pilihan)").font = Font(bold=True, color="002D5E")
+    
+    # Dictionary berisi semua pilihan baku sesuai models.py kita
+    kamus_pilihan = {
+        'Status Kepemilikan (Kolom F)': ['BELUM_JELAS', 'PEMDA', 'MASYARAKAT', 'PROVINSI', 'PUSAT'],
+        'Cara Perolehan (Kolom H)': ['HIBAH', 'PEMBELIAN', 'PENYERAHAN', 'GANTI_RUGI'],
+        'Status Sertifikasi (Kolom P)': ['BERSERTIFIKAT', 'BELUM_BERSERTIFIKAT'],
+        'Kondisi Pemanfaatan (Kolom R)': ['TIDAK_DIKETAHUI', 'DIMANFAATKAN', 'TANAH_KOSONG', 'RUSAK', 'SENGKETA'],
+        'Status Hak Sementara (Kolom W)': ['HAK_PAKAI', 'HAK_MILIK'],
+        'Keterangan Sertif (Kolom Z)': ['ASLI_PEMKOT', 'FOTOKOPI_PEMKOT', 'ASLI_NON_PEMKOT', 'FOTOKOPI_NON_PEMKOT']
+    }
+
+    start_col = 4
+    for header, pilihan in kamus_pilihan.items():
+        # Buat Header Pilihan
+        cell_header = ws_ref.cell(row=2, column=start_col, value=header)
+        cell_header.font = Font(bold=True)
+        cell_header.fill = PatternFill(start_color="E2E8F0", end_color="E2E8F0", fill_type="solid")
+        
+        # Cetak isi pilihannya ke bawah
+        for r_idx, opsi in enumerate(pilihan, start=3):
+            ws_ref.cell(row=r_idx, column=start_col, value=opsi)
+            
+        ws_ref.column_dimensions[ws_ref.cell(row=2, column=start_col).column_letter].width = 28
+        start_col += 1
+    # ==============================================================
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="Template Import Data Aset Tanah.xlsx"'
+    workbook.save(response)
+    
+    return response
 
 
 # - - - - -

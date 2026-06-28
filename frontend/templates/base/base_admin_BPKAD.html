@@ -143,19 +143,22 @@
                             </a>
 
                             <div class="menu-label">Administrasi & Laporan</div>
-                            <a href="#" class="menu-item"><i class="bi bi-cloud-upload-fill text-primary"></i> Import Data Excel</a>
-                            <a href="{% url 'tanah:halaman_export' %}" class="menu-item {% if 'export' in request.resolver_match.url_name %}active{% endif %}">
-                                <i class="bi bi-file-earmark-excel-fill text-success"></i> Export Excel
-                            </a>
-                            <a href="#" class="menu-item">
-                                <i class="bi bi-file-earmark-pdf-fill text-danger"></i> Export PDF <span class="badge bg-secondary ms-auto" style="font-size: 0.6rem;">Segera</span>
-                            </a>
+
+                                <a href="{% url 'tanah:halaman_import' %}" class="menu-item {% if 'import' in request.resolver_match.url_name %}active{% endif %}">
+                                    <i class="bi bi-cloud-upload-fill text-primary"></i> Import Data Excel
+                                </a>
+                                <a href="{% url 'tanah:halaman_export' %}" class="menu-item {% if 'export' in request.resolver_match.url_name %}active{% endif %}">
+                                    <i class="bi bi-file-earmark-excel-fill text-success"></i> Export Excel
+                                </a>
+                                <a href="#" class="menu-item">
+                                    <i class="bi bi-file-earmark-pdf-fill text-danger"></i> Export PDF <span class="badge bg-secondary ms-auto" style="font-size: 0.6rem;">Segera</span>
+                                </a>
                         {% endif %}
                         
                         <div class="menu-label">Lainnya</div>
                         <a href="{% url 'publik:bantuan' %}" class="menu-item"><i class="bi bi-question-circle"></i> Pusat Bantuan</a>
                         <a href="{% url 'auth:pengaturan_profil' %}" class="menu-item {% if 'pengaturan' in request.resolver_match.url_name %}active{% endif %}">
-                            <i class="bi bi-person-circle"></i> Akun
+                            <i class="bi bi-person-circle"></i> Pusat Akun
                         </a>
                     </div>
                     
@@ -333,13 +336,16 @@
                 </a>
 
                 <div class="menu-label">Administrasi & Laporan</div>
-                <a href="#" class="menu-item"><i class="bi bi-cloud-upload-fill text-primary"></i> Import Data Excel</a>
-                <a href="{% url 'tanah:halaman_export' %}" class="menu-item {% if 'export' in request.resolver_match.url_name %}active{% endif %}">
-                    <i class="bi bi-file-earmark-excel-fill text-success"></i> Export Excel
-                </a>
-                <a href="#" class="menu-item">
-                    <i class="bi bi-file-earmark-pdf-fill text-danger"></i> Export PDF <span class="badge bg-secondary ms-auto" style="font-size: 0.6rem;">Segera</span>
-                </a>
+
+                    <a href="{% url 'tanah:halaman_import' %}" class="menu-item {% if 'import' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-cloud-upload-fill text-primary"></i> Import Data Excel
+                    </a>
+                    <a href="{% url 'tanah:halaman_export' %}" class="menu-item {% if 'export' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-file-earmark-excel-fill text-success"></i> Export Excel
+                    </a>
+                    <a href="#" class="menu-item">
+                        <i class="bi bi-file-earmark-pdf-fill text-danger"></i> Export PDF <span class="badge bg-secondary ms-auto" style="font-size: 0.6rem;">Segera</span>
+                    </a>
                 
             {% endif %}
             
