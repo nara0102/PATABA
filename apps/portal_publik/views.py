@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Sum
 from .forms import KontakForm
 
 # 1. Impor Model Milik Portal Publik Sendiri
@@ -20,31 +21,43 @@ from pataba_core.constants import ROLE_OPERATOR, ROLE_ADMIN, STATUS_PENDING
 # LAMAN
 # - - - - -
 
-# 1 - Halaman Utama
+# 1 - Halaman Utama Publik 
 def index_view(request):
-    # Ambil Jumlah Aset Tanah
-    total_aset_tanah = AsetTanah.objects.count()
-
-    # Ambil Data Berita & Pengumuman
+    queryset_publik = AsetTanah.objects.filter(status_verifikasi='VALID')
+    
+    total_aset_tanah = queryset_publik.count()
+    agregasi = queryset_publik.aggregate(
+        total_luas_m2=Sum('luas_m2'),
+        total_nilai_rp=Sum('nilai_aset')
+    )
+    
+    luas_mentah = agregasi['total_luas_m2'] or 0
+    nilai_mentah = agregasi['total_nilai_rp'] or 0
+    total_luas_ha = luas_mentah / 10000                 # m2 dikonversi ke Hektare (Ha)
+    total_nilai_miliar = nilai_mentah / 1000000000  # Rupiah dikonversi ke Miliar (M)
+    
+    # berita
     berita_semua = PublikasiInstansi.objects.filter(
         kategori__in=['BERITA', 'PENGUMUMAN'], 
         is_published=True
     ).order_by('-tanggal_upload')
     
-    berita_utama = berita_semua.first() # Berita paling baru untuk kotak besar
-    list_berita = berita_semua[1:4]     # Berita selanjutnya untuk list di kanan
+    berita_utama = berita_semua.first() 
+    list_berita = berita_semua[1:4]     
 
-    # Ambil Data Galeri Kegiatan
+    # galeri
     galeri_semua = PublikasiInstansi.objects.filter(
         kategori='KEGIATAN', 
         is_published=True
     ).order_by('-tanggal_upload')
     
-    galeri_utama = galeri_semua.first() # Kegiatan terbaru untuk kotak besar
-    list_galeri = galeri_semua[1:3]     # Kegiatan selanjutnya untuk tumpukan di kanan
+    galeri_utama = galeri_semua.first() 
+    list_galeri = galeri_semua[1:3]     
 
     context = {
         'total_aset_tanah': total_aset_tanah,
+        'total_luas_ha': total_luas_ha,                  
+        'total_nilai_triliun': total_nilai_miliar,
         'berita_utama': berita_utama,
         'list_berita': list_berita,
         'galeri_utama': galeri_utama,
@@ -52,6 +65,7 @@ def index_view(request):
     }
     return render(request, 'portal_publik/index.html', context)
 
+# 2 - Halaman Peta Gis
 def peta_gis_view(request):
     # Kirim data aset ke peta (Hanya yang VALID)
     semua_aset = AsetTanah.objects.filter(status_verifikasi='VALID')
@@ -123,7 +137,7 @@ def tambah_publikasi_view(request):
     # Harus ada perintah render di baris paling bawah ini
     return render(request, 'portal_publik/input_publikasi.html')
 
-# 2 - list
+# 2 - List
 @login_required(login_url='auth:login')
 @user_passes_test(is_admin_bpkad)
 def list_publikasi_view(request):
@@ -166,7 +180,6 @@ def edit_publikasi_view(request, pk):
             
     return render(request, 'portal_publik/input_publikasi.html', {'publikasi': publikasi})
 
-
 # 4 - Delete Publikasi
 @login_required(login_url='auth:login')
 @user_passes_test(is_admin_bpkad)
@@ -184,7 +197,7 @@ def delete_publikasi_view(request, pk):
 
 
 # - - - - - -
-# -- COOMING SOON --
+# COOMING SOON
 # - - - - - -
 
 def coming_soon_view(request):
@@ -203,9 +216,13 @@ def list_aset_kendaraan(request):
 def bantuan_view(request):
     return render(request, 'portal_publik/bantuan.html')
 
-# data aset
+
+# - - - - -
+# LAINNYA
+# - - - - -
+
+# 1 - TABEL Data Aset
 def data_aset_publik_view(request):
-    # Ambil data aset yang sudah valid saja
     semua_aset = AsetTanah.objects.filter(status_verifikasi='VALID').order_by('-created_at')
     
     context = {
