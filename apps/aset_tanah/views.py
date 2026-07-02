@@ -13,17 +13,22 @@ from django.db.models import Sum, Q
 from django.db import transaction
 from django.contrib.auth.decorators import login_required, user_passes_test
 
-# 1. Impor Model Milik Aset Tanah Sendiri
+# 1. pdf 
+import qrcode
+import base64
+from io import BytesIO
+from django.urls import reverse
+
+# 2. Impor Model Milik Aset Tanah Sendiri
 from .models import AsetTanah, FotoAsetTanah, RefKelurahan, RefKecamatan, SertifikatTanah, MasterOPD
 
-# 2. Impor Hak Akses & Perekam Jejak dari Manajemen Pengguna
+# 3. Impor Hak Akses & Perekam Jejak dari Manajemen Pengguna
 from apps.manajemen_pengguna.views import role_required, is_admin_bpkad, is_operator, catat_aktivitas
 from apps.manajemen_pengguna.utils import get_user_profile
 
 from pataba_core.constants import ROLE_OPERATOR, ROLE_ADMIN, STATUS_PENDING
 
 
-    
     
 # - - - - -
 # CRUD ASET TANAH
@@ -184,13 +189,21 @@ def input_aset_tanah(request):
 # 2. Daftar Aset Tanah
 @login_required(login_url='auth:login')
 def list_aset_tanah(request):
-    profile = request.user.profile
-    role_user = profile.role.strip().upper()
     
-    # a pembatsan hak akses
-    if role_user == 'OPERATOR_OPD':
-        queryset_dasar = AsetTanah.objects.filter(opd=profile.opd)
+    # role super admin
+    if request.user.is_superuser:
+        role_user = 'SUPERADMIN'
+        base_template = 'base/base_superadmin.html'
     else:
+        profile = request.user.profile
+        role_user = profile.role.strip().upper()
+        base_template = 'base/base_admin_BPKAD.html'
+    
+    # a. pembatasan hak akses
+    if role_user == 'OPERATOR_OPD':
+        queryset_dasar = AsetTanah.objects.filter(opd=request.user.profile.opd)
+    else:
+        # SUPERADMIN & ADMIN BPKAD bisa melihat semua data
         queryset_dasar = AsetTanah.objects.all()
 
     # b logika filter
@@ -292,6 +305,8 @@ def list_aset_tanah(request):
         'opd_list': MasterOPD.objects.filter(is_active=1),
         'kecamatan_list': RefKecamatan.objects.all(),
         'kelurahan_list': RefKelurahan.objects.all(),
+        
+        'base_template': base_template,
     }
     
     return render(request, 'aset_tanah/list_aset_tanah.html', context)
@@ -300,7 +315,7 @@ def list_aset_tanah(request):
 @login_required(login_url='auth:login')
 @role_required(allowed_roles=['ADMIN_BPKAD', 'OPERATOR_OPD'])
 def edit_aset_tanah(request, pk):
-    aset = get_object_or_404(AsetTanah, pk=pk)
+    aset = get_object_or_404(AsetTanah.objects.prefetch_related('koleksi_foto'), pk=pk)
     profile = request.user.profile
     role_user = profile.role.strip().upper()
 
@@ -406,7 +421,8 @@ def edit_aset_tanah(request, pk):
                 'aset': aset, 
                 'opd_list': MasterOPD.objects.filter(is_active=1),
                 'kecamatan_list': RefKecamatan.objects.all(),
-                'kelurahan_list': RefKelurahan.objects.all(), 
+                'kelurahan_list': RefKelurahan.objects.all(),
+                'daftar_foto': FotoAsetTanah.objects.filter(aset=aset), 
             })
 
         # EKSEKUSI SAVE DATABASE JIKA LOLOS VALIDASI 
@@ -419,6 +435,18 @@ def edit_aset_tanah(request, pk):
                 if daftar_foto_baru:
                     for file in daftar_foto_baru:
                         FotoAsetTanah.objects.create(aset=aset, file_foto=file)
+                        
+                deleted_ids = request.POST.get('deleted_images')
+                if deleted_ids:
+                    list_id = deleted_ids.split(',')
+                    # Ambil semua objek foto yang ID-nya ada di daftar hapus
+                    fotos_to_delete = FotoAsetTanah.objects.filter(id__in=list_id, aset=aset)
+                    
+                    for foto in fotos_to_delete:
+                        # Ini akan menghapus file fisik di Supabase (via Django Storage)
+                        # dan menghapus record di database
+                        foto.file_foto.delete(save=False) 
+                        foto.delete()
             
             try:
                 if role_user == 'ADMIN_BPKAD' or request.user.is_superuser:
@@ -444,7 +472,8 @@ def edit_aset_tanah(request, pk):
                 'aset': aset, 
                 'opd_list': MasterOPD.objects.filter(is_active=1), 
                 'kecamatan_list': RefKecamatan.objects.all(),
-                'kelurahan_list': RefKelurahan.objects.all()
+                'kelurahan_list': RefKelurahan.objects.all(),
+                'daftar_foto': FotoAsetTanah.objects.filter(aset=aset),
             })
     
     # Menampilkan Form Awal (Method GET)
@@ -453,11 +482,14 @@ def edit_aset_tanah(request, pk):
         'opd_list': MasterOPD.objects.filter(is_active=1),
         'kecamatan_list': RefKecamatan.objects.all(),
         'kelurahan_list': RefKelurahan.objects.all(), # Ditambahkan agar kelurahan ter-load saat buka form
+        'daftar_foto': FotoAsetTanah.objects.filter(aset=aset),
     })
 
 # 4. Detail Aset Tanah
+@login_required(login_url='auth:login')
+@role_required(allowed_roles=['ADMIN_BPKAD', 'OPERATOR_OPD', 'SUPERADMIN'])
 def detail_aset_tanah(request, pk):
-    aset = get_object_or_404(AsetTanah, pk=pk)
+    aset = get_object_or_404(AsetTanah.objects.prefetch_related('koleksi_foto'), pk=pk)
     return render(request, 'aset_tanah/detail_aset_tanah.html', {
         'aset': aset,
         'profile': get_user_profile(request.user)
@@ -467,7 +499,7 @@ def detail_aset_tanah(request, pk):
 @login_required(login_url='auth:login')
 @role_required(allowed_roles=['ADMIN_BPKAD'])
 def delete_aset_tanah(request, pk):
-    aset = get_object_or_404(AsetTanah, pk=pk)
+    aset = get_object_or_404(AsetTanah.objects.prefetch_related('koleksi_foto'), pk=pk)
     nama_aset_terhapus = aset.nama_barang
     aset.delete()
     catat_aktivitas(request.user, "Menghapus Data Aset", nama_aset_terhapus, request)
@@ -641,8 +673,24 @@ def delete_sertifikat(request, sertifikat_id):
 
 # 4. List Sertifikat 
 @login_required(login_url='auth:login')
-@role_required(allowed_roles=['ADMIN_BPKAD'])
+@role_required(allowed_roles=['ADMIN_BPKAD', 'SUPERADMIN'])
 def list_sertifikat(request):
+    # --- LOGIKA AMAN UNTUK MEMBACA ROLE SUPERADMIN ---
+    if request.user.is_superuser:
+        role_user = 'SUPERADMIN'
+        base_template = 'base/base_superadmin.html'
+    else:
+        profile = request.user.profile
+        role_user = profile.role.strip().upper()
+        base_template = 'base/base_admin_BPKAD.html'
+    
+    # a. pembatasan hak akses
+    if role_user == 'OPERATOR_OPD':
+        queryset_dasar = AsetTanah.objects.filter(opd=request.user.profile.opd)
+    else:
+        # SUPERADMIN & ADMIN BPKAD bisa melihat semua data
+        queryset_dasar = AsetTanah.objects.all()
+        
     semua_aset = AsetTanah.objects.filter(status_verifikasi='VALID')
     
     total_aset = semua_aset.count()
@@ -707,12 +755,14 @@ def list_sertifikat(request):
         'persen_belum': persen_belum,
     
         'semua_sertifikat': sertifikat_list,
+        
+        'base_template': base_template,
     }
     return render(request, 'aset_tanah/list_sertifikat.html', context)
 
 # 5. Detail Sertifikat
 @login_required(login_url='auth:login')
-@role_required(allowed_roles=['ADMIN_BPKAD', 'SUPERADMIN']) # Sesuaikan jika Superadmin juga boleh lihat
+@role_required(allowed_roles=['ADMIN_BPKAD', 'SUPERADMIN'])
 def detail_sertifikat(request, sertifikat_id):
     # Tarik data sertifikat beserta data aset tanah induknya
     sertifikat = get_object_or_404(SertifikatTanah, id=sertifikat_id)
@@ -1014,7 +1064,7 @@ def unduh_template_import(request):
 @login_required(login_url='auth:login')
 def export_pdf_detail(request, id_aset):
     # Ambil data aset
-    aset = get_object_or_404(AsetTanah, id=id_aset)
+    aset = get_object_or_404(AsetTanah.objects.prefetch_related('koleksi_foto'), id=id_aset)
     # Tarik data sertifikat (bisa kosong jika belum sertifikat)
     sertifikat = aset.data_sertifikat.first()
     
@@ -1022,18 +1072,35 @@ def export_pdf_detail(request, id_aset):
     logo_path = os.path.join(settings.BASE_DIR, 'frontend', 'static', 'images', 'logo.png')
     template_path = 'aset_tanah/pdf_profil_aset.html'
     
+    # 1. pdf
+    path_publik = reverse('publik:data_aset_publik') # Contoh jika mengarah ke halaman utama TRANSPARA
+    url_verifikasi = request.build_absolute_uri(path_publik) + f"?q={aset.nama_barang}"
+
+    # 2. Generate QR Code secara lokal dalam bentuk biner memori
+    qr = qrcode.QRCode(version=1, box_size=10, border=2)
+    qr.add_data(url_verifikasi)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="#002D5E", back_color="white")
+
+    buffer = BytesIO()
+    qr_img.save(buffer, format="PNG")
+    qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+
     # Render ke HTML khusus PDF
     template_path = 'aset_tanah/pdf_profil_aset.html'
     context = {
         'aset': aset, 
         'sertifikat': sertifikat,
         'user': request.user,
-        'logo_path': logo_path
+        'logo_path': logo_path,
+        'koleksi_foto': aset.koleksi_foto.all(),
+        'qr_code_base64': f"data:image/png;base64,{qr_base64}", # Dikirim sebagai Data URI aman
+        'url_verifikasi': url_verifikasi
     }
     
     response = HttpResponse(content_type='application/pdf')
     # Pakai 'attachment' agar terunduh otomatis
-    response['Content-Disposition'] = f'attachment; filename="Profil_Aset_{aset.kode_barang or aset.id}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="Profil Aset {aset.kode_barang or aset.id}.pdf"'
     
     template = get_template(template_path)
     html = template.render(context)

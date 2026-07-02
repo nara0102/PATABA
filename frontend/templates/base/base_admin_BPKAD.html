@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Ruang Kendali - PATABA{% endblock %}</title>
+    <title>{% block title %}Ruang Kendali Admin - PATABA{% endblock %}</title>
 
     <link rel="icon" type="image/png" href="{% static 'images/p-favicon.jpg' %}">
     <link rel="apple-touch-icon" href="{% static 'images/p-favicon.jpg' %}">
@@ -398,6 +398,6 @@
             });
         });
     </script>
-    
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

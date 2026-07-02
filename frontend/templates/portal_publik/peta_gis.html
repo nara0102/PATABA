@@ -7,43 +7,40 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
 <style>
-    /* Mengunci Layar untuk pengalaman Web-App Penuh */
-    body { overflow: hidden !important; }
+    body { 
+        overflow: hidden !important; 
+        height: 100vh !important; 
+        background-color: #F5F5F7;
+    }
     
-    /* Memastikan Wrapper Peta mengambil sisa tinggi layar setelah Navbar */
     .gis-wrapper { 
         position: relative; 
         flex-grow: 1; 
         width: 100%; 
-        height: calc(100vh - 76px); /* 76px adalah estimasi tinggi Navbar base.html */
+        height: calc(100vh - 76px); 
         overflow: hidden; 
         display: flex; 
         background-color: #E1E3E4;
     }
     
-    /* MAP CANVAS */
-    #mainMap { flex-grow: 1; height: 100%; z-index: 1; }
+    #mainMap { flex-grow: 1; height: 100%; z-index: 1; position: relative; }
 
-    /* PANEL KIRI (Pencarian & Daftar) */
     .gis-panel-left {
         width: 400px; height: 100%; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(15px);
         border-right: 1px solid rgba(0,0,0,0.08); z-index: 10; display: flex; flex-direction: column;
         box-shadow: 5px 0 20px rgba(0,0,0,0.03); flex-shrink: 0;
     }
     
-    /* SEARCH BAR (Apple Style) */
     .search-container { padding: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); background: white; }
-    .input-search-apple { border-radius: 12px; background: #f5f5f7; border: 1px solid transparent; transition: all 0.3s ease; font-size: 0.95rem; }
-    .input-search-apple:focus { background: white; border-color: #0056B3; box-shadow: 0 0 0 3px rgba(0,86,179,0.1); outline: none; }
+    .input-search-apple { border-radius: 12px; background: #f5f5f7; border: 1px solid transparent; transition: all 0.3s ease; font-size: 0.85rem; }
+    .input-search-apple:focus { background: white; border-color: #003F87; box-shadow: 0 0 0 3px rgba(0,63,135,0.1); outline: none; }
 
-    /* AREA LIST ASET (Scrollable) */
     .gis-scroll-area { flex-grow: 1; overflow-y: auto; padding: 20px; background: #fafafa; }
     
-    /* DESAIN CARD ELEGAN & ANTI-LUBER */
-    .card-aset { border: 1px solid #e9ecef; border-radius: 16px; transition: all 0.2s ease; cursor: pointer; background: white; margin-bottom: 15px; }
-    .card-aset:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); border-color: #0056B3; }
+    /* RAMPING & MINIMALIS: Gaya list elips mewah */
+    .card-aset { border: 1px solid #e9ecef; border-radius: 14px; transition: all 0.2s ease; cursor: pointer; background: white; margin-bottom: 10px; }
+    .card-aset:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.05); border-color: #003F87; }
 
-    /* PANEL KANAN (Detail Aset) */
     .gis-panel-right {
         position: absolute; top: 0; right: 0; width: 420px; height: 100%; background: rgba(255, 255, 255, 0.98);
         backdrop-filter: blur(15px); border-left: 1px solid rgba(0,0,0,0.08); z-index: 100;
@@ -52,19 +49,42 @@
     }
     .gis-panel-right.active { transform: translateX(0); }
     
-    /* ISI PANEL DETAIL */
     .detail-header-bar { padding: 15px 20px; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; background: white; }
     .detail-content { flex-grow: 1; overflow-y: auto; padding: 0; }
-    .hero-image { width: 100%; height: 200px; object-fit: cover; background-color: #e9ecef; }
     
-    /* BENTO GRID (Data Detail) */
-    .bento-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-    .bento-item { background: #f8f9fa; padding: 15px; border-radius: 12px; border: 1px solid #e9ecef; }
+    /* GAYA HORIZONTAL GALLERY SLIDER */
+    .scroll-snap-gallery {
+        display: flex; gap: 10px; overflow-x: auto; padding: 15px 20px;
+        scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+        background-color: #f1f3f5; border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .scroll-snap-gallery::-webkit-scrollbar { height: 4px; }
+    .scroll-snap-gallery::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
+    .gallery-img-item { scroll-snap-align: start; flex-shrink: 0; width: 260px; height: 160px; object-fit: cover; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); }
+
+    .bento-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+    .bento-item { background: #f8f9fa; padding: 12px; border-radius: 12px; border: 1px solid #e9ecef; }
+    .detail-label-title { font-size: 0.65rem; font-weight: 800; color: #8e8e93; letter-spacing: 0.5px; margin-bottom: 2px; text-transform: uppercase; }
+    .detail-value-text { font-size: 0.9rem; font-weight: 700; color: #1c1c1e; }
+
+    @media (max-width: 767px) {
+        .gis-wrapper { flex-direction: column; height: calc(100vh - 60px); }
+        #mainMap { order: 1; height: 40vh !important; width: 100%; flex-grow: 0; }
+        .gis-panel-left { order: 2; width: 100% !important; height: 60vh !important; border-right: none; border-top: 1px solid rgba(0,0,0,0.08); }
+        
+        .gis-panel-right {
+            width: 100% !important; height: 65vh !important; top: auto !important; bottom: 0 !important; left: 0 !important; right: 0 !important;
+            transform: translateY(100%) !important; border-left: none !important; border-top: 1px solid rgba(0,0,0,0.1);
+            border-radius: 24px 24px 0 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); overflow: hidden !important; z-index: 1050;
+        }
+        .gis-panel-right.active { transform: translateY(0) !important; }
+        .detail-content { height: calc(100% - 56px) !important; overflow-y: auto !important; }
+    }
 </style>
 {% endblock %}
 
 {% block nav_button %}
-<button onclick="window.history.back()" class="btn rounded-pill px-4 shadow-sm fw-medium text-white btn-login-hover" style="background-color: #003F87; border: none;">
+<button onclick="window.history.back()" class="btn rounded-pill px-4 shadow-sm fw-medium text-white" style="background-color: #003F87; border: none;">
     <i class="bi bi-arrow-left me-1"></i> Kembali
 </button>
 {% endblock %}
@@ -75,52 +95,68 @@
     <div class="gis-panel-left">
         <div class="search-container">
             <h5 class="fw-bold text-dark mb-3"><i class="bi bi-map-fill text-primary me-2"></i>Peta Aset Daerah</h5>
-            <div class="position-relative">
-                <i class="bi bi-search position-absolute top-50 translate-middle-y ms-3 text-secondary"></i>
-                <input type="text" id="searchInput" class="form-control input-search-apple ps-5 py-2" placeholder="Cari aset atau lokasi..." onkeyup="filterAset()">
-            </div>
+            
+            <form method="GET" action="" class="d-flex flex-column gap-2 m-0">
+                <div class="position-relative">
+                    <i class="bi bi-search position-absolute top-50 translate-middle-y ms-3 text-secondary"></i>
+                    <input type="text" name="q" id="searchInput" value="{{ query_cari|default:'' }}" class="form-control input-search-apple ps-5 py-2" placeholder="Cari kata kunci aset...">
+                </div>
+                
+                <select name="opd" class="form-select input-search-apple py-2" style="cursor: pointer;" onchange="this.form.submit()">
+                    <option value="">-- Semua Instansi / OPD --</option>
+                    {% for opd_item in opd_list %}
+                        <option value="{{ opd_item.id }}" {% if opd_id == opd_item.id|stringformat:"i" %}selected{% endif %}>{{ opd_item.nama_opd }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="d-none"></button>
+            </form>
         </div>
 
         <div class="gis-scroll-area" id="asetList">
-            <p class="text-secondary small fw-bold mb-3" style="letter-spacing: 1px;">DAFTAR LOKASI ({{ semua_aset.count }})</p>
+            <p class="text-secondary small fw-bold mb-3" style="letter-spacing: 1px;">HASIL FILTER DATA TERCATAT</p>
             
             {% for aset in semua_aset %}
             <div class="card-aset p-3 aset-item shadow-sm" 
-                 data-nama="{{ aset.nama_barang|default:''|lower }}" 
-                 data-lokasi="{{ aset.alamat_lokasi|default:''|lower }}"
-                 onclick="showDetail('{{ aset.nama_barang|escapejs }}', '{{ aset.alamat_lokasi|escapejs }}', '{{ aset.luas_m2|default:"0" }}', '{{ aset.nilai_aset|default:"0" }}', '{{ aset.status_sertifikasi }}', '{{ aset.opd.nama_opd|default:"Setda Kota Palu"|escapejs }}', '{{ aset.latitude|default:"" }}', '{{ aset.longitude|default:"" }}', '{{ aset.nibar|default:"-" }}')">
+                onclick="showDetail(
+                    '{{ aset.nama_barang|escapejs }}', 
+                    '{{ aset.alamat_lokasi|escapejs }}', 
+                    '{{ aset.luas_m2|default:0 }}', 
+                    '{{ aset.nilai_aset|default:0 }}', 
+                    '{{ aset.status_sertifikasi|escapejs }}', 
+                    '{% if aset.opd %}{{ aset.opd.nama_opd|escapejs }}{% else %}BPKAD Kota Palu{% endif %}', 
+                    '{{ aset.latitude|default:"" }}', 
+                    '{{ aset.longitude|default:"" }}', 
+                    '{{ aset.nibar|default:"-"|escapejs }}',
+                    '{{ aset.kode_barang|default:"-"|escapejs }}',
+                    '{{ aset.nomor_register|default:"-"|escapejs }}',
+                    '{{ aset.kecamatan_nama|default:"-"|escapejs }}',
+                    '{{ aset.kelurahan_nama|default:"-"|escapejs }}',
+                    '{% for foto in aset.koleksi_foto.all %}{{ foto.file_foto.url }}{% if not forloop.last %},{% endif %}{% endfor %}'
+                )">
                 
-                <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
-                    {% if aset.status_sertifikasi == 'BERSERTIFIKAT' %}
-                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 flex-shrink-0"><i class="bi bi-shield-check me-1"></i>Bersertifikat</span>
-                    {% else %}
-                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1 flex-shrink-0">Belum Sertifikat</span>
-                    {% endif %}
-                    
-                    <span class="text-secondary small fw-medium text-truncate" style="max-width: 120px;" title="NIBAR: {{ aset.nibar|default:'-' }}">
-                        {{ aset.nibar|default:"-" }}
-                    </span>
-                </div>
-                
-                <h6 class="fw-bold text-dark mb-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;">
-                    {{ aset.nama_barang }}
-                </h6>
-                
-                <p class="text-secondary small mb-3 text-truncate" title="{{ aset.alamat_lokasi|default:'-' }}">
-                    <i class="bi bi-geo-alt-fill text-danger opacity-75 me-1"></i>{{ aset.alamat_lokasi|default:"-" }}
-                </p>
-                
-                <div class="d-flex justify-content-between align-items-center pt-2 border-top border-light">
-                    <span class="text-dark fw-bold" style="font-size: 0.85rem;">{{ aset.luas_m2|default:"0" }} m²</span>
-                    <span class="btn btn-sm btn-light text-primary fw-bold rounded-pill px-3" style="font-size: 0.75rem;">Detail <i class="bi bi-arrow-right ms-1"></i></span>
-                </div>
+                <h6 class="fw-bold text-dark mb-1 lh-base">{{ aset.nama_barang }}</h6>
+                <p class="text-secondary small mb-0 mt-1" style="font-size: 0.8rem;"><i class="bi bi-building me-1 opacity-75"></i>{{ aset.opd.nama_opd|default:"BPKAD Kota Palu" }}</p>
             </div>
             {% empty %}
             <div class="text-center text-secondary py-5">
                 <i class="bi bi-map fs-1 opacity-25 d-block mb-2"></i>
-                <p>Belum ada titik koordinat tervalidasi.</p>
+                <p class="small fw-bold text-muted">Tidak ada data valid yang cocok.</p>
             </div>
             {% endfor %}
+
+            {% if semua_aset.has_other_pages %}
+            <nav aria-label="Navigasi Halaman" class="d-flex justify-content-center mt-3 mb-2">
+                <ul class="pagination pagination-sm gap-1 mb-0">
+                    {% if semua_aset.has_previous %}
+                        <li class="page-item"><a class="page-link rounded-pill px-2 border-0 bg-light text-dark" href="?page={{ semua_aset.previous_page_number }}{% if query_cari %}&q={{ query_cari }}{% endif %}{% if opd_id %}&opd={{ opd_id }}{% endif %}">&lsaquo;</a></li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link rounded-pill px-3 border-0 bg-dark text-white fw-bold" style="font-size: 0.75rem;">{{ semua_aset.number }} / {{ semua_aset.paginator.num_pages }}</span></li>
+                    {% if semua_aset.has_next %}
+                        <li class="page-item"><a class="page-link rounded-pill px-2 border-0 bg-light text-dark" href="?page={{ semua_aset.next_page_number }}{% if query_cari %}&q={{ query_cari }}{% endif %}{% if opd_id %}&opd={{ opd_id }}{% endif %}">&rsaquo;</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
         </div>
     </div>
 
@@ -128,140 +164,200 @@
 
     <div class="gis-panel-right" id="detailPanel">
         <div class="detail-header-bar">
-            <h5 class="fw-bold m-0 text-dark">Detail Lokasi</h5>
-            <button class="btn btn-sm btn-light rounded-circle" onclick="closeDetail()"><i class="bi bi-x-lg"></i></button>
+            <h5 class="fw-bold m-0 text-dark"><i class="bi bi-info-circle-fill text-primary me-1"></i> Detail Informasi Lahan</h5>
+            <button class="btn btn-sm btn-light rounded-circle border" onclick="closeDetail()"><i class="bi bi-x-lg"></i></button>
         </div>
 
         <div class="detail-content">
-            <img src="https://images.unsplash.com/photo-1596395819057-e37f55a8516b?q=80&w=600&auto=format&fit=crop" class="hero-image" alt="Peta Lahan">
+            <div id="detFotoContainer"></div>
             
             <div class="p-4">
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-3 px-3 py-2 rounded-pill" id="detOpd">OPD</span>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-3 px-3 py-2 rounded-pill fw-bold" id="detOpd">OPD</span>
                 <h4 class="fw-bold mb-2 text-dark lh-sm" id="detNama">Nama Lahan</h4>
                 
-                <p class="text-secondary small mb-2 fw-medium text-break"><i class="bi bi-upc-scan text-muted me-1"></i> NIBAR: <span id="detNibar">-</span></p>
-                <p class="text-secondary small mb-4 lh-base"><i class="bi bi-geo-alt-fill text-danger me-1"></i> <span id="detAlamat">Alamat Lahan</span></p>
+                <p class="text-secondary small mb-2 fw-medium"><i class="bi bi-upc-scan text-muted me-1"></i> NIBAR: <span id="detNibar" class="fw-bold text-dark">-</span></p>
+                <p class="text-secondary small mb-4 lh-base fw-medium"><i class="bi bi-geo-alt-fill text-danger me-1"></i> <span id="detAlamat">Alamat Lahan</span></p>
 
                 <div class="bento-grid">
                     <div class="bento-item">
-                        <p class="text-secondary small fw-bold mb-1">LUAS LAHAN</p>
-                        <h5 class="fw-bold text-dark m-0"><span id="detLuas">0</span> <span class="fs-6 text-secondary fw-normal">m²</span></h5>
+                        <div class="detail-label-title">Luas Tanah</div>
+                        <div class="detail-value-text text-primary" id="detLuas">0 m²</div>
                     </div>
                     <div class="bento-item">
-                        <p class="text-secondary small fw-bold mb-1">NILAI ASET</p>
-                        <h5 class="fw-bold text-success m-0" id="detNilai">Rp 0</h5>
+                        <div class="detail-label-title">Nilai Aset</div>
+                        <div class="detail-value-text text-success" id="detNilai">Rp 0</div>
+                    </div>
+                    <div class="bento-item">
+                        <div class="detail-label-title">Kode Barang</div>
+                        <div class="detail-value-text" id="detKodeBarang">-</div>
+                    </div>
+                    <div class="bento-item">
+                        <div class="detail-label-title">No. Register</div>
+                        <div class="detail-value-text" id="detRegister">-</div>
+                    </div>
+                    <div class="bento-item">
+                        <div class="detail-label-title">Kecamatan</div>
+                        <div class="detail-value-text" id="detKecamatan">-</div>
+                    </div>
+                    <div class="bento-item">
+                        <div class="detail-label-title">Kelurahan</div>
+                        <div class="detail-value-text" id="detKelurahan">-</div>
                     </div>
                     <div class="bento-item col-span-2" style="grid-column: span 2;">
-                        <p class="text-secondary small fw-bold mb-1">STATUS HUKUM</p>
-                        <h6 class="fw-bold text-dark m-0" id="detStatus"><i class="bi bi-shield-check text-success me-2"></i>Status</h6>
+                        <div class="detail-label-title">Status Sertifikasi Hukum</div>
+                        <div class="detail-value-text text-dark" id="detStatus">-</div>
                     </div>
                 </div>
 
-                <div class="mt-4 pt-3 border-top">
-                    <button class="btn btn-outline-primary w-100 rounded-pill fw-bold" onclick="arahkanKeGoogleMaps()">
-                        <i class="bi bi-cursor-fill me-2"></i> Buka Navigasi (Google Maps)
+                <div class="mt-4 pt-2 pb-4">
+                    <button class="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm" style="background-color: #003F87; border: none;" onclick="arahkanKeGoogleMaps()">
+                        <i class="bi bi-cursor-fill me-2"></i> Buka Rute Google Maps
                     </button>
                 </div>
             </div>
         </div>
     </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        var map = L.map('mainMap', { zoomControl: false }).setView([-0.8917, 119.8707], 13);
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        var markers = [];
+        var currentLat = '';
+        var currentLng = '';
+
+        function formatKeLuas(angka) {
+            if (!angka) return '0 m²';
+            let cleanStr = angka.toString().split(',')[0].replace(/\./g, "");
+            let val = parseInt(cleanStr);
+            if(isNaN(val)) return '0 m²';
+            return val.toLocaleString('id-ID') + ' m²';
+        }
+
+        function formatKeRupiah(angka) {
+            if (!angka) return 'Rp 0,00';
+            let cleanStr = angka.toString().split(',')[0].replace(/\./g, "");
+            let val = parseInt(cleanStr);
+            if(isNaN(val)) return 'Rp 0,00';
+            return 'Rp ' + val.toLocaleString('id-ID') + ',00';
+        }
+
+        // FUNGSI UTAMA SHOW DETAIL YANG SUDAH KEBAL CRASH
+        function showDetail(nama, alamat, luas, nilai, status, opd, lat, lng, nibar, kodeBarang, register, kecamatan, kelurahan, fotoUrlsStr) {
+            document.getElementById('detailPanel').classList.add('active');
+            
+            document.getElementById('detNama').innerText = nama;
+            document.getElementById('detAlamat').innerText = alamat;
+            document.getElementById('detOpd').innerText = opd;
+            document.getElementById('detNibar').innerText = nibar;
+            document.getElementById('detKodeBarang').innerText = kodeBarang;
+            document.getElementById('detRegister').innerText = register;
+            document.getElementById('detKecamatan').innerText = kecamatan;
+            document.getElementById('detKelurahan').innerText = kelurahan;
+            
+            document.getElementById('detLuas').innerText = formatKeLuas(luas);
+            document.getElementById('detNilai').innerText = formatKeRupiah(nilai);
+
+            let iconStatus = status === 'BERSERTIFIKAT' ? '<i class="bi bi-shield-check text-success me-1"></i> Bersertifikat' : '<i class="bi bi-exclamation-circle text-warning me-1"></i> Belum Bersertifikat';
+            document.getElementById('detStatus').innerHTML = iconStatus;
+
+            currentLat = lat; 
+            currentLng = lng;
+
+            // MANAJEMEN MULTI-IMAGE DOKUMENTASI (SINKRON DATA_ASET)
+            let imgContainer = document.getElementById('detFotoContainer');
+            imgContainer.innerHTML = '';
+            
+            if (fotoUrlsStr && fotoUrlsStr.trim() !== '') {
+                let urls = fotoUrlsStr.split(',');
+                let galleryHtml = '<div class="scroll-snap-gallery">';
+                urls.forEach(url => {
+                    galleryHtml += '<a href="' + url + '" target="_blank"><img src="' + url + '" class="gallery-img-item" alt="Dokumentasi Lahan"></a>';
+                });
+                galleryHtml += '</div>';
+                imgContainer.innerHTML = galleryHtml;
+            } else {
+                imgContainer.innerHTML = '<div class="text-muted small w-100 text-center py-4 bg-light border-bottom"><i class="bi bi-camera me-1"></i> Foto dokumentasi belum diunggah.</div>';
+            }
+
+            setTimeout(() => { map.invalidateSize(); }, 300);
+
+            if (lat && lng && lat !== 'None' && lat !== '') {
+                tambahPin(lat, lng, nama);
+            } else {
+                let queryAlamat = alamat + ", Palu, Sulawesi Tengah";
+                fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(queryAlamat))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            currentLat = data[0].lat; 
+                            currentLng = data[0].lon;
+                            tambahPin(currentLat, currentLng, nama + " (Estimasi Alamat)");
+                        } else {
+                            map.setView([-0.8917, 119.8707], 13);
+                        }
+                    }).catch(e => {
+                        map.setView([-0.8917, 119.8707], 13);
+                    });
+            }
+        }
+
+        function tambahPin(lat, lng, judul) {
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+            var marker = L.marker([lat, lng]).addTo(map).bindPopup('<b>' + judul + '</b>').openPopup();
+            markers.push(marker);
+            map.flyTo([lat, lng], 16, { animate: true, duration: 1.2 });
+        }
+
+        function closeDetail() {
+            document.getElementById('detailPanel').classList.remove('active');
+            markers.forEach(m => map.removeLayer(m));
+            map.flyTo([-0.8917, 119.8707], 13, { animate: true, duration: 1.2 });
+        }
+
+        // HILANGKAN MANTRA JAHAT '5{' STRIL JALUR AMAN KOORDINAT
+        function arahkanKeGoogleMaps() {
+            if (currentLat && currentLng && currentLat !== 'None' && currentLat !== '') {
+                window.open('https://www.google.com/maps/search/?api=1&query=' + currentLat + ',' + currentLng, '_blank');
+            } else {
+                var alamat = document.getElementById('detAlamat').innerText;
+                window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(alamat + " Palu, Sulawesi Tengah"), '_blank');
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(() => { map.invalidateSize(); }, 500);
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const cariAset = urlParams.get('q');
+            
+            if (cariAset) {
+                let searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.value = cariAset;
+                    
+                    setTimeout(() => {
+                        let items = document.querySelectorAll('.aset-item');
+                        for (let item of items) {
+                            if (item.style.display !== 'none') {
+                                item.click(); 
+                                break;
+                            }
+                        }
+                    }, 800);
+                }
+            }
+        });
+    </script>
 </div>
 {% endblock %}
 
 {% block footer %}
-{% endblock %}
-
-{% block extra_js %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
-<script>
-    var map = L.map('mainMap', { zoomControl: false }).setView([-0.8917, 119.8707], 13);
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap contributors © CARTO',
-        maxZoom: 19
-    }).addTo(map);
-
-    var markers = [];
-    var currentLat = '';
-    var currentLng = '';
-
-    function showDetail(nama, alamat, luas, nilai, status, opd, lat, lng, nibar) {
-        document.getElementById('detailPanel').classList.add('active');
-        
-        document.getElementById('detNama').innerText = nama;
-        document.getElementById('detAlamat').innerText = alamat;
-        document.getElementById('detOpd').innerText = opd;
-        document.getElementById('detNibar').innerText = nibar;
-        
-        document.getElementById('detLuas').innerText = parseFloat(luas).toLocaleString('id-ID');
-        
-        let nilaiFloat = parseFloat(nilai.replace(/[^0-9.-]+/g,""));
-        if(!isNaN(nilaiFloat)) {
-            document.getElementById('detNilai').innerText = 'Rp ' + nilaiFloat.toLocaleString('id-ID');
-        } else {
-            document.getElementById('detNilai').innerText = 'Rp 0';
-        }
-
-        let iconStatus = status === 'BERSERTIFIKAT' ? '<i class="bi bi-shield-check text-success me-2"></i>' : '<i class="bi bi-exclamation-triangle text-warning me-2"></i>';
-        document.getElementById('detStatus').innerHTML = iconStatus + status;
-
-        currentLat = lat; currentLng = lng;
-
-        if (lat && lng && lat !== 'None' && lng !== 'None') {
-            tambahPin(lat, lng, nama);
-        } else {
-            let queryAlamat = alamat + ", Palu, Sulawesi Tengah";
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryAlamat)}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.length > 0) {
-                        let geoLat = data[0].lat; let geoLng = data[0].lon;
-                        currentLat = geoLat; currentLng = geoLng; 
-                        tambahPin(geoLat, geoLng, nama + " (Estimasi)");
-                    } else {
-                        map.setView([-0.8917, 119.8707], 13);
-                    }
-                }).catch(e => console.log("Geocoding gagal", e));
-        }
-    }
-
-    function tambahPin(lat, lng, judul) {
-        markers.forEach(m => map.removeLayer(m));
-        markers = [];
-        var marker = L.marker([lat, lng]).addTo(map).bindPopup(`<b>${judul}</b>`).openPopup();
-        markers.push(marker);
-        map.flyTo([lat, lng], 16, { animate: true, duration: 1.5 });
-    }
-
-    function closeDetail() {
-        document.getElementById('detailPanel').classList.remove('active');
-        markers.forEach(m => map.removeLayer(m));
-        map.flyTo([-0.8917, 119.8707], 13, { animate: true, duration: 1.5 });
-    }
-
-    function arahkanKeGoogleMaps() {
-        if (currentLat && currentLng) {
-            window.open(`https://www.google.com/maps/dir/?api=1&destination=$${currentLat},${currentLng}`, '_blank');
-        } else {
-            let alamat = document.getElementById('detAlamat').innerText;
-            window.open(`https://www.google.com/maps/search/?api=1&query=$${encodeURIComponent(alamat + " Palu")}`, '_blank');
-        }
-    }
-
-    function filterAset() {
-        let input = document.getElementById('searchInput').value.toLowerCase();
-        let items = document.querySelectorAll('.aset-item');
-        items.forEach(item => {
-            let nama = item.getAttribute('data-nama');
-            let lokasi = item.getAttribute('data-lokasi');
-            if (nama.includes(input) || lokasi.includes(input)) {
-                item.style.display = 'block';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    }
-</script>
 {% endblock %}

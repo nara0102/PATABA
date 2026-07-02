@@ -33,6 +33,7 @@ python-bidi==0.6.10
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
 PyYAML==6.0.3
+qrcode==8.2
 reportlab==4.5.1
 requests==2.34.2
 s3transfer==0.18.0

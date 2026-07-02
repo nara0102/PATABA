@@ -315,3 +315,45 @@ label.small { margin-bottom: 6px !important; display: block; color: var(--text-m
 [data-theme="dark"] #mobileSidebarMenu {
     border-right: 1px solid var(--border-soft) !important;
 }
+
+/* ==============================================================
+   SECTION 4: PRESET GLOSSPARIUM (SEARCH & OFFCANVAS ALIGNMENT)
+   Fungsi: Mengatur elastisitas bar pencarian dan mengunci lebar filter.
+   ============================================================== */
+
+/* Rumah Input Cari Berbentuk Elips Melonjong */
+.search-bar-wrapper {
+    background-color: var(--bg-input) !important;
+    border: 1px solid var(--border-soft);
+    border-radius: 24px !important; 
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+    width: 100% !important;
+}
+
+/* Memastikan Input Teks Mengisi Sisa Ruang Setelah Ikon Cari */
+.search-bar-wrapper .form-control {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding-left: 5px !important;
+}
+
+/* Sistem Pengunci Ukuran Tombol Filter (Anti-Melar Lonjong) */
+@media (min-width: 768px) {
+    .btn-filter-lock-wrapper {
+        width: 180px !important; /* UKURAN DIKUNCI MUTLAK DI DESKTOP */
+    }
+}
+
+/* Penyesuaian Responsif Tombol Filter untuk iPhone / Layar Kecil */
+@media (max-width: 767px) {
+    .btn-filter-lock-wrapper {
+        width: 100% !important; 
+    }
+}
+
+/* Mempertegas Ujung Sudut Seluruh Glass Card Agar Lonjong Mewah */
+.glass-card {
+    border-radius: 24px !important; 
+}

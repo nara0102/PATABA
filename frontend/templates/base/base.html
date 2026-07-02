@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <link rel="stylesheet" href="{% static 'css/transpara_publik.css' %}">
+    <link rel="stylesheet" href="{% static 'css/transpara_buttons.css' %}">
     
     {% block extra_css %}{% endblock %}
 </head>
@@ -33,11 +34,34 @@
                 </ul>
             </div>
             
-            <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
+            <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                <div class="dropdown">
+                    <button class="btn btn-light rounded-circle shadow-sm p-0 d-flex align-items-center justify-content-center" id="settingsDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="width: 38px; height: 38px; background: var(--bg-input); border: 1px solid var(--border-soft);">
+                        <i class="bi bi-gear-fill text-secondary fs-5"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end apple-modal border-0 shadow-lg mt-2 p-2" aria-labelledby="settingsDropdown" style="width: 230px; background: var(--card-light); z-index: 1100;">
+                        <div class="px-3 py-2 small fw-bold text-uppercase text-muted" style="font-size: 0.65rem; letter-spacing: 0.5px;">Tema Aplikasi</div>
+                        <li>
+                            <button class="dropdown-item menu-item rounded-3 py-2 text-start w-100 border-0 bg-transparent" onclick="document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')">
+                                <i class="bi bi-moon-stars-fill me-2 text-primary"></i> Alihkan Mode Tema
+                            </button>
+                        </li>
+                        <hr class="my-1 border-light opacity-50">
+                        <div class="px-3 py-2 small fw-bold text-uppercase text-muted" style="font-size: 0.65rem; letter-spacing: 0.5px;">Bahasa / Language</div>
+                        <li>
+                            <a class="dropdown-item menu-item rounded-3 py-2 fw-medium active" href="#"><span class="me-2">🇮🇩</span> Indonesia</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item menu-item rounded-3 py-2 text-muted fw-medium" href="#" onclick="alert('Paket translasi bahasa inggris sedang dipersiapkan untuk konteks penilaian.')"><span class="me-2">🇬🇧</span> English (Template)</a>
+                        </li>
+                    </ul>
+                </div>
+                
                 {% block nav_button %}
-                <a href="{% url 'auth:login' %}" class="btn rounded-pill px-4 shadow-sm fw-medium text-white btn-login-hover" style="background-color: #003F87; border: none;">Login</a>
+                <a href="{% url 'auth:login' %}" class="btn rounded-pill px-4 shadow-sm fw-medium text-white" style="background-color: #003F87; border: none;">Login</a>
                 {% endblock %}
             </div>
+
         </div>
     </nav>
 
@@ -45,51 +69,89 @@
     {% endblock %}
 
     {% block footer %}
+    <!-- footer -->
     <footer class="footer-minimalis">
-        <div class="container-fluid px-4">
-            <div class="row g-2 mb-2">
-                <div class="col-lg-5">
-                    <h5 class="fw-bold mb-2" style="color: #1d1d1f;">Transpara</h5>
-                    <p class="mb-1" style="line-height: 1.4; font-size: 0.8rem; color: #86868b;">
-                        Sistem Informasi Transparansi Aset Daerah Kota Palu.<br>Dikelola oleh Bidang Aset BPKAD Kota Palu.
-                    </p>
-                    <div class="d-flex gap-3 mt-2">
-                        <a href="#" style="font-size: 1rem;"><i class="bi bi-globe"></i></a>
-                        <a href="#" style="font-size: 1rem;"><i class="bi bi-share"></i></a>
-                        <a href="mailto:bpkad@palukota.go.id" style="font-size: 1rem;"><i class="bi bi-envelope"></i></a>
-                    </div>
-                </div>
-                <div class="col-lg-3">
-                    <h6 class="fw-bold mb-2">TAUTAN CEPAT</h6>
-                    <ul class="list-unstyled d-flex flex-column gap-1 mb-0">
-                        <li><a href="{% url 'publik:data_aset_publik' %}">Data Aset</a></li>
-                        <li><a href="{% url 'publik:peta_gis' %}">Peta GIS</a></li>
-                        <li><a href="{% url 'publik:home' %}#berita">Berita & Galeri</a></li>
-                    </ul>
-                </div>
+
+        <div class="container">
+            <div class="row g-5 mb-5 text-center text-lg-start">
+
                 <div class="col-lg-4">
-                    <h6 class="fw-bold mb-2">INFORMASI KONTAK</h6>
-                    <ul class="list-unstyled d-flex flex-column gap-1 mb-0">
-                        <li class="d-flex gap-2"><i class="bi bi-geo-alt text-secondary"></i> <span>Kompleks Kantor Walikota Palu, Blok B, Lt. 2</span></li>
-                        <li class="d-flex gap-2"><i class="bi bi-telephone text-secondary"></i> <span>(0451) 421001</span></li>
-                        <li class="d-flex gap-2"><i class="bi bi-clock text-secondary"></i> <span>Senin - Jumat: 08:00 - 16:00</span></li>
+
+                    <div class="d-flex align-items-center mb-3 justify-content-center justify-content-lg-start">
+                        <img src="{% static 'images/logo.png' %}" alt="Logo PATABA" height="35" class="me-2 logo-footer-pataba" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
+                        <h4 class="fw-bold mb-0" style="color: var(--text-main); font-family: 'Playfair Display', serif; letter-spacing: 1px;">PATABA</h4>
+                    </div>
+                    
+                    <p style="line-height: 1.7; font-size: 0.95rem; color: var(--text-muted);">
+                        Portal Aset Tanah Pemerintah Daerah Kota Palu. Dikelola oleh Bidang Aset Badan Pengelola Keuangan dan Aset Daerah (BPKAD) Pemerintah Kota Palu.
+                    </p>
+                    
+                    <div class="d-flex gap-3 mt-4 justify-content-center justify-content-lg-start">
+                        <a href="https://instagram.com/bpkadpalu" target="_blank" class="text-decoration-none footer-icon" style="color: var(--text-muted); font-size: 1.2rem; transition: color 0.3s ease;"><i class="bi bi-instagram"></i></a>
+                        <a href="javascript:void(0);" onclick="shareWebsite()" class="text-decoration-none footer-icon" style="color: var(--text-muted); font-size: 1.2rem; transition: color 0.3s ease;"><i class="bi bi-share"></i></a>
+                        <a href="mailto:bpkad@palukota.go.id" class="text-decoration-none footer-icon" style="color: var(--text-muted); font-size: 1.2rem; transition: color 0.3s ease;"><i class="bi bi-envelope"></i></a>
+                    </div>
+
+                </div>
+
+                <div class="col-lg-4">
+                    <h6 class="fw-bold mb-4" style="color: #1d1d1f; letter-spacing: 0.5px;">TAUTAN CEPAT</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-3" style="color: #86868b;">
+                        <li><a href="#data-aset" class="text-decoration-none" style="color: #86868b;">Data Aset</a></li>
+                        <li><a href="{% url 'publik:peta_gis' %}" class="text-decoration-none" style="color: #86868b;">Peta GIS</a></li>
+                        <li><a href="#berita" class="text-decoration-none" style="color: #86868b;">Berita Terkini</a></li>
+                        <li><a href="#galeri-kegiatan" class="text-decoration-none" style="color: #86868b;">Galeri Dokumentasi</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4">
+                    <h6 class="fw-bold mb-4" style="color: #1d1d1f; letter-spacing: 0.5px;">INFORMASI KONTAK</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-3" style="color: #86868b;">
+                        <li class="d-flex gap-3 justify-content-center justify-content-lg-start"><i class="bi bi-geo-alt"></i> <span>Kompleks Kantor Walikota Palu, Lt. 2</span></li>
+                        <li class="d-flex gap-3 justify-content-center justify-content-lg-start"><i class="bi bi-telephone"></i> <span>(0451) 421001</span></li>
+                        <li class="d-flex gap-3 justify-content-center justify-content-lg-start"><i class="bi bi-clock"></i> <span>Senin - Jumat: 08:00 - 16:00</span></li>
                     </ul>
                 </div>
             </div>
-            <hr>
-            <div class="row align-items-center" style="font-size: 0.75rem; color: #86868b;">
-                <div class="col-md-6 text-center text-md-start">&copy; 2024 BPKAD Kota Palu. Hak Cipta Dilindungi Undang-Undang.</div>
-                <div class="col-md-6 text-center text-md-end d-flex gap-3 justify-content-center justify-content-md-end">
-                    <a href="#">Kebijakan Privasi</a>
-                    <a href="#">Syarat & Ketentuan</a>
+
+            <hr style="border-color: #D1D1D6; margin-bottom: 30px;">
+
+            <div class="row align-items-center" style="font-size: 0.8rem; color: #86868b;">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    © 2026 BPKAD Kota Palu. Hak Cipta Dilindungi Undang-Undang.
+                </div>
+                <div class="col-md-6 text-center text-md-end d-flex gap-4 justify-content-center justify-content-md-end">
+                    <a href="#" class="text-decoration-none" style="color: #86868b;">Kebijakan Privasi</a>
+                    <a href="#" class="text-decoration-none" style="color: #86868b;">Syarat & Ketentuan</a>
                 </div>
             </div>
+
         </div>
+
     </footer>
+
     {% endblock %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/pataba_theme.js' %}"></script>
+
+    <script>
+
+        // share link
+        function shareWebsite() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'PATABA - BPKAD Kota Palu',
+                    text: 'Kunjungi Portal Aset Tanah Pemerintah Daerah Kota Palu untuk transparansi data aset daerah.',
+                    url: window.location.href,
+                }).catch(console.error);
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert('Tautan website berhasil disalin ke clipboard!');
+            }
+        }
+    </script>
     
 </body>
 </html>

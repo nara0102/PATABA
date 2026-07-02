@@ -1,22 +1,92 @@
 {% extends 'base/base.html' %}
+{% load i18n %}
 
 {% block title %}Data Aset Daerah - TRANSPARA{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* Mengunci layar agar terasa seperti web-app */
-    body { overflow: hidden; height: 100vh; }
+    /* ==============================================================
+       PREMIUM PUBLIC PORTAL LAYOUT OPTIMIZATION
+       ============================================================== */
     
-    .main-wrapper-aset { flex-grow: 1; display: flex; flex-direction: column; padding-top: 20px; padding-bottom: 20px; overflow: hidden; }
+    /* 1. BEBASKAN LAYAR: Izinkan scroll alami mengalir sampai ke footer bawah */
+    body { 
+        overflow: auto !important; 
+        height: auto !important; 
+        background-color: #F5F5F7;
+    }
     
-    .tabel-scroll-wrapper { flex-grow: 1; overflow-y: auto; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); background: white; margin-bottom: 0; }
-    .tabel-scroll-wrapper thead th { position: sticky; top: 0; background-color: #003F87; color: white; z-index: 10; border-bottom: none; white-space: nowrap; }
+    /* 2 tabel */
+    .main-wrapper-aset { 
+        padding-top: 40px; 
+        padding-bottom: 60px; 
+        min-height: 80vh; 
+    }
     
-    td { white-space: nowrap; font-size: 0.9rem; }
+    .tabel-scroll-wrapper { 
+        background: white; 
+        border-radius: 20px; 
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04); 
+        border: 1px solid #E2E8F0;
+        
+        /* PERBAIKAN UTAMA: Mengubah hidden menjadi auto secara horizontal */
+        overflow-x: auto; 
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch; /* Membuat scroll di iOS/Android terasa ringan & native */
+        
+        margin-bottom: 25px;
+    }
+
+    /* KUNCI PENTING: Memaksa tabel memiliki ruang minimal di HP agar tidak ringsek */
+    .tabel-scroll-wrapper table {
+        min-width: 800px; /* Menjamin kolom aksi & status tidak terpotong atau gepeng di layar kecil */
+    }
     
-    /* Animasi Glow Search */
-    #quickSearchOPD { transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); border: 2px solid transparent !important; }
-    #quickSearchOPD:focus { border: 2px solid #0056B3 !important; box-shadow: 0 0 15px rgba(0,86,179,0.15) !important; transform: translateY(-2px); outline: none; }
+    .tabel-scroll-wrapper thead th { 
+        background-color: #003F87; 
+        color: white; 
+        padding: 16px 20px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    td { 
+        padding: 16px 20px !important;
+        font-size: 0.9rem; 
+    }
+    
+    /* Input Search Glow */
+    #quickSearchOPD { 
+        transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); 
+        border: 1px solid #E2E8F0 !important; 
+    }
+    #quickSearchOPD:focus { 
+        border: 1px solid #0056B3 !important; 
+        box-shadow: 0 0 15px rgba(0,86,179,0.1) !important; 
+    }
+
+    /* Paginator Kapsul Melonjong Premium */
+    .page-link-pataba {
+        border-radius: 50rem !important;
+        padding: 8px 16px;
+        font-weight: 600;
+        color: #003F87;
+        border: 1px solid #E2E8F0;
+        transition: all 0.2s ease;
+    }
+    .page-link-pataba:hover {
+        background-color: #EBF5FF;
+        color: #002D5E;
+    }
+    .page-item.active .page-link-pataba {
+        background-color: #003F87 !important;
+        border-color: #003F87 !important;
+        color: white !important;
+    }
 </style>
 {% endblock %}
 
@@ -28,16 +98,17 @@
 
 {% block content %}
 <main class="container-fluid px-4 main-wrapper-aset">
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
-            <h4 class="fw-bold text-dark mb-0">Daftar Aset Tanah Daerah</h4>
-            <p class="text-secondary mb-0" style="font-size: 0.85rem;">Rincian aset tervalidasi oleh BPKAD Kota Palu.</p>
+            <h4 class="fw-bold text-dark mb-1">Daftar Aset Tanah Daerah</h4>
+            <p class="text-secondary mb-0" style="font-size: 0.85rem;">Rincian data inventarisasi resmi tervalidasi oleh BPKAD Kota Palu.</p>
         </div>
         
-        <div class="position-relative" style="width: 300px;">
+        <form method="GET" action="" class="position-relative m-0" style="width: 320px;">
             <i class="bi bi-search position-absolute text-muted" style="top: 50%; left: 15px; transform: translateY(-50%);"></i>
-            <input type="text" id="quickSearchOPD" onkeyup="cariCepatOPD()" class="form-control bg-white shadow-sm border-0" style="padding-left: 2.5rem !important; border-radius: 50rem !important;" placeholder="Cari Nama Aset atau OPD...">
-        </div>
+            <input type="text" name="q" id="quickSearchOPD" value="{{ query_cari|default:'' }}" class="form-control bg-white shadow-sm" style="padding-left: 2.5rem !important; border-radius: 50rem !important; padding-top: 10px; padding-bottom: 10px;" placeholder="Cari Nama Aset atau OPD...">
+        </form>
     </div>
 
     <div class="tabel-scroll-wrapper">
@@ -70,7 +141,7 @@
                         {% endif %}
                     </td>
                     <td class="text-center pe-4">
-                        <button type="button" class="btn btn-sm btn-bpkad-outline rounded-pill px-3 fw-bold w-100" data-bs-toggle="modal" data-bs-target="#detailAsetModal{{ aset.id }}">Detail</button>
+                        <button type="button" class="btn btn-sm btn-bpkad-outline-primary rounded-pill px-4 fw-bold shadow-sm w-100" data-bs-toggle="modal" data-bs-target="#detailAsetModal{{ aset.id }}">Detail</button>
                     </td>
                 </tr>
                 {% empty %}
@@ -82,16 +153,34 @@
                     </td>
                 </tr>
                 {% endfor %}
-
-                <tr id="noResultRow" style="display: none;">
-                    <td colspan="5" class="text-center text-secondary" style="height: 40vh; vertical-align: middle; background-color: #FAFAFA;">
-                        <i class="bi bi-search fs-2 d-block mb-2 opacity-25"></i>
-                        <p class="mb-0">Pencarian untuk "<b id="searchText" class="text-dark"></b>" tidak ditemukan.</p>
-                    </td>
-                </tr>
             </tbody>
         </table>
     </div>
+
+    {% if semua_aset.has_other_pages %}
+    <nav aria-label="Navigasi Halaman Aset" class="d-flex justify-content-center mt-2 mb-4">
+        <ul class="pagination gap-2">
+            {% if semua_aset.has_previous %}
+                <li class="page-item"><a class="page-link page-link-pataba" href="?page=1{% if query_cari %}&q={{ query_cari }}{% endif %}">&laquo; Pertama</a></li>
+                <li class="page-item"><a class="page-link page-link-pataba" href="?page={{ semua_aset.previous_page_number }}{% if query_cari %}&q={{ query_cari }}{% endif %}">Sebelumnya</a></li>
+            {% endif %}
+
+            {% for num in semua_aset.paginator.page_range %}
+                {% if semua_aset.number == num %}
+                    <li class="page-item active"><span class="page-link page-link-pataba">{{ num }}</span></li>
+                {% elif num > semua_aset.number|add:-3 and num < semua_aset.number|add:3 %}
+                    <li class="page-item"><a class="page-link page-link-pataba" href="?page={{ num }}{% if query_cari %}&q={{ query_cari }}{% endif %}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if semua_aset.has_next %}
+                <li class="page-item"><a class="page-link page-link-pataba" href="?page={{ semua_aset.next_page_number }}{% if query_cari %}&q={{ query_cari }}{% endif %}">Selanjutnya</a></li>
+                <li class="page-item"><a class="page-link page-link-pataba" href="?page={{ semua_aset.paginator.num_pages }}{% if query_cari %}&q={{ query_cari }}{% endif %}">Terakhir &raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
 </main>
 
 {% for aset in semua_aset %}
@@ -134,7 +223,9 @@
                                         {% if aset.latitude and aset.longitude %}
                                             <a href="http://googleusercontent.com/maps.google.com/4{{ aset.latitude }},{{ aset.longitude }}" target="_blank" class="text-decoration-none text-primary"><i class="bi bi-geo-alt-fill me-1"></i>Buka Peta</a>
                                         {% else %}
-                                            <a href="http://googleusercontent.com/maps.google.com/5{{ aset.alamat_lokasi|urlencode }} Palu" target="_blank" class="text-decoration-none text-primary"><i class="bi bi-search me-1"></i>Cari di Peta</a>
+                                            <a href="{% url 'publik:peta_gis' %}?q={{ aset.nama_barang|urlencode }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold shadow-sm">
+                                                <i class="bi bi-map-fill me-1"></i> Lihat di Peta GIS
+                                            </a>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -182,42 +273,5 @@
             if(!isNaN(val)) { el.innerText = val.toLocaleString('id-ID') + ' m²'; }
         });
     });
-
-    function cariCepatOPD() {
-        let inputRaw = document.getElementById("quickSearchOPD").value;
-        let input = inputRaw.toLowerCase();
-        let tableBody = document.getElementById("tabelRingkasanAset");
-        if(!tableBody) return; 
-        
-        let rows = tableBody.getElementsByTagName("tr");
-        let hasResult = false;
-        let noResultRow = document.getElementById("noResultRow");
-        let searchText = document.getElementById("searchText");
-
-        for (let i = 0; i < rows.length; i++) {
-            if (rows[i].id === "noResultRow" || rows[i].classList.contains("modal")) continue;
-
-            let opdElement = rows[i].querySelector(".nama-opd");
-            let asetElement = rows[i].querySelector(".nama-aset"); 
-            
-            if (opdElement && asetElement) {
-                if (opdElement.innerText.toLowerCase().includes(input) || asetElement.innerText.toLowerCase().includes(input)) {
-                    rows[i].style.display = "";
-                    hasResult = true; 
-                } else {
-                    rows[i].style.display = "none";
-                }
-            }
-        }
-
-        if (noResultRow) {
-            if (hasResult || input === "") {
-                noResultRow.style.display = "none";
-            } else {
-                noResultRow.style.display = "";
-                if (searchText) searchText.innerText = inputRaw;
-            }
-        }
-    }
 </script>
 {% endblock %}

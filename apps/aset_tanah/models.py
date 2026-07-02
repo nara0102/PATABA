@@ -1,3 +1,9 @@
+import os
+from django.utils.text import slugify
+
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
@@ -133,10 +139,21 @@ class AsetTanah(models.Model):
         return f"{self.nama_barang} - {self.kode_barang}"
     
 # foto 
+# FUNGSI DINAMIS UNTUK STRUKTUR FOLDER
+def get_upload_path(instance, filename):
+    # Mengambil nama OPD dan Nama Barang dari relasi aset
+    opd_name = slugify(instance.aset.opd.nama_opd) if instance.aset.opd else 'umum'
+    asset_name = slugify(instance.aset.nama_barang)
+    
+    # Menghasilkan struktur: foto-tanah/nama-opd/nama-aset/filename.jpg
+    return f'foto-tanah/{opd_name}/{asset_name}/{filename}'
+
 class FotoAsetTanah(models.Model):
-    # Hubungkan ke AsetTanah menggunakan ForeignKey
     aset = models.ForeignKey(AsetTanah, on_delete=models.CASCADE, related_name='koleksi_foto')
-    file_foto = models.ImageField(upload_to='foto-tanah', storage=AsetTanahStorage())
+    
+    # UBAH BAGIAN INI: Gunakan fungsi get_upload_path
+    file_foto = models.ImageField(upload_to=get_upload_path, storage=AsetTanahStorage())
+    
     diunggah_pada = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -208,5 +225,12 @@ class RefKelurahan(models.Model):
         unique_together = (('kecamatan', 'nama_kelurahan'),)
 
 
+# hapus foto sekaligus data
+@receiver(post_delete, sender=FotoAsetTanah)
+def hapus_file_dari_storage(sender, instance, **kwargs):
+    # instance.file_foto adalah ImageField milikmu
+    if instance.file_foto:
+        # Perintah .delete(save=False) akan memicu S3/Supabase Storage untuk menghapus file fisik
+        instance.file_foto.delete(save=False)
 
    

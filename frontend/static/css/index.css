@@ -202,26 +202,35 @@ section {
 }
 
 /* =========================================
-   6. ANIMASI & KOMPONEN VISUAL LAINNYA
+   6. ANIMASI & KOMPONEN VISUAL LAINNYA (CLEAN & ULTRA LIGHT)
    ========================================= */
-.reveal-left { opacity: 0; transform: translateX(-40px); transition: all 1s cubic-bezier(0.25, 1, 0.5, 1); }
-.reveal-right { opacity: 0; transform: translateX(40px); transition: all 1s cubic-bezier(0.25, 1, 0.5, 1); }
-.reveal-active { opacity: 1; transform: translateX(0); }
 
-/* Lengkungan Transisi */
+/* Kita hapus properti translateX / translate3d yang memicu beban GPU/CPU */
+.reveal-left, 
+.reveal-right { 
+    opacity: 0; 
+    /* Transisi memudar murni sangat ringan dibaca oleh peramban manapun */
+    transition: opacity 0.6s ease-in-out; 
+    will-change: opacity;
+}
+
+/* Saat class aktif dipicu oleh JavaScript Scroll, dia cukup muncul anggun di tempat */
+.reveal-active { 
+    opacity: 1 !important; 
+}
+
+/* --- Komponen Lengkungan & Zoom Tetap Aman --- */
 .curved-transition { 
     position: relative; 
-    background-color: var(--bg-main); 
+    background-color: var(--bg-light); 
     padding-top: 100px !important; 
-    transition: background-color 0.4s ease; 
 }
 .curved-transition::before {
     content: ""; position: absolute; top: -50px; left: 0; width: 100%; height: 100px;
-    background-color: var(--bg-main); border-radius: 50% 50% 0 0 / 100% 100% 0 0; z-index: 10;
-    transition: background-color 0.4s ease;
+    background-color: var(--bg-light); border-radius: 50% 50% 0 0 / 100% 100% 0 0; z-index: 10;
 }
 
-.zoom-container { overflow: hidden; transition: transform 0.5s ease; }
+.zoom-container { overflow: hidden; }
 .zoom-container img { transition: transform 0.5s ease; }
 .card:hover .zoom-container img { transform: scale(1.08); }
 

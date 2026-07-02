@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Sum
 from .forms import KontakForm
+from django.core.paginator import Paginator
 
 # 1. Impor Model Milik Portal Publik Sendiri
 from .models import PublikasiInstansi, PesanKontak
@@ -67,10 +68,39 @@ def index_view(request):
 
 # 2 - Halaman Peta Gis
 def peta_gis_view(request):
-    # Kirim data aset ke peta (Hanya yang VALID)
-    semua_aset = AsetTanah.objects.filter(status_verifikasi='VALID')
+    # 1. Tangkap parameter filter & pencarian (Mendukung deep-linking dari aset publik)
+    query_cari = request.GET.get('q', '')
+    opd_id = request.GET.get('opd', '')
+    
+    # 2. Base Queryset Utama (Mengunci mutlak status VALID sesuai aturan ping-pong data)
+    queryset = AsetTanah.objects.filter(status_verifikasi='VALID').order_by('nama_barang')
+    
+    # 3. Eksekusi Pencarian Teks
+    if query_cari:
+        queryset = queryset.filter(nama_barang__icontains=query_cari) | queryset.filter(alamat_lokasi__icontains=query_cari)
+        
+    # 4. Eksekusi Filter OPD
+    if opd_id:
+        queryset = queryset.filter(opd_id=opd_id)
+        
+    # 5. Kumpulkan Daftar OPD Aktif secara aman tanpa tebak-tebakan path import model
+    opd_list = []
+    seen_opds = set()
+    for aset in AsetTanah.objects.filter(status_verifikasi='VALID').select_related('opd'):
+        if aset.opd and aset.opd.id not in seen_opds:
+            opd_list.append(aset.opd)
+            seen_opds.add(aset.opd.id)
+
+    # 6. ANTISIPASI DATA RIBUAN: Batasi muatan maksimal 10 data per halaman di panel kiri
+    paginator = Paginator(queryset, 10)
+    page_number = request.GET.get('page')
+    semua_aset_paginated = paginator.get_page(page_number)
+    
     context = {
-        'semua_aset': semua_aset,
+        'semua_aset': semua_aset_paginated,
+        'opd_list': opd_list,
+        'query_cari': query_cari,
+        'opd_id': opd_id,
     }
     return render(request, 'portal_publik/peta_gis.html', context)
 
@@ -89,6 +119,18 @@ def hubungi_kami(request):
     
     return render(request, 'portal_publik/kontak.html', {'form': form})
 
+# 4 - Halaman Berita
+def berita_publik_view(request):
+    # Ambil seluruh publikasi secara terpusat dan urutkan dari yang terbaru
+    semua_publikasi = PublikasiInstansi.objects.all().order_by('-tanggal_upload')
+    
+    context = {
+        # Saring berdasarkan kategori untuk dilempar ke template berita.html
+        'berita_list': semua_publikasi.filter(kategori='BERITA'),
+        'pengumuman_list': semua_publikasi.filter(kategori='PENGUMUMAN'),
+        'kegiatan_list': semua_publikasi.filter(kategori='KEGIATAN'), # Opsional jika ingin dipakai nanti
+    }
+    return render(request, 'portal_publik/berita.html', context)
 
 # - - - - -
 # PUBLIKASI KONTEN/MEDIA
@@ -222,10 +264,25 @@ def bantuan_view(request):
 # - - - - -
 
 # 1 - TABEL Data Aset
+
+
 def data_aset_publik_view(request):
-    semua_aset = AsetTanah.objects.filter(status_verifikasi='VALID').order_by('-created_at')
+    # Ambil semua aset yang sudah diverifikasi VALID oleh BPKAD
+    aset_list = AsetTanah.objects.filter(status_verifikasi='VALID').order_by('nama_barang')
+    
+    # Ambil parameter pencarian kata kunci jika ada
+    query_cari = request.GET.get('q', '')
+    if query_cari:
+        aset_list = aset_list.filter(nama_barang__icontains=query_cari)
+        
+    # --- PROSES PAGINATOR DJANGO ---
+    # Batasi muatan maksimal 10 baris per halaman sesuai request kamu
+    paginator = Paginator(aset_list, 10) 
+    page_number = request.GET.get('page')
+    semua_aset_paginated = paginator.get_page(page_number)
     
     context = {
-        'semua_aset': semua_aset,
+        'semua_aset': semua_aset_paginated,
+        'query_cari': query_cari,
     }
     return render(request, 'portal_publik/data_aset.html', context)

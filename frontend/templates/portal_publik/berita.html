@@ -1,0 +1,310 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Pusat Informasi & Berita - TRANSPARA{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ==============================================================
+       QUIET LUXURY NEWS & ANNOUNCEMENT LAYOUT STYLE
+       ============================================================== */
+    body { 
+        overflow-y: auto !important; 
+        height: auto !important; 
+    }
+    
+    .news-hero-section {
+        padding-top: 40px;
+        padding-bottom: 50px;
+        background-color: var(--card-light);
+        border-bottom: 1px solid var(--border-soft);
+        margin-bottom: 40px;
+        transition: background-color 0.4s ease, border-color 0.4s ease;
+    }
+
+    /* Kartu Berita Utama */
+    .card-berita-premium {
+        background: var(--card-light);
+        border: 1px solid var(--border-soft);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow-soft);
+        transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .card-berita-premium:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0, 45, 94, 0.06);
+        border-color: var(--accent-blue);
+    }
+    [data-theme="dark"] .card-berita-premium:hover {
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .wrapper-img-berita {
+        width: 100%;
+        height: 220px;
+        overflow: hidden;
+        position: relative;
+        background-color: var(--bg-input);
+    }
+    .img-berita-fluid {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    .card-berita-premium:hover .img-berita-fluid {
+        transform: scale(1.04);
+    }
+
+    /* Garis Pembatas Vertikal Kolom */
+    .divider-column {
+        border-right: 1px solid var(--border-soft);
+    }
+    @media (max-width: 991px) {
+        .divider-column {
+            border-right: none;
+            border-bottom: 1px solid var(--border-soft);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+    }
+
+    /* List Pengumuman Sisi Kanan */
+    .box-pengumuman-wrapper {
+        background: var(--card-light);
+        border: 1px solid var(--border-soft);
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: var(--shadow-soft);
+        transition: all 0.4s ease;
+    }
+
+    .item-pengumuman-link {
+        display: block;
+        padding: 16px;
+        background: var(--bg-input);
+        border-radius: 14px;
+        border: 1px solid var(--border-soft);
+        text-decoration: none !important;
+        transition: all 0.2s ease;
+        margin-bottom: 12px;
+    }
+    .item-pengumuman-link:hover {
+        border-color: var(--accent-blue);
+        background: var(--card-light);
+        transform: translateX(3px);
+    }
+
+    /* SIHIR BLUR BACKGROUND UNTUK DETAIL MODAL TENGAH */
+    .modal-blur-backdrop {
+        backdrop-filter: blur(15px) !important;
+        background-color: rgba(15, 23, 42, 0.4) !important;
+    }
+    [data-theme="dark"] .modal-blur-backdrop {
+        background-color: rgba(0, 0, 0, 0.6) !important;
+    }
+    
+    .modal-dialog-centered {
+        display: flex;
+        align-items: center;
+        min-height: calc(100% - 3.5rem);
+    }
+
+    /* Integrasi Dark Mode untuk Teks di dalam Modal */
+    .modal-article-content {
+        max-height: 65vh;
+        overflow-y: auto;
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: var(--text-body);
+    }
+    .theme-card-bg {
+        background-color: var(--card-light) !important;
+        transition: background-color 0.4s ease;
+    }
+    .theme-text-main { color: var(--text-main) !important; transition: color 0.4s ease; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="news-hero-section">
+    <div class="container px-4">
+        <h2 class="fw-bold theme-text-main mb-2" style="font-size: 2.25rem; letter-spacing: -0.5px;">Pusat Informasi & Dokumentasi</h2>
+        <p class="text-secondary mb-0 style-sub" style="font-size: 1.05rem; max-width: 800px;">
+            Transparansi tata kelola aset Pemerintah Kota Palu melalui berita terkini dan dokumentasi kegiatan resmi BPKAD.
+        </p>
+    </div>
+</section>
+
+<section class="container px-4 mb-5">
+    <div class="row g-4">
+        
+        <div class="col-lg-8 divider-column pe-lg-5">
+            <div class="d-flex align-items-center mb-4">
+                <div class="p-2 bg-primary-subtle rounded-3 me-2 text-primary"><i class="bi bi-newspaper fs-5"></i></div>
+                <h5 class="fw-bold theme-text-main m-0">Berita & Kegiatan Terkini</h5>
+            </div>
+
+            <div class="row g-4">
+                {% for b in berita_list %}
+                <div class="col-md-6">
+                    <div class="card-berita-premium h-100 d-flex flex-direction-column">
+                        <div class="wrapper-img-berita">
+                            {% if b.gambar_utama %}
+                                <img src="{{ b.gambar_utama.url }}" class="img-berita-fluid" alt="{{ b.judul }}">
+                            {% else %}
+                                <img src="{% static 'images/konten/berita1.jpg' %}" class="img-berita-fluid" alt="Cover Default">
+                            {% endif %}
+                            <span class="position-absolute top-0 start-0 badge bg-primary-blue text-white m-3 px-3 py-1 rounded-pill text-uppercase" style="font-size: 0.70rem; letter-spacing: 0.5px;">
+                                {{ b.get_kategori_display }}
+                            </span>
+                        </div>
+                        
+                        <div class="p-4 d-flex flex-column flex-grow-1 theme-card-bg">
+                            <div class="text-muted small mb-2"><i class="bi bi-calendar3 me-1"></i> {{ b.tanggal_upload|date:"d F Y" }}</div>
+                            <h5 class="fw-bold theme-text-main mb-2 lh-sm text-line-clamp-2" style="font-size: 1.15rem; height: 2.8rem; overflow: hidden;">{{ b.judul }}</h5>
+                            <p class="text-secondary small mb-4 text-line-clamp-3" style="overflow: hidden; height: 3.6rem;">
+                                {{ b.isi_konten|striptags|truncatechars:120 }}
+                            </p>
+                            
+                            <div class="mt-auto pt-2">
+                                <button type="button" class="btn btn-sm btn-bpkad-outline px-4 fw-bold shadow-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#beritaModal{{ b.id }}">Baca Selengkapnya</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-md-6">
+                    <div class="card-berita-premium h-100 d-flex flex-direction-column opacity-75" style="border-style: dashed !important; cursor: default;">
+                        <div class="wrapper-img-berita">
+                            <img src="{% static 'images/konten/berita1.jpg' %}" class="img-berita-fluid" alt="Placeholder">
+                            <span class="position-absolute top-0 start-0 badge bg-secondary text-white m-3 px-3 py-1 rounded-pill" style="font-size: 0.65rem;">TEMPLATE</span>
+                        </div>
+                        <div class="p-4 d-flex flex-column flex-grow-1 theme-card-bg">
+                            <div class="text-muted small mb-2"><i class="bi bi-calendar3 me-1"></i> Hari ini</div>
+                            <h5 class="fw-bold theme-text-main mb-2 lh-sm">Ruang Publikasi Kegiatan Resmi</h5>
+                            <p class="text-secondary small mb-4">Ruang ini akan otomatis terisi dengan publikasi berita atau kegiatan resmi BPKAD Kota Palu setelah admin menambahkan data.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card-berita-premium h-100 d-flex flex-direction-column opacity-75 d-none d-md-flex" style="border-style: dashed !important; cursor: default;">
+                        <div class="wrapper-img-berita">
+                            <img src="{% static 'images/konten/berita2.jpg' %}" class="img-berita-fluid" alt="Placeholder">
+                            <span class="position-absolute top-0 start-0 badge bg-secondary text-white m-3 px-3 py-1 rounded-pill" style="font-size: 0.65rem;">TEMPLATE</span>
+                        </div>
+                        <div class="p-4 d-flex flex-column flex-grow-1 theme-card-bg">
+                            <div class="text-muted small mb-2"><i class="bi bi-calendar3 me-1"></i> Hari ini</div>
+                            <h5 class="fw-bold theme-text-main mb-2 lh-sm">Berita Pengelolaan Aset</h5>
+                            <p class="text-secondary small mb-4">Ruang ini akan otomatis terisi dengan publikasi berita atau kegiatan resmi BPKAD Kota Palu setelah admin menambahkan data.</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-lg-4 ps-lg-4">
+            <div class="d-flex align-items-center mb-4">
+                <div class="p-2 bg-warning-subtle rounded-3 me-2 text-warning"><i class="bi bi-megaphone-fill fs-5"></i></div>
+                <h5 class="fw-bold theme-text-main m-0">Pengumuman Resmi</h5>
+            </div>
+
+            <div class="box-pengumuman-wrapper">
+                {% for p in pengumuman_list %}
+                <a href="javascript:void(0);" class="item-pengumuman-link" data-bs-toggle="modal" data-bs-target="#pengumumanModal{{ p.id }}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-warning-subtle text-warning px-2 py-1 text-uppercase" style="font-size: 0.65rem;"><i class="bi bi-pin-angle-fill me-1"></i>{{ p.get_kategori_display }}</span>
+                        <span class="text-muted small" style="font-size: 0.75rem;">{{ p.tanggal_upload|date:"d M Y" }}</span>
+                    </div>
+                    <h6 class="fw-bold theme-text-main mb-1 lh-base text-break">{{ p.judul }}</h6>
+                    <div class="text-primary small fw-bold mt-2" style="font-size: 0.8rem;">Lihat Detail <i class="bi bi-arrow-right ms-1"></i></div>
+                </a>
+                {% empty %}
+                <div class="item-pengumuman-link opacity-50" style="border-style: dashed !important; cursor: default;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-secondary-subtle text-secondary px-2 py-1" style="font-size: 0.65rem;"><i class="bi bi-info-circle me-1"></i>INFO</span>
+                        <span class="text-muted small" style="font-size: 0.75rem;">--/--/----</span>
+                    </div>
+                    <h6 class="fw-bold text-muted mb-1 lh-base">Belum ada pengumuman resmi yang disiarkan.</h6>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</section>
+
+{% for b in berita_list %}
+<div class="modal fade" id="beritaModal{{ b.id }}" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content apple-modal">
+            <div class="apple-modal-header d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="text-primary small fw-bold mb-1 text-uppercase"><i class="bi bi-calendar3 me-1"></i> {{ b.get_kategori_display }} • {{ b.tanggal_upload|date:"d F Y" }}</div>
+                    <h4 class="fw-bold theme-text-main m-0 lh-sm">{{ b.judul }}</h4>
+                </div>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="apple-modal-body p-0 theme-card-bg">
+                {% if b.gambar_utama %}
+                    <img src="{{ b.gambar_utama.url }}" style="width: 100%; height: 300px; object-fit: cover;" alt="Banner">
+                {% endif %}
+                <div class="p-4 theme-card-bg rounded-bottom-24">
+                    <div class="modal-article-content pe-2 text-justify">
+                        {{ b.isi_konten|safe }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% for p in pengumuman_list %}
+<div class="modal fade" id="pengumumanModal{{ p.id }}" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content apple-modal">
+            <div class="apple-modal-header d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="text-warning small fw-bold mb-1 text-uppercase"><i class="bi bi-megaphone me-1"></i> Dokumen {{ p.get_kategori_display }}</div>
+                    <h5 class="fw-bold theme-text-main m-0 lh-base">{{ p.judul }}</h5>
+                    <div class="text-muted small mt-1" style="font-size: 0.75rem;">Diterbitkan: {{ p.tanggal_upload|date:"d F Y" }}</div>
+                </div>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="apple-modal-body theme-card-bg p-4 rounded-bottom-24">
+                <div class="modal-article-content style-container-text pe-1 mb-4" style="font-size: 1rem;">
+                    {{ p.isi_konten|safe }}
+                </div>
+                
+                {% if p.file_lampiran %}
+                <div class="pt-3 border-top" style="border-color: var(--border-soft) !important;">
+                    <div class="small text-muted mb-2 fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">DOKUMEN LAMPIRAN RESMI</div>
+                    <a href="{{ p.file_lampiran.url }}" target="_blank" class="btn btn-unduh w-100 rounded-pill fw-bold py-2 shadow-sm d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-file-earmark-pdf-fill fs-5"></i> Unduh Berkas Lampiran (.pdf)
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Daftarkan fungsi pemantau saat modal Bootstrap menyala untuk Blur Effect
+        const allModals = document.querySelectorAll('.modal');
+        allModals.forEach(modalElement => {
+            modalElement.addEventListener('show.bs.modal', function () {
+                setTimeout(() => {
+                    let backdrops = document.querySelectorAll('.modal-backdrop');
+                    backdrops.forEach(b => b.classList.add('modal-blur-backdrop'));
+                }, 10);
+            });
+        });
+    });
+</script>
+{% endblock %}

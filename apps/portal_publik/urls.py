@@ -10,6 +10,7 @@ urlpatterns = [
     path('kontak/', views.hubungi_kami, name='kontak'),
     path('aset/kendaraan/coming-soon/', views.coming_soon_view, name='coming_soon_kendaraan'),
     path('bantuan/', views.bantuan_view, name='bantuan'),
+    path('berita/', views.berita_publik_view, name='berita'),
     
     # data aset 
     path('data-aset/', views.data_aset_publik_view, name='data_aset_publik'),

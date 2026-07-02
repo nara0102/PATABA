@@ -1,4 +1,4 @@
-{% extends 'base/base_admin_BPKAD.html' %}
+{% extends base_template %} {% load static %}
 {% block title %}Master Data Aset Tanah - TRANSPARA{% endblock %}
 {% block extra_css %}
 <style>
@@ -45,7 +45,9 @@
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-bpkad-outline rounded-pill px-3 shadow-sm"><i class="bi bi-activity me-1"></i> Log Aktivitas</button>
+            {% if not request.user.is_superuser %}
             <a href="{% url 'tanah:input_aset_tanah' %}" class="btn btn-bpkad-primary rounded-pill px-4 shadow-sm"><i class="bi bi-plus-lg me-1"></i> Tambah Aset</a>
+            {% endif %}
         </div>
     </div>
 
@@ -131,19 +133,29 @@
             </div>
 
             <!-- filter -->
-            <div class="glass-card py-3 px-4 mb-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                <form method="GET" class="position-relative w-100" style="max-width: 450px;">
+            <div class="glass-card p-3 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
+    
+                <form method="GET" class="position-relative flex-grow-1 w-100 m-0">
                     {% if request.GET.opd %}<input type="hidden" name="opd" value="{{ request.GET.opd }}">{% endif %}
                     {% if request.GET.status_verifikasi %}<input type="hidden" name="status_verifikasi" value="{{ request.GET.status_verifikasi }}">{% endif %}
+                    {% if request.GET.status_sertifikasi %}<input type="hidden" name="status_sertifikasi" value="{{ request.GET.status_sertifikasi }}">{% endif %}
                     
-                    <input type="text" name="q" value="{{ request.GET.q|default:'' }}" class="form-control bg-light rounded-pill input-search-pataba" style="padding-left: 2.5rem !important;" 
-                    placeholder="{% if request.user.profile.role|upper != 'OPERATOR_OPD' %}Cari NIBAR, No. Sertifikat, Kode Barang...{% else %}Cari NIBAR, No. Sertifikat...{% endif %}">
-                    <i class="bi bi-search position-absolute text-muted" style="top: 50%; left: 15px; transform: translateY(-50%);"></i>
+                    <div class="input-group search-bar-wrapper d-flex align-items-center">
+                        <span class="input-group-text border-0 bg-transparent ps-3" style="color: var(--text-muted);"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" value="{{ request.GET.q|default:'' }}" class="form-control border-0 bg-transparent py-2 shadow-none" 
+                        placeholder="{% if request.user.profile.role|upper != 'OPERATOR_OPD' %}Cari NIBAR, No. Sertifikat, Kode Barang...{% else %}Cari NIBAR, No. Sertifikat...{% endif %}">
+                    </div>
                 </form>
 
-                <button class="btn btn-bpkad-primary rounded-pill px-4 shadow-sm fw-bold w-100 w-md-auto text-nowrap" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvasAset" aria-controls="filterOffcanvasAset" style="background-color: #1E293B !important; border-color: #1E293B !important;">
-                    <i class="bi bi-funnel-fill me-1"></i> Filter Tampilan
-                </button>
+                <div class="w-100 w-md-auto btn-filter-lock-wrapper flex-shrink-0">
+                    <button class="btn btn-bpkad-primary rounded-pill px-4 py-2 shadow-sm fw-bold w-100 text-nowrap d-flex align-items-center justify-content-center gap-2" 
+                            type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvasAset" aria-controls="filterOffcanvasAset" 
+                            style="background-color: #1E293B !important; border-color: #1E293B !important;">
+                        <i class="bi bi-funnel-fill"></i> 
+                        <span>Filter Tampilan</span>
+                    </button>
+                </div>
+
             </div>
 
             <!-- master tabel -->
@@ -209,18 +221,30 @@
                                 
                                 <td class="text-center align-middle">
                                     <div class="d-flex flex-wrap justify-content-center gap-1" style="max-width: 76px; margin: 0 auto;">
-                                        {% if aset.status_verifikasi == 'VALID' and aset.status_sertifikasi == 'BERSERTIFIKAT' %}
-                                            <a href="{% url 'tanah:tambah_sertifikat' aset.id %}" class="btn btn-sm btn-bpkad-outline-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Tambah Detail Sertifikat"><i class="bi bi-file-earmark-plus"></i></a>
-                                        {% else %}
-                                            <button class="btn btn-sm btn-light border rounded-circle shadow-sm text-muted opacity-50 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Aset belum Valid atau Bersertifikat." disabled><i class="bi bi-lock-fill"></i></button>
+
+                                        {% if not request.user.is_superuser %}
+
+                                            {% if aset.status_verifikasi == 'VALID' and aset.status_sertifikasi == 'BERSERTIFIKAT' %}
+                                                <a href="{% url 'tanah:tambah_sertifikat' aset.id %}" class="btn btn-sm btn-bpkad-outline-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Tambah Detail Sertifikat"><i class="bi bi-file-earmark-plus"></i></a>
+                                            {% else %}
+                                                <button class="btn btn-sm btn-light border rounded-circle shadow-sm text-muted opacity-50 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Aset belum Valid atau Bersertifikat." disabled><i class="bi bi-lock-fill"></i></button>
+                                            {% endif %}
+
                                         {% endif %}
+
                                         <a href="{% url 'tanah:detail_aset_tanah' aset.id %}" class="btn btn-sm btn-bpkad-info rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Lihat Detail Data"><i class="bi bi-eye"></i></a>
-                                        <a href="{% url 'tanah:edit_aset_tanah' aset.id %}" class="btn btn-sm btn-bpkad-warning rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Tinjau & Validasi Data"><i class="bi bi-pencil"></i></a>
-                                        {% if aset.status_verifikasi == 'VALID' %}
-                                            <a href="{% url 'tanah:delete_aset_tanah' aset.id %}" class="btn btn-sm btn-bpkad-danger rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Hapus Data" onclick="return confirm('Yakin ingin menghapus aset ini?')"><i class="bi bi-trash"></i></a>
-                                        {% else %}
-                                            <button class="btn btn-sm btn-light border rounded-circle shadow-sm text-muted opacity-50 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Aset belum valid." disabled><i class="bi bi-lock-fill"></i></button>
+                                        
+                                        {% if not request.user.is_superuser %}
+                                            <a href="{% url 'tanah:edit_aset_tanah' aset.id %}" class="btn btn-sm btn-bpkad-warning rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Tinjau & Validasi Data"><i class="bi bi-pencil"></i></a>
                                         {% endif %}
+
+                                        {% if not request.user.is_superuser %}
+                                            {% if aset.status_verifikasi == 'VALID' %}
+                                                <a href="{% url 'tanah:delete_aset_tanah' aset.id %}" class="btn btn-sm btn-bpkad-danger rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Hapus Data" onclick="return confirm('Yakin ingin menghapus aset ini?')"><i class="bi bi-trash"></i></a>
+                                            {% else %}
+                                                <button class="btn btn-sm btn-light border rounded-circle shadow-sm text-muted opacity-50 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" title="Aset belum valid." disabled><i class="bi bi-lock-fill"></i></button>
+                                            {% endif %}
+                                        {% endif %} 
                                     </div>
                                 </td>
                             </tr>

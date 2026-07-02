@@ -101,9 +101,15 @@
                     {% endif %}
                 </div>
 
-                <a href="{% url 'tanah:export_pdf_detail' aset.id %}" class="btn btn-danger rounded-pill w-100 fw-bold shadow-sm py-2 mt-auto" style="background-color: #991B1B; border-color: #991B1B;">
-                    <i class="bi bi-file-earmark-pdf-fill me-2"></i> Cetak Profil Aset
-                </a>
+                <!-- Tombol Cetak PDF dengan Spinner Tersembunyi -->
+                <button type="button" id="btnCetakPDF" onclick="unduhPDFDenganLoading(this, '{% url 'tanah:export_pdf_detail' aset.id %}')" class="btn btn-sm btn-danger rounded-pill px-4 fw-bold shadow-sm">
+                    <span id="textNormal">
+                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> Cetak PDF
+                    </span>
+                    <span id="textLoading" class="d-none">
+                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Menyiapkan Dokumen...
+                    </span>
+                </button>
                 
             </div>
         </div>
@@ -245,4 +251,55 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        function unduhPDFDenganLoading(btn, urlTarget) {
+            const textNormal = document.getElementById('textNormal');
+            const textLoading = document.getElementById('textLoading');
+            
+            // 1. Kunci tombol & Aktifkan Animasi Loading
+            btn.disabled = true;
+            textNormal.classList.add('d-none');
+            textLoading.classList.remove('d-none');
+            
+            // 2. Ambil data PDF secara background (Fetch Blob)
+            fetch(urlTarget)
+                .then(response => {
+                    if (!response.ok) throw new Error('Gagal merender dokumen PDF.');
+                    
+                    // PERBAIKAN DI SINI: Menggunakan komentar JS yang benar (//)
+                    let namaFile = "Profil_Aset.pdf";
+                    const disposition = response.headers.get('Content-Disposition');
+                    if (disposition && disposition.includes('filename=')) {
+                        namaFile = disposition.split('filename=')[1].replace(/['"]/g, '');
+                    }
+                    
+                    return response.blob().then(blob => ({ blob, namaFile }));
+                })
+                .then(({ blob, namaFile }) => {
+                    // 3. Trigger unduhan otomatis di browser setelah file siap
+                    const urlBlob = window.URL.createObjectURL(blob);
+                    const linkDummy = document.createElement('a');
+                    linkDummy.href = urlBlob;
+                    linkDummy.download = namaFile; 
+                    document.body.appendChild(linkDummy);
+                    linkDummy.click();
+                    
+                    // Bersihkan sisa memori browser
+                    linkDummy.remove();
+                    window.URL.revokeObjectURL(urlBlob);
+                })
+                .catch(err => {
+                    alert('Anomali Sistem: ' + err.message);
+                })
+                .finally(() => {
+                    // 4. Kembalikan tombol ke kondisi semula setelah proses selesai
+                    btn.disabled = false;
+                    textNormal.classList.remove('d-none');
+                    textLoading.classList.add('d-none');
+                });
+        }
+    </script>
 {% endblock %}

@@ -1,4 +1,4 @@
-{% extends 'base/base_admin_BPKAD.html' %}
+{% extends base_template %} {% load static %}
 {% block title %}Master Data Sertifikat Tanah - TRANSPARA{% endblock %}
 
 {% block content %}
@@ -11,9 +11,12 @@
             <p class="text-muted small mb-0">Manajemen dokumen legalitas aset daerah Kota Palu.</p>
         </div>
        <div class="d-flex gap-2">
-            <a href="{% url 'tanah:list_aset_tanah' %}" class="btn btn-bpkad-primary rounded-pill px-4 fw-bold shadow-sm" title="Pilih aset di master data untuk menambah sertifikat">
-                <i class="bi bi-search me-1"></i> Cari Aset & Tambah Sertifikat
-            </a>
+
+            {% if not request.user.is_superuser %}
+                <a href="{% url 'tanah:list_aset_tanah' %}" class="btn btn-bpkad-primary rounded-pill px-4 fw-bold shadow-sm" title="Pilih aset di master data untuk menambah sertifikat">
+                    <i class="bi bi-search me-1"></i> Cari Aset & Tambah Sertifikat
+                </a>
+            {% endif %}
             <button class="btn btn-outline-success rounded-pill px-3 fw-bold shadow-sm"><i class="bi bi-download me-1"></i> Export</button>
         </div>
     </div>
@@ -173,7 +176,7 @@
                             <div class="d-grid gap-1 mx-auto" style="grid-template-columns: repeat(2, 1fr); max-width: 70px;">
                                 <a href="{% url 'tanah:detail_sertifikat' sertifikat.id %}" class="btn btn-sm btn-bpkad-info shadow-sm" title="Lihat Detail"><i class="bi bi-eye"></i></a>
                                 <a href="{% url 'tanah:edit_sertifikat' sertifikat.id %}" class="btn btn-sm btn-bpkad-warning shadow-sm" title="Edit Dokumen"><i class="bi bi-pencil"></i></a>
-                                <a href="{% url 'tanah:delete_sertifikat' sertifikat.id %}" class="btn btn-sm btn-light text-danger border shadow-sm" title="Hapus Data" onclick="return confirm('Yakin hapus sertifikat ini?')"><i class="bi bi-trash"></i></a>
+                                <a href="{% url 'tanah:delete_sertifikat' sertifikat.id %}" class="btn btn-sm btn-bpkad-danger rounded-circle shadow-sm d-flex align-items-center justify-content-center" title="Hapus Data" onclick="return confirm('Yakin hapus sertifikat ini?')"><i class="bi bi-trash"></i></a>
                             </div>
                         </td>
                     </tr>

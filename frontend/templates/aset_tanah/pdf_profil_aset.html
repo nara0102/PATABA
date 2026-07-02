@@ -8,8 +8,6 @@
         @page {
             /* MENGGUNAKAN UKURAN KERTAS F4 (FOLIO) */
             size: 21.5cm 33cm portrait; 
-            
-            /* Margin Atas diperbesar jadi 3.5cm agar Judul H1 (24px) tidak menabrak Header */
             margin: 3.5cm 2cm 2.5cm 2cm; 
             
             /* Area Identitas Dokumen (Header Kanan Atas) */
@@ -18,19 +16,17 @@
                 left: 2cm; right: 2cm; top: 1.2cm; height: 2cm;
             }
             
-            /* Area Nomor Halaman (Footer ditekan ke paling bawah: 0.5cm) */
+            /* Area Nomor Halaman (Footer) */
             @frame footer_frame {
                 -pdf-frame-content: footer_content;
-                left: 2cm; right: 2cm; bottom: 0.5cm; height: 1cm;
+                left: 2cm; right: 2cm; bottom: 0.5cm; height: 1.3cm;
             }
         }
         
         body { font-family: Helvetica, sans-serif; font-size: 11px; color: #333; line-height: 1.5; }
-        
         h1 { font-size: 24px; text-align: center; color: #002D5E; margin-top: 10px; margin-bottom: 2px; text-transform: uppercase; }
         h2 { font-size: 14px; text-align: center; color: #555; margin-top: 0; margin-bottom: 20px; }
         
-        /* Baris Judul Bagian */
         .section-title { 
             font-size: 12px; 
             font-weight: bold; 
@@ -44,29 +40,31 @@
             margin-bottom: 5px; 
         }
         
-        /* Tabel Utama */
         table { width: 100%; border-collapse: collapse; margin-top: 5px; }
         td { padding: 5px 6px; border-bottom: 1px solid #ddd; vertical-align: top; }
         .label { font-weight: bold; width: 35%; color: #555; }
         .value { width: 65%; }
         
-        /* ttd */
-        .signature-box { width: 100%; margin-top: 90px; page-break-inside: avoid; }
-        .signature-table { width: 100%; border: none; }
-        .signature-table td { border: none; padding: 0; vertical-align: top; }
-        .ttd-right { text-align: center; width: 45%; float: right; }
+        .foto-table { width: 100%; border: none; margin-top: 10px; }
+        .foto-table td { border: none; padding: 8px; text-align: center; vertical-align: top; width: 50%; }
+        .img-container { background-color: #f8f9fa; border: 1px solid #ddd; padding: 6px; text-align: center; }
+        .img-pdf { width: 250px; height: auto; }
+        .foto-caption { font-size: 9px; color: #666; margin-top: 4px; font-style: italic; }
+
+        .signature-box { width: 100%; margin-top: 40px; page-break-inside: avoid; }
     </style>
 </head>
 <body>
     
+    <!-- ==============================================================
+         STATIC FRAMES (HEADER & FOOTER DI LETAKKAN DI ATAS BODY)
+         ============================================================== -->
     <div id="header_content">
         <table style="width: 100%; border: none; margin: 0; padding: 0;">
             <tr>
-                <!-- KOLOM KIRI (LOGO) -->
                 <td style="width: 50%; text-align: left; border: none; padding: 0; vertical-align: top;">
                     <img src="{{ logo_path }}" width="65" alt="Logo Pataba">
                 </td>
-                <!-- KOLOM KANAN (TEKS) -->
                 <td style="width: 50%; text-align: right; font-size: 9px; color: #777; line-height: 1.3; border: none; padding: 0; vertical-align: top;">
                     <strong>DOKUMEN REGISTER:</strong> PATABA-ASET-{{ aset.id }}-{% now "Y" %}<br>
                     Diunduh pada: {% now "d/m/Y H:i" %} WITA
@@ -75,6 +73,28 @@
         </table>
     </div>
 
+    <!-- Footer -->
+    <div id="footer_content" style="border-top: 1px solid #ddd; padding-top: 5px;">
+        <table style="width: 100%; border: none; margin: 0; padding: 0;">
+            <tr>
+                <td style="width: 65%; text-align: left; font-size: 8px; color: #002D5E; border: none; padding: 0;">
+                    <i>Sistem Validasi Konten:</i> <span style="font-family: monospace;">{{ url_verifikasi }}</span>
+                </td>
+                <td style="width: 35%; text-align: right; font-size: 9px; color: #999; border: none; padding: 0;">
+                    Halaman <pdf:pagenumber> dari <pdf:pagecount>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align: center; font-size: 7.5px; color: #999; border: none; padding-top: 3px;">
+                    Dokumen elektronik ini diterbitkan secara sah oleh Sistem Portal Aset Daerah (PATABA) BPKAD Kota Palu.
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ==============================================================
+         KONTEN UTAMA LAPORAN
+         ============================================================== -->
     <h1>PROFIL LENGKAP ASET TANAH</h1>
     <h2>Pemerintah Daerah Kota Palu</h2>
     <hr style="border: 0.5px solid #002D5E; margin-bottom: 15px;">
@@ -114,8 +134,7 @@
         {% if aset.status_sertifikasi == 'BERSERTIFIKAT' and sertifikat %}
             <tr><td class="label">Nomor Sertifikat (BPN)</td><td class="value">{{ sertifikat.nomor_sertifikat|default:"-" }}</td></tr>
             <tr><td class="label">Status & Nomor Hak</td><td class="value">
-                {% if sertifikat.status_hak == 'HAK_PAKAI' %}Hak Pakai{% else %}Hak Milik{% endif %} 
-                {{ sertifikat.nomor_hak|default:"" }}
+                {% if sertifikat.status_hak == 'HAK_PAKAI' %}Hak Pakai{% else %}Hak Milik{% endif %} {{ sertifikat.nomor_hak|default:"" }}
             </td></tr>
             <tr><td class="label">Kondisi Fisik Dokumen</td><td class="value">
                 {% if sertifikat.keterangan == 'ASLI' %}Dokumen Asli{% else %}Salinan / Fotokopi{% endif %}
@@ -142,31 +161,58 @@
         <tr><td class="label">Catatan Tambahan</td><td class="value">{{ aset.keterangan|default:"-" }}</td></tr>
     </table>
 
-    <div style="height: 60px; line-height: 60px;">&nbsp;</div> 
+    <div class="section-title">E. DOKUMENTASI FOTO LOKASI & LINGKUNGAN ASET</div>
+    {% if koleksi_foto %}
+        <table class="foto-table">
+            <tr>
+            {% for foto in koleksi_foto %}
+                <td>
+                    <div class="img-container">
+                        <img src="{{ foto.file_foto.url }}" class="img-pdf" alt="Dokumentasi Aset">
+                        <div class="foto-caption">Dokumentasi Aset Tanah Ke-{{ forloop.counter }}</div>
+                    </div>
+                </td>
+                {% if forloop.counter|divisibleby:2 and not forloop.last %}
+                    </tr><tr>
+                {% endif %}
+            {% endfor %}
+            </tr>
+        </table>
+    {% else %}
+        <p style="text-align: center; color: #888; font-style: italic; margin-top: 15px; margin-bottom: 15px;">
+            Tidak ada dokumen foto lokasi lapangan atau road map Aset Tanah yang dilampirkan pada aset ini.
+        </p>
+    {% endif %}
+
+    <!-- ==============================================================
+         TTD & QR CODE OTENTIKASI
+         ============================================================== -->
     <div class="signature-box">
-        <table style="width: 100%; border: none; margin-top: 40px; page-break-inside: avoid;">
-        <tr>
-            <!-- Kolom kosong di kiri sebesar 65% -->
-            <td style="width: 65%; border: none;"></td> 
-            
-            <!-- Kolom TTD di kanan sebesar 35% -->
-            <td style="width: 35%; text-align: left; border: none; padding-left: 10px; line-height: 1.3;">
-                <p style="margin-bottom: 60px;">
-                    Palu, {% now "d F Y" %}<br>
-                    Dicetak Oleh,
-                </p>
-                <p style="margin-bottom: 0;">
-                    <strong><u>{{ user.first_name|default:"Administrator BPKAD" }} {{ user.last_name }}</u></strong><br>
-                    NIP. {{ user.profile.nip|default:"-" }}
-                </p>
-            </td>
-        </tr>
-    </table>
+        <table style="width: 100%; border: none; margin-top: 20px; page-break-inside: avoid;">
+            <tr>
+                <!-- Narasi QR Code Baru Lebih Keren & Resmi -->
+                <td style="width: 45%; text-align: left; border: none; padding-top: 10px; line-height: 1.4;">
+                    <img src="{{ qr_code_base64 }}" width="85" height="85" alt="QR Otentikasi"><br>
+                    <span style="font-size: 7.5px; color: #555; font-style: italic; display: block; margin-top: 5px;">
+                        <strong>SISTEM OTENTIKASI DIGITAL:</strong> Dokumen cetak ini diterbitkan otomatis oleh <i>Core Engine</i> PATABA BPKAD Kota Palu. Pindai kode QR untuk memvalidasi integritas data fisik langsung dari server master.
+                    </span>
+                </td> 
+                
+                <td style="width: 20%; border: none;"></td> 
+                
+                <td style="width: 35%; text-align: left; border: none; padding-left: 10px; line-height: 1.4; padding-top: 10px;">
+                    <p style="margin-bottom: 55px;">
+                        Palu, {% now "d F Y" %}<br>
+                        Dicetak Oleh,
+                    </p>
+                    <p style="margin-bottom: 0;">
+                        <strong><u>{{ user.first_name|default:"Administrator BPKAD" }} {{ user.last_name }}</u></strong><br>
+                        NIP. {{ user.profile.nip|default:"-" }}
+                    </p>
+                </td>
+            </tr>
+        </table>
     </div>
 
-    <div id="footer_content" style="text-align: center; font-size: 9px; color: #999; border-top: 4px solid #ddd; padding-top: 20px;">
-        Dokumen elektronik ini diterbitkan oleh Sistem Portal Aset Daerah (PATABA) BPKAD Kota Palu.<br>
-        Halaman <pdf:pagenumber> dari <pdf:pagecount>
-    </div>
 </body>
 </html>

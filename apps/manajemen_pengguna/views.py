@@ -27,7 +27,7 @@ from apps.portal_publik.models import PublikasiInstansi
 from pataba_core.constants import ROLE_OPERATOR, ROLE_ADMIN, ROLE_SUPER, STATUS_PENDING, STATUS_VALID, STATUS_REVIEW
 
 # - - - - -
-# FUNGSI UTILITY UNTUK ROLE CHECKING (SUDAH DIPERBAIKI ANTI-LOOPING)
+# FUNGSI UTILITY UNTUK ROLE CHECKING
 # - - - - -
 
 def is_superadmin(user):
@@ -56,6 +56,8 @@ def is_operator(user):
         return role_ok
     except UserProfile.DoesNotExist:
         return False
+    
+# keamanan log in sistem
 def role_required(allowed_roles=[]):
     def decorator(view_func):
         @wraps(view_func)
@@ -86,6 +88,7 @@ def role_required(allowed_roles=[]):
                 
         return wrap
     return decorator
+
 
 # - - - - -
 # AUTENTIKASI
@@ -298,10 +301,12 @@ def register_view(request):
         
     return render(request, 'manajemen_pengguna/login.html', context)
 
+
 # - - - - -
 # DASHBOARD
 # - - - - -
 
+# rute dashboard
 def dashboard_router(request):
     if not request.user.is_authenticated:
         return redirect('auth:login')
@@ -313,7 +318,7 @@ def dashboard_router(request):
         pass
     return redirect('auth:dashboard_bpkad')
 
-# SEMUA DECORATOR TELAH DIPERBAIKI (Ditambahkan login_url='auth:login')
+# super admin
 @login_required(login_url='auth:login')
 @user_passes_test(is_superadmin, login_url='auth:login')
 def dashboard_superadmin_view(request):
@@ -335,6 +340,7 @@ def dashboard_superadmin_view(request):
     }
     return render(request, 'manajemen_pengguna/dashboard_superadmin.html', context) 
 
+# admin bpkad
 @login_required(login_url='auth:login')
 @user_passes_test(is_admin_bpkad, login_url='auth:login') 
 def dashboard_bpkad_view(request):
@@ -405,6 +411,7 @@ def dashboard_bpkad_view(request):
     }
     return render(request, 'manajemen_pengguna/dashboard_BPKAD.html', context)
 
+# operator opd
 @login_required(login_url='auth:login')
 @user_passes_test(is_operator, login_url='auth:login')
 def dashboard_opd_view(request):
@@ -426,10 +433,12 @@ def dashboard_opd_view(request):
     }
     return render(request, 'manajemen_pengguna/dashboard_OPD.html', context)
 
+
 # - - - - -
 # PERSETUJUAN & TOLAK
 # - - - - -
 
+# setuju pengguna
 @login_required(login_url='auth:login')
 @user_passes_test(is_superadmin, login_url='auth:login')
 def setujui_user(request, user_id):
@@ -446,6 +455,7 @@ def setujui_user(request, user_id):
         messages.error(request, "Profil tidak ada.")
     return redirect('auth:dashboard_superadmin')
 
+# setuju opd
 @login_required(login_url='auth:login')
 @user_passes_test(is_superadmin, login_url='auth:login')
 def setujui_opd(request, opd_id):
@@ -457,6 +467,7 @@ def setujui_opd(request, opd_id):
     messages.success(request, f"OPD {opd.nama_opd} berhasil diaktifkan.")
     return redirect('auth:dashboard_superadmin')
 
+# tolak pengguna
 @login_required(login_url='auth:login')
 @user_passes_test(is_superadmin, login_url='auth:login')
 def tolak_user(request, user_id):
@@ -465,6 +476,7 @@ def tolak_user(request, user_id):
     messages.success(request, f"User {user.username} ditolak & dihapus.")
     return redirect('auth:dashboard_superadmin')
 
+# tolak opd
 @login_required(login_url='auth:login')
 @user_passes_test(is_superadmin, login_url='auth:login')
 def tolak_opd(request, opd_id):
@@ -473,19 +485,12 @@ def tolak_opd(request, opd_id):
     messages.success(request, f"OPD {opd.nama_opd} ditolak & dihapus.")
     return redirect('auth:dashboard_superadmin')
 
-@login_required(login_url='auth:login')
-@user_passes_test(is_superadmin, login_url='auth:login')
-def hapus_user(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-    username = user.username
-    user.delete() 
-    messages.success(request, f"Pengguna {username} telah dihapus.")
-    return redirect(request.META.get('HTTP_REFERER', 'auth:dashboard_superadmin'))
 
 # - - - - -
 # KELOLA OPD
 # - - - - -
 
+# ajuan opd dari publik
 def input_opd_publik_view(request):
     if request.method == 'POST':
         nama = request.POST.get('nama_opd')
@@ -502,6 +507,7 @@ def input_opd_publik_view(request):
             messages.error(request, f"Gagal: OPD '{nama}' sudah terdaftar.")
     return render(request, 'manajemen_pengguna/input_OPD_publik.html')
 
+# ajuan opd dari super admin
 @login_required(login_url='auth:login')
 @user_passes_test(is_superadmin, login_url='auth:login')
 def input_opd_sadmin_view(request):
@@ -520,6 +526,7 @@ def input_opd_sadmin_view(request):
             messages.error(request, f"Gagal: Instansi '{nama}' sudah ada.")
     return render(request, 'manajemen_pengguna/input_OPD_SAdmin.html')
 
+# daftar list opd
 @login_required(login_url='auth:login')
 @user_passes_test(is_superadmin, login_url='auth:login')
 def daftar_opd_view(request):
@@ -530,12 +537,14 @@ def daftar_opd_view(request):
     }
     return render(request, 'manajemen_pengguna/daftar_opd.html', context)
 
+# detail opd
 @login_required(login_url='auth:login')
 @user_passes_test(is_admin_bpkad, login_url='auth:login')
 def detail_opd_view(request, opd_id):
     opd = get_object_or_404(MasterOPD, id=opd_id)
     return render(request, 'manajemen_pengguna/detail_opd.html', {'opd': opd, 'title': f"Detail {opd.singkatan or opd.nama_opd}"})
 
+# edit opd
 @login_required(login_url='auth:login')
 @user_passes_test(is_superadmin, login_url='auth:login')
 def edit_opd_view(request, opd_id):
@@ -557,6 +566,7 @@ def edit_opd_view(request, opd_id):
             messages.error(request, "Gagal update: Instansi sudah ada.")
     return render(request, 'manajemen_pengguna/input_OPD_SAdmin.html', {'opd': opd, 'title': f"Edit {opd.singkatan or opd.nama_opd}"})
 
+# hapus opd
 @login_required(login_url='auth:login')
 @user_passes_test(is_superadmin, login_url='auth:login')
 def hapus_opd(request, opd_id):
@@ -566,22 +576,26 @@ def hapus_opd(request, opd_id):
     messages.success(request, f"OPD {nama} dihapus.")
     return redirect('auth:daftar_opd')
 
+
 # - - - - -
 # KELOLA PENGGUNA
 # - - - - -
 
+# daftar list operator opd
 @login_required(login_url='auth:login')
 @user_passes_test(is_superadmin, login_url='auth:login')
 def daftar_operator_opd(request):
     users = UserProfile.objects.select_related('user', 'opd').filter(role__iexact='OPERATOR_OPD')
     return render(request, 'manajemen_pengguna/daftar_pengguna.html', {'users': users, 'title': 'Operator OPD'})
 
+# daftar list admin bpkad
 @login_required(login_url='auth:login')
 @user_passes_test(is_superadmin, login_url='auth:login')
 def daftar_admin_bpkad(request):
     users = UserProfile.objects.select_related('user').filter(role__iexact='ADMIN_BPKAD')
     return render(request, 'manajemen_pengguna/daftar_pengguna.html', {'users': users, 'title': 'Admin BPKAD'})
 
+# detail pengguna
 @login_required(login_url='auth:login')
 @user_passes_test(is_superadmin, login_url='auth:login')
 def detail_pengguna_view(request, user_id):
@@ -589,6 +603,7 @@ def detail_pengguna_view(request, user_id):
     profile = get_object_or_404(UserProfile, user=target_user)
     return render(request, 'manajemen_pengguna/detail_pengguna.html', {'target_user': target_user, 'profile': profile, 'title': f"Profil @{target_user.username}"})
 
+# edit pengguna
 @login_required(login_url='auth:login')
 @user_passes_test(is_superadmin, login_url='auth:login')
 def edit_pengguna_view(request, user_id):
@@ -646,7 +661,17 @@ def edit_pengguna_view(request, user_id):
         'title': f"Edit - @{target_user.username}"
     })
     
+# hapus pengguna
+@login_required(login_url='auth:login')
+@user_passes_test(is_superadmin, login_url='auth:login')
+def hapus_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    username = user.username
+    user.delete() 
+    messages.success(request, f"Pengguna {username} telah dihapus.")
+    return redirect(request.META.get('HTTP_REFERER', 'auth:dashboard_superadmin'))
 
+# pengaturan profil pengguna
 @login_required(login_url='auth:login')
 def pengaturan_profil_view(request):
     target_user = request.user
