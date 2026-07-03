@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Buku Inventaris Aset Tanah OPD</title>
+    <style>
+        @page {
+            size: 33cm 21.5cm landscape; /* TOTAL LOCK KE LANDSCAPE BALANCED */
+            margin: 2.2cm 1.2cm 2.2cm 1.2cm;
+            
+            @frame footer_frame {
+                -pdf-frame-content: footer_content;
+                left: 1.2cm; right: 1.2cm; bottom: 0.5cm; height: 1cm;
+            }
+        }
+        
+        body { font-family: Helvetica, sans-serif; font-size: 7.5px; color: #0f172a; line-height: 1.3; }
+        
+        .meta-header-table { width: 100%; border: none; font-size: 9px; margin-top: 10px; margin-bottom: 12px; }
+        .meta-header-table td { border: none; padding: 2px 0; }
+        
+        .table-inventaris { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .table-inventaris th { 
+            background-color: #cbd5e1; 
+            color: #000000; 
+            border: 0.5px solid #334155; 
+            font-weight: bold; 
+            text-align: center;
+            vertical-align: middle;
+            padding: 5px 2px;
+        }
+        .table-inventaris td { 
+            border: 0.5px solid #475569; 
+            padding: 5px 4px; 
+            vertical-align: top;
+            overflow: hidden;
+        }
+        
+        /* Protektor pembungkus blok sel tabel */
+        .cell-wrap { word-wrap: break-word; -pdf-word-wrap: break; width: 100%; }
+        
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .font-mono { font-family: Courier, monospace; font-size: 7px; }
+        
+        .sign-section { width: 100%; margin-top: 30px; page-break-inside: avoid; font-size: 9px; }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER LAPORAN INTEGRASI -->
+    <table style="width: 100%; border: none;">
+        <tr>
+            <td style="width: 5%; border: none; padding: 0;">
+                <img src="{{ logo_path }}" width="40" alt="Logo">
+            </td>
+            <td style="width: 95%; border: none; padding: 0; padding-left: 10px; vertical-align: middle;">
+                <span style="font-size: 12px; font-weight: bold; color: #002D5E; display: block;">DAFTAR BARANG MILIK DAERAH (BMD) PADA PENGGUNA BARANG TANAH</span>
+                <span style="font-size: 9.5px; color: #334155; display: block; font-weight: bold; text-transform: uppercase;">PROVINSI SULAWESI TENGAH PEMERINTAH KOTA PALU</span>
+            </td>
+        </tr>
+    </table>
+    <hr style="border: 0.5px solid #002D5E; margin-top: 6px; margin-bottom: 6px;">
+
+    <!-- METADATA INDENTASI DINAS -->
+    <table class="meta-header-table">
+        <tr>
+            <td style="width: 12%; font-weight: bold;">Pengguna Barang</td>
+            <td style="width: 1.5%;">:</td>
+            <td style="width: 86.5%; text-transform: uppercase; font-weight: bold;">{{ opd.nama_opd }}</td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold;">Kode Lokasi</td>
+            <td>:</td>
+            <td class="font-mono" style="font-weight: bold;">{{ opd.kode_lokasi|default:"72.71.5.02.01" }}</td>
+        </tr>
+    </table>
+
+    <!-- MODEL TABEL AMAN KOTAK (WIDTH DIKUNCI MATANG) -->
+    <table class="table-inventaris">
+        <thead>
+            <tr>
+                <th rowspan="2" style="width: 2.5%;">NO</th>
+                <th rowspan="2" style="width: 8%;">Kode Barang</th>
+                <th rowspan="2" style="width: 8%;">Nama Barang</th>
+                <th rowspan="2" style="width: 7%;">NIBAR</th>
+                <th rowspan="2" style="width: 4%;">No.<br>Reg</th>
+                <th rowspan="2" style="width: 8%;">Spesifikasi<br>Nama Barang</th>
+                <th rowspan="2" style="width: 7%;">Spesifikasi<br>Lainnya</th>
+                <th rowspan="2" style="width: 4%;">Luas<br>(m²)</th>
+                <th rowspan="2" style="width: 11%;">Lokasi Alamat</th>
+                <th rowspan="2" style="width: 5%;">Koordinat</th>
+                <th colspan="5" style="width: 23%;">Bukti Kepemilikan Dokumen</th>
+                <th rowspan="2" style="width: 5%;">Asal Usul</th>
+                <th rowspan="2" style="width: 8.5%;">Nilai (Rp)</th>
+            </tr>
+            <tr>
+                <th style="width: 5%;">Nama Pemegang Hak</th>
+                <th style="width: 6%;">Nomor Buku</th>
+                <th style="width: 5%;">Tanggal</th>
+                <th style="width: 3%;">Fisik</th>
+                <th style="width: 4%;">Status Pilar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in daftar_aset %}
+            <tr>
+                <td class="text-center"><div class="cell-wrap">{{ forloop.counter }}</div></td>
+                <td class="font-mono"><div class="cell-wrap">{{ a.kode_barang }}</div></td>
+                <td><div class="cell-wrap">{{ a.nama_barang }}</div></td>
+                <td class="font-mono text-center"><div class="cell-wrap">{{ a.nibar }}</div></td>
+                <td class="font-mono text-center"><div class="cell-wrap">{{ a.nomor_register }}</div></td>
+                <td><div class="cell-wrap">{{ a.spesifikasi_nama_barang }}</div></td>
+                <td><div class="cell-wrap">{{ a.spesifikasi_lainnya }}</div></td>
+                <td class="text-right" style="font-weight: bold;"><div class="cell-wrap">{{ a.luas }}</div></td>
+                <td><div class="cell-wrap">{{ a.lokasi }}</div></td>
+                <td class="font-mono text-center"><div class="cell-wrap">{{ a.koordinat }}</div></td>
+                
+                <!-- Sub-kolom Bukti Kepemilikan (Lega & Proteksi Kotak) -->
+                <td><div class="cell-wrap">{{ a.sertif_nama }}</div></td>
+                <td class="font-mono"><div class="cell-wrap">{{ a.sertif_nomor }}</div></td>
+                <td class="text-center font-mono"><div class="cell-wrap">{{ a.sertif_tanggal }}</div></td>
+                <td class="text-center" style="font-weight: bold;"><div class="cell-wrap">{{ a.status_dokumen }}</div></td>
+                <td class="text-center text-primary" style="font-size: 5.5px;"><div class="cell-wrap">{{ a.status_5_pilar }}</div></td>
+                
+                <td><div class="cell-wrap">{{ a.cara_perolehan }}</div></td>
+                <td class="text-right font-mono" style="font-weight: bold; background-color: #f8fafc;"><div class="cell-wrap">{{ a.nilai }}</div></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- AREA TANDA TANGAN KEPALA DINAS (100% DINAMIS DARI DATABASE) -->
+    <div class="sign-section">
+        <table style="width: 100%; border: none;">
+            <tr>
+                <td style="width: 72%; border: none;"></td>
+                <td style="width: 28%; border: none; text-align: left; line-height: 1.4;">
+                    <p style="margin-bottom: 50px;">
+                        Palu, {% now "d F Y" %}<br>
+                        <strong>Kepala {{ opd.nama_opd }}</strong><br>
+                        Pengguna Barang
+                    </p>
+                    <p style="margin-bottom: 0;">
+                        <strong><u>{{ nama_kepala }}</u></strong><br>
+                        NIP. {{ nip_kepala }}
+                    </p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- SINKRONISASI BALANCE FOOTER KIRI-KANAN -->
+    <div id="footer_content" style="border-top: 0.5px solid #cbd5e1; padding-top: 5px;">
+        <table style="width: 100%; border: none; margin: 0; padding: 0;">
+            <tr>
+                <td style="width: 60%; text-align: left; font-size: 7.5px; color: #002D5E; border: none; padding: 0; font-family: monospace;">
+                    Sistem Otentikasi Laporan: <span>{{ url_verifikasi }}</span>
+                </td>
+                <td style="width: 40%; text-align: right; font-size: 7.5px; color: #94a3b8; border: none; padding: 0;">
+                    PATABA BPKAD — Halaman <pdf:pagenumber> dari <pdf:pagecount>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>

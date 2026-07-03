@@ -1,0 +1,150 @@
+{% extends 'base/base_admin_BPKAD.html' %}
+{% block title %}Pusat Cetak Laporan PDF - TRANSPARA{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 mb-5">
+    
+    <!-- HEADER HALAMAN -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1" style="color: var(--text-main);"><i class="bi bi-file-earmark-pdf text-danger me-2"></i>Pusat Cetak Laporan PDF</h4>
+            <p class="text-muted small mb-0">Pilih jenis format laporan fisik regulasi BPKAD Kota Palu untuk dicetak langsung ke dalam berkas PDF.</p>
+        </div>
+    </div>
+
+    <!-- ROW CIRI UTAMA 2 PILIHAN FORMAT LAPORAN -->
+    <div class="row g-4">
+        
+        <!-- KARTU 1: REKAPITULASI CAPAIAN SERTIFIKASI (LANDSCAPE F4) -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4 h-100 d-flex flex-column">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="rounded-circle bg-danger bg-opacity-10 p-2 text-danger me-3 d-flex justify-content-center align-items-center" style="width: 45px; height: 45px;">
+                        <i class="bi bi-table fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0" style="color: var(--accent-blue);">1. Laporan Rekapitulasi Capaian Sertifikasi</h6>
+                        <small class="text-muted">Format Kertas: F4 Folio - Landscape (Mendatar)</small>
+                    </div>
+                </div>
+                
+                <p class="text-muted small flex-grow-1 mb-4">
+                    Menghasilkan tabel matriks komprehensif seluruh OPD Kota Palu mengenai akumulasi total luasan tanah, total nilai rupiah, serta persentase capaian target pensertifikatan tanah daerah. Format ini persis seperti format baku pemeriksaan internal BPKAD.
+                </p>
+                
+                <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                    <span class="badge bg-light text-secondary border px-3 py-2"><i class="bi bi-globe me-1"></i> Data Kompilasi Global</span>
+                    <button type="button" onclick="unduhPDFLaporan(this, '{% url 'tanah:export_pdf_rekap_sertif' %}')" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" style="background-color: #991B1B; border-color: #991B1B;">
+                        <span class="text-normal"><i class="bi bi-printer-fill me-1"></i> Cetak Rekapitulasi</span>
+                        <span class="text-loading d-none">
+                            <span class="spinner-border spinner-border-sm me-1" role="status"></span> Mengompilasi...
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- KARTU 2: DAFTAR RINCIAN DETAIL ASET TANAH PER OPD (PORTRAIT F4) -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4 h-100 d-flex flex-column">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="rounded-circle bg-danger bg-opacity-10 p-2 text-danger me-3 d-flex justify-content-center align-items-center" style="width: 45px; height: 45px;">
+                        <i class="bi bi-building-gear fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0" style="color: var(--accent-blue);">2. Laporan Rincian Buku Inventaris per OPD</h6>
+                        <small class="text-muted">Format Kertas: F4 Folio - Portrait (Tegak)</small>
+                    </div>
+                </div>
+                
+                <p class="text-muted small flex-grow-1 mb-3">
+                    Mencetak buku registrasi daftar inventaris fisik tanah lengkap (NIBAR, Kode Barang, Legalitas Utama) khusus yang dikelola oleh satu instansi pilihan tertentu. Sangat cocok digunakan untuk serah terima laporan aset berkala antar instansi.
+                </p>
+                
+                <!-- Filter Pilihan OPD Sebelum Cetak -->
+                <div class="mb-4 bg-light p-3 rounded-4 border">
+                    <label class="small fw-bold text-dark mb-1">Pilih Instansi Pengelola (OPD)</label>
+                    <select id="selectFilterOPD" class="form-select bg-white border-secondary-subtle small shadow-none">
+                        <option value="">-- Semua Instansi (Gabungan) --</option>
+                        {% for opd in opd_list %}
+                            <option value="{{ opd.id }}">{{ opd.nama_opd }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="pt-3 border-top text-end">
+                    <button type="button" onclick="cetakLaporanPerOPD(this)" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" style="background-color: #991B1B; border-color: #991B1B;">
+                        <span class="text-normal"><i class="bi bi-printer-fill me-1"></i> Cetak Daftar Aset</span>
+                        <span class="text-loading d-none">
+                            <span class="spinner-border spinner-border-sm me-1" role="status"></span> Memproses...
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- BLOCK INTERCEPTOR ANIMASI LOADING DOWNLOAD -->
+{% block extra_js %}
+<script>
+    // Fungsi universal download PDF dengan efek spinner loading
+    function unduhPDFLaporan(btn, urlTarget) {
+        const textNormal = btn.querySelector('.text-normal');
+        const textLoading = btn.querySelector('.text-loading');
+        
+        btn.disabled = true;
+        textNormal.classList.add('d-none');
+        textLoading.classList.remove('d-none');
+        
+        fetch(urlTarget)
+            .then(response => {
+                if (!response.ok) throw new Error('Server gagal memproses konversi HTML ke berkas PDF.');
+                
+                let namaFile = "Laporan_PATABA.pdf";
+                const disposition = response.headers.get('Content-Disposition');
+                if (disposition && disposition.includes('filename=')) {
+                    namaFile = disposition.split('filename=')[1].replace(/['"]/g, '');
+                }
+                return response.blob().then(blob => ({ blob, namaFile }));
+            })
+            .then(({ blob, namaFile }) => {
+                const urlBlob = window.URL.createObjectURL(blob);
+                const linkDummy = document.createElement('a');
+                linkDummy.href = urlBlob;
+                linkDummy.download = namaFile;
+                document.body.appendChild(linkDummy);
+                linkDummy.click();
+                
+                linkDummy.remove();
+                window.URL.revokeObjectURL(urlBlob);
+            })
+            .catch(err => {
+                alert('Anomali Cetak: ' + err.message);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                textNormal.classList.remove('d-none');
+                textLoading.classList.add('d-none');
+            });
+    }
+
+    // Fungsi pemicu cetak laporan tipe 2 (Mengirimkan ID OPD terpilih via URL Parameter)
+    function cetakLaporanPerOPD(btn) {
+        const opdId = document.getElementById('selectFilterOPD').value;
+        
+        // Buat url dinamis, arahkan ke view penangan baru nanti (misal: export_pdf_aset_opd)
+        // Kita tambahkan parameter query string ?opd_id=
+        let urlTarget = "{% url 'tanah:export_pdf_aset_opd' %}"; // Sementara arahkan ke rekap, nanti kalau view ke-2 jadi tinggal ganti nama rutenya
+        
+        if(opdId) {
+            urlTarget = urlTarget + "?opd_id=" + opdId;
+        }
+        
+        // Jalankan mesin download
+        unduhPDFLaporan(btn, urlTarget);
+    }
+</script>
+{% endblock %}
+{% endblock %}

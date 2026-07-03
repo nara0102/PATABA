@@ -9,9 +9,10 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models import Sum, Q
+from django.db.models import Count, Sum, Q
 from django.db import transaction
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.models import User
 
 # 1. pdf 
 import qrcode
@@ -813,88 +814,127 @@ def list_pembebasan_lahan(request):
 
 # 1. Tampilkan Halaman Konfigurasi Export Excel 
 @login_required(login_url='auth:login')
-def halaman_export_view(request):
+def halaman_export_excel(request):
     opd_list = MasterOPD.objects.filter(is_active=1)
     kecamatan_list = RefKecamatan.objects.all()
     
-    return render(request, 'aset_tanah/halaman_export.html', {
+    return render(request, 'aset_tanah/halaman_export_excel.html', {
         'opd_list': opd_list,
         'kecamatan_list': kecamatan_list,
     })
 
 # 2. Mesin Pembuat Excel Dinamis (Berdasarkan Centang)
+
+# fungsi ambil data dari sertifikat
+def ambil_detail_sertifikat(aset, field_name, tipe_data='string'):
+    sertifikat = aset.data_sertifikat.first()
+    if sertifikat:
+        nilai = getattr(sertifikat, field_name, None)
+        if nilai is not None:
+            if tipe_data == 'numeric':
+                try:
+                    return float(nilai)
+                except (ValueError, TypeError):
+                    return 0
+            if tipe_data == 'date' and hasattr(nilai, 'strftime'):
+                return nilai.strftime("%d-%m-%Y")
+            return nilai
+    return 0 if tipe_data == 'numeric' else "-"
+
+# proses excel
 @login_required(login_url='auth:login')
 @role_required(allowed_roles=['ADMIN_BPKAD', 'SUPERADMIN'])
 def proses_export_excel(request):
     if request.method == 'POST':
-        # --- A. Tangkap Parameter Filter ---
         q = request.POST.get('q', '')
         opd_id = request.POST.get('opd', '')
-        kecamatan_id = request.POST.get('kecamatan', '')
         status_sertif = request.POST.get('status_sertifikasi', '')
         status_verifikasi = request.POST.get('status_verifikasi', 'VALID') 
-        
-        # Tangkapan Filter Baru (Logika Sertifikat)
         bukti_fisik = request.POST.get('bukti_fisik', '')
         pemegang_hak = request.POST.get('pemegang_hak', '')
 
-        # --- B. Tangkap Kolom yang Dicentang ---
         kolom_pilihan = request.POST.getlist('kolom_export')
         
-        def get_kondisi_fisik(a):
-            if a.status_sertifikasi == 'BERSERTIFIKAT' and a.keterangan_sertifikasi_lainnya:
+        # --- LOGIKA KONSOLIDASI PINTAR (ANTI-DUPLIKAT) ---
+        
+        def logika_gabungan_status_hak(a):
+            if a.status_sertifikasi == 'BERSERTIFIKAT':
+                sertif = a.data_sertifikat.first()
+                if sertif and sertif.status_hak:
+                    return "Hak Pakai" if sertif.status_hak == 'HAK_PAKAI' else "Hak Milik"
+            return a.get_status_hak_sementara_display() or "-"
+
+        def logika_gabungan_nomor_hak(a):
+            if a.status_sertifikasi == 'BERSERTIFIKAT':
+                sertif = a.data_sertifikat.first()
+                return sertif.nomor_hak if (sertif and sertif.nomor_hak) else "-"
+            return a.nomor_hak or "-"
+
+        def logika_kondisi_fisik_dokumen(a):
+            # Prioritas 1: Ambil dari rincian buku sertifikat BPN
+            sertif = a.data_sertifikat.first()
+            if sertif and sertif.keterangan:
+                return "Dokumen Asli" if sertif.keterangan == 'ASLI' else "Hanya Fotokopi"
+            # Prioritas 2: Ambil dari kode sinkronisasi 5 pilar di tabel master
+            if a.keterangan_sertifikasi_lainnya:
                 if 'ASLI' in a.keterangan_sertifikasi_lainnya: return 'Dokumen Asli'
                 if 'FOTOKOPI' in a.keterangan_sertifikasi_lainnya: return 'Hanya Fotokopi'
             return "-"
 
-        # Peta Logika Kolom (Semua Data Dipecah Sesuai Permintaan)
+        # --- PETA KOLOM BERSIH (FIXED) ---
         PETA_KOLOM = {
-            'opd': ('Instansi (OPD)', lambda a: a.opd.nama_opd if a.opd else "-"),
-            'kode_barang': ('Kode Barang', lambda a: a.kode_barang or "-"),
-            'nama_barang': ('Nama Barang', lambda a: a.nama_barang or "-"),
-            'nibar': ('NIBAR', lambda a: a.nibar or "-"),
-            'nomor_register': ('Nomor Register', lambda a: a.nomor_register or "-"),
-            'luas': ('Luas (m2)', lambda a: a.luas_m2 or 0),
-            'nilai': ('Nilai Aset (Rp)', lambda a: a.nilai_aset or 0),
-            'alamat': ('Alamat Lokasi', lambda a: a.alamat_lokasi or "-"),
-            'kecamatan': ('Kecamatan', lambda a: a.kecamatan_nama or "-"),
-            'kelurahan': ('Kelurahan', lambda a: a.kelurahan_nama or "-"),
-            'koordinat': ('Titik Koordinat', lambda a: f"{a.latitude}, {a.longitude}" if a.latitude and a.longitude else "-"),
-            'cara_perolehan': ('Cara Perolehan', lambda a: a.cara_perolehan or "-"),
-            'tgl_perolehan': ('Tanggal Perolehan', lambda a: a.tanggal_perolehan.strftime("%d-%m-%Y") if a.tanggal_perolehan else "-"),
-            'status_guna': ('Status Penggunaan', lambda a: a.status_penggunaan or "-"),
-            'kondisi': ('Kondisi Pemanfaatan', lambda a: a.kondisi_pemanfaatan or "-"),
+            'opd': ('Instansi (OPD)', lambda a: a.opd.nama_opd if a.opd else "-", None),
+            'kode_barang': ('Kode Barang', lambda a: a.kode_barang or "-", None),
+            'nama_barang': ('Nama Barang', lambda a: a.nama_barang or "-", None),
+            'nibar': ('NIBAR', lambda a: a.nibar or "-", None),
+            'nomor_register': ('Nomor Register', lambda a: a.nomor_register or "-", None),
+            'luas': ('Luas Tanah (m2)', lambda a: float(a.luas_m2) if a.luas_m2 else 0, '#,##0 "m²"'),
+            'nilai': ('Nilai Aset (Rp)', lambda a: float(a.nilai_aset) if a.nilai_aset else 0, '"Rp"#,##0'),
+            'alamat': ('Alamat Lokasi', lambda a: a.alamat_lokasi or "-", None),
+            'kecamatan': ('Kecamatan', lambda a: a.kecamatan_nama or "-", None),
+            'kelurahan': ('Kelurahan', lambda a: a.kelurahan_nama or "-", None),
+            'koordinat': ('Titik Koordinat', lambda a: f"{a.latitude}, {a.longitude}" if a.latitude and a.longitude else "-", None),
+            'cara_perolehan': ('Cara Perolehan', lambda a: a.cara_perolehan or "-", None),
+            'tgl_perolehan': ('Tanggal Perolehan', lambda a: a.tanggal_perolehan.strftime("%d-%m-%Y") if a.tanggal_perolehan else "-", None),
+            'status_guna': ('Status Penggunaan', lambda a: a.status_penggunaan or "-", None),
+            'kondisi': ('Kondisi Pemanfaatan', lambda a: a.kondisi_pemanfaatan or "-", None),
             
-            # Kolom Spesifik Sertifikasi
-            'status_sertif': ('Status Sertifikasi', lambda a: a.get_status_sertifikasi_display() or "-"),
-            'status_hak_sementara': ('Status Hak (Proses)', lambda a: a.get_status_hak_sementara_display() or "-"),
-            'no_hak': ('Nomor Hak', lambda a: a.nomor_hak or "-"),
-            'no_sertif': ('Nomor Sertifikat (BPN)', lambda a: a.nomor_sertifikat or "-"),
-            'nama_pemilik': ('Nama Pemegang Hak', lambda a: a.nama_pemegang_hak or "-"),
-            'bukti_fisik': ('Kondisi Fisik Sertifikat', get_kondisi_fisik),
+            # Kolom Hasil Penyatuan (Deduplicated)
+            'status_sertif': ('Status Sertifikasi', lambda a: a.get_status_sertifikasi_display() or "-", None),
+            'status_hak': ('Status Hak (HP/HM)', logika_gabungan_status_hak, None),
+            'nomor_hak': ('Nomor Hak', logika_gabungan_nomor_hak, None),
+            'kondisi_fisik': ('Kondisi Fisik Dokumen', logika_kondisi_fisik_dokumen, None),
+            
+            # Sisa Rincian Tambahan Buku Sertifikat (BPN)
+            'sertif_nomor': ('Nomor Sertifikat (BPN)', lambda a: ambil_detail_sertifikat(a, 'nomor_sertifikat'), None),
+            'sertif_pemegang': ('Nama Pemegang Hak', lambda a: ambil_detail_sertifikat(a, 'nama_pemegang_hak'), None),
+            'sertif_alamat': ('Alamat di Sertifikat', lambda a: ambil_detail_sertifikat(a, 'alamat'), None),
+            'sertif_peruntukan': ('Peruntukan Wilayah BPN', lambda a: ambil_detail_sertifikat(a, 'peruntukan'), None),
+            'sertif_luas': ('Luas Sertifikat (BPN)', lambda a: ambil_detail_sertifikat(a, 'luas', 'numeric'), '#,##0 "m²"'),
+            'sertif_nilai': ('Nilai Sertifikat (BPN)', lambda a: ambil_detail_sertifikat(a, 'nilai', 'numeric'), '"Rp"#,##0'),
+            'sertif_tgl_buat': ('Tanggal Pembuatan Sertifikat', lambda a: ambil_detail_sertifikat(a, 'tanggal_pembuatan', 'date'), None),
+            'sertif_tahun': ('Tahun Terbit Sertifikat', lambda a: ambil_detail_sertifikat(a, 'tahun_terbit'), None),
+            'sertif_pemetaan': ('Pemetaan BPN', lambda a: ambil_detail_sertifikat(a, 'pemetaan_bpn'), None),
+            'sertif_catatan': ('Catatan Tambahan', lambda a: ambil_detail_sertifikat(a, 'catatan'), None),
         }
 
-        # Jika user tidak mencentang apa-apa, pakai default
         if not kolom_pilihan:
             kolom_pilihan = ['opd', 'kode_barang', 'nama_barang', 'nilai']
 
         headers = ['No'] + [PETA_KOLOM[k][0] for k in kolom_pilihan if k in PETA_KOLOM]
 
-        # --- C. Terapkan Filter Query ---
-        aset_data = AsetTanah.objects.all()
+        aset_data = AsetTanah.objects.all().select_related('opd').prefetch_related('data_sertifikat')
+        
+        # Jalankan filter query
         if status_verifikasi != 'SEMUA':
             aset_data = aset_data.filter(status_verifikasi=status_verifikasi)
-        
         if q:
             aset_data = aset_data.filter(Q(nama_barang__icontains=q) | Q(nibar__icontains=q) | Q(alamat_lokasi__icontains=q))
         if opd_id:
             aset_data = aset_data.filter(opd_id=opd_id)
-        if kecamatan_id:
-            aset_data = aset_data.filter(kelurahan__kecamatan_id=kecamatan_id)
         if status_sertif:
             aset_data = aset_data.filter(status_sertifikasi=status_sertif)
             
-        # Logika Pencarian String Cerdas untuk Filter Bukti Fisik & Kepemilikan
         if bukti_fisik == 'ASLI':
             aset_data = aset_data.filter(keterangan_sertifikasi_lainnya__startswith='ASLI')
         elif bukti_fisik == 'FOTOKOPI':
@@ -907,57 +947,56 @@ def proses_export_excel(request):
 
         aset_data = aset_data.order_by('-created_at')
 
-        # --- D. Buat File Excel ---
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename="Custom_Laporan_Aset_TRANSPARA.xlsx"'
+        response['Content-Disposition'] = 'attachment; filename="Custom_Laporan_Aset_BPN_PATABA.xlsx"'
+        
         workbook = openpyxl.Workbook()
         worksheet = workbook.active
-        worksheet.title = 'Data Aset'
+        worksheet.title = 'Data Inventaris'
 
-        # Styling Header
         header_fill = PatternFill(start_color="002D5E", end_color="002D5E", fill_type="solid")
         header_font = Font(color="FFFFFF", bold=True)
+        
         for col_num, header_title in enumerate(headers, 1):
             cell = worksheet.cell(row=1, column=col_num, value=header_title)
             cell.fill = header_fill
             cell.font = header_font
             cell.alignment = Alignment(horizontal='center', vertical='center')
 
-        # Masukkan Data Dinamis
         for row_num, aset in enumerate(aset_data, 2):
-            row_data = [row_num - 1] 
+            row_data = [row_num - 1]
+            formats = [None]
+            
             for k in kolom_pilihan:
                 if k in PETA_KOLOM:
                     row_data.append(PETA_KOLOM[k][1](aset))
-            
-            for col_num, cell_value in enumerate(row_data, 1):
-                worksheet.cell(row=row_num, column=col_num, value=cell_value)
+                    formats.append(PETA_KOLOM[k][2])
 
-        # Auto-adjust Lebar Kolom
+            for col_num, cell_value in enumerate(row_data, 1):
+                cell = worksheet.cell(row=row_num, column=col_num, value=cell_value)
+                fmt = formats[col_num - 1]
+                if fmt:
+                    cell.number_format = fmt
+                    cell.alignment = Alignment(horizontal='right')
+
         for col in worksheet.columns:
-            max_length = 0
+            max_length = max(len(str(cell.value or '')) for cell in col)
             col_letter = col[0].column_letter
-            for cell in col:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
-            worksheet.column_dimensions[col_letter].width = max_length + 2
+            worksheet.column_dimensions[col_letter].width = max(max_length + 3, 10)
 
         workbook.save(response)
         return response
 
-    return redirect('tanah:halaman_export')
+    return redirect('tanah:halaman_export_excel')
 
-# 3. Import Excel
+# 3. Halaman Import Excel
 @login_required(login_url='auth:login')
 @role_required(allowed_roles=['ADMIN_BPKAD', 'SUPERADMIN'])
 def halaman_import_view(request):
     # Hanya bertugas membuka halaman utama import
     return render(request, 'aset_tanah/halaman_import.html')
 
-# 4. Template file excel
+# 4. Template file import excel
 @login_required(login_url='auth:login')
 @role_required(allowed_roles=['ADMIN_BPKAD', 'SUPERADMIN'])
 def unduh_template_import(request):
@@ -1061,7 +1100,9 @@ def unduh_template_import(request):
 # PDF - detail
 # - - - - -
 
+# 1. pdf profile per aset
 @login_required(login_url='auth:login')
+@role_required(allowed_roles=['ADMIN_BPKAD', 'SUPERADMIN'])
 def export_pdf_detail(request, id_aset):
     # Ambil data aset
     aset = get_object_or_404(AsetTanah.objects.prefetch_related('koleksi_foto'), id=id_aset)
@@ -1109,5 +1150,259 @@ def export_pdf_detail(request, id_aset):
     pisa_status = pisa.CreatePDF(html, dest=response)
     if pisa_status.err:
         return HttpResponse(f'Terjadi kesalahan saat membuat PDF: <pre>{html}</pre>')
+        
+    return response
+
+# 2. halaman export pdf
+@login_required(login_url='auth:login')
+@role_required(allowed_roles=['ADMIN_BPKAD', 'SUPERADMIN'])
+def halaman_export_pdf(request):
+    # Ambil daftar OPD untuk dipasang di dropdown pilihan kartu ke-2
+    opd_list = MasterOPD.objects.filter(is_active=1).order_by('nama_opd')
+    
+    return render(request, 'aset_tanah/reports/halaman_export_pdf.html', {
+        'opd_list': opd_list
+    })
+    
+# pdf rekap sertif
+@login_required(login_url='auth:login')
+@role_required(allowed_roles=['ADMIN_BPKAD', 'SUPERADMIN'])
+def export_pdf_rekap_sertif(request):
+    # A. Tarik seluruh 40 OPD Aktif & Aset Tanah tervalidasi VALID
+    semua_opd = MasterOPD.objects.filter(is_active=1).order_by('nama_opd')
+    aset_valid = AsetTanah.objects.filter(status_verifikasi='VALID').select_related('opd')
+    
+    # B. Inisialisasi hitung akumulasi data
+    stats_per_opd = {}
+    for opd in semua_opd:
+        stats_per_opd[opd.id] = {
+            'total_aset': 0, 'sertif_total': 0, 'sertif_luas': 0.0, 'sertif_nilai': 0.0,
+            'belum_total': 0, 'belum_luas': 0.0, 'belum_nilai': 0.0,
+        }
+        
+    for aset in aset_valid:
+        if aset.opd_id in stats_per_opd:
+            stats = stats_per_opd[aset.opd_id]
+            stats['total_aset'] += 1
+            
+            if aset.status_sertifikasi == 'BERSERTIFIKAT':
+                stats['sertif_total'] += 1
+                stats['sertif_luas'] += float(aset.luas_m2) if aset.luas_m2 else 0.0
+                stats['sertif_nilai'] += float(aset.nilai_aset) if aset.nilai_aset else 0.0
+            elif aset.status_sertifikasi == 'BELUM_BERSERTIFIKAT':
+                stats['belum_total'] += 1
+                stats['belum_luas'] += float(aset.luas_m2) if aset.luas_m2 else 0.0
+                stats['belum_nilai'] += float(aset.nilai_aset) if aset.nilai_aset else 0.0
+
+    # C. Wadah hitung Grand Total bawah tabel
+    grand_total = {
+        'aset': 0, 's_total': 0, 's_luas': 0, 's_nilai': 0, 'b_total': 0, 'b_luas': 0, 'b_nilai': 0, 'persen': 0.0
+    }
+    
+    daftar_rekap_raw = []
+    for opd in semua_opd:
+        stats = stats_per_opd[opd.id]
+        total_aset = stats['total_aset']
+        persen = (stats['sertif_total'] / total_aset * 100) if total_aset > 0 else 0.0
+        
+        daftar_rekap_raw.append({
+            'nama_opd': opd.nama_opd, 'total_aset': total_aset, 'sertif_total': stats['sertif_total'],
+            'sertif_luas': stats['sertif_luas'], 'sertif_nilai': stats['sertif_nilai'],
+            'belum_total': stats['belum_total'], 'belum_luas': stats['belum_luas'],
+            'belum_nilai': stats['belum_nilai'], 'persen': persen
+        })
+        
+        grand_total['aset'] += total_aset
+        grand_total['s_total'] += stats['sertif_total']
+        grand_total['s_luas'] += stats['sertif_luas']
+        grand_total['s_nilai'] += stats['sertif_nilai']
+        grand_total['b_total'] += stats['belum_total']
+        grand_total['b_luas'] += stats['belum_luas']
+        grand_total['b_nilai'] += stats['belum_nilai']
+        
+    grand_total['persen'] = (grand_total['s_total'] / grand_total['aset'] * 100) if grand_total['aset'] > 0 else 0.0
+
+    # D. ENGINE FORMATTING: Mengubah angka mulus menjadi format titik (.) khas Indonesia
+    def format_ke_indonesia(angka, dengan_rp=False, tampilkan_nol=False):
+        if not angka or angka == 0:
+            return "Rp 0" if (dengan_rp and tampilkan_nol) else ("0" if tampilkan_nol else "-")
+        formatted = f"{int(angka):,}".replace(",", ".")
+        return f"Rp {formatted}" if dengan_rp else formatted
+
+    daftar_rekap_final = []
+    for r in daftar_rekap_raw:
+        daftar_rekap_final.append({
+            'nama_opd': r['nama_opd'],
+            'total_aset': r['total_aset'],
+            'sertif_total': r['sertif_total'],
+            'sertif_luas': format_ke_indonesia(r['sertif_luas']),
+            'sertif_nilai': format_ke_indonesia(r['sertif_nilai'], dengan_rp=True),
+            'belum_total': r['belum_total'],
+            'belum_luas': format_ke_indonesia(r['belum_luas']),
+            'belum_nilai': format_ke_indonesia(r['belum_nilai'], dengan_rp=True),
+            'persen': f"{r['persen']:.2f}%"
+        })
+
+    grand_total_final = {
+        'aset': format_ke_indonesia(grand_total['aset'], tampilkan_nol=True),
+        's_total': format_ke_indonesia(grand_total['s_total'], tampilkan_nol=True),
+        's_luas': format_ke_indonesia(grand_total['s_luas'], tampilkan_nol=True),
+        's_nilai': format_ke_indonesia(grand_total['s_nilai'], dengan_rp=True, tampilkan_nol=True),
+        'b_total': format_ke_indonesia(grand_total['b_total'], tampilkan_nol=True),
+        'b_luas': format_ke_indonesia(grand_total['b_luas'], tampilkan_nol=True),
+        'b_nilai': format_ke_indonesia(grand_total['b_nilai'], dengan_rp=True, tampilkan_nol=True),
+        'persen': f"{grand_total['persen']:.2f}%"
+    }
+
+    # E. Bangun Tautan Verifikasi Absolut untuk Sisi Kiri Footer
+    url_verifikasi = request.build_absolute_uri(reverse('tanah:halaman_export_pdf'))
+
+    # F. Ambil parameter gambar & Render
+    logo_path = os.path.join(settings.BASE_DIR, 'frontend', 'static', 'images', 'logo.png')
+    template_path = 'aset_tanah/reports/pdf_rekap_sertif.html'
+    
+    context = {
+        'daftar_rekap': daftar_rekap_final,
+        'grand_total': grand_total_final,
+        'logo_path': logo_path,
+        'url_verifikasi': url_verifikasi,
+        'user': request.user
+    }
+    
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="Rekapitulasi Sertifikasi Aset Tanah.pdf"'
+    
+    template = get_template(template_path)
+    html = template.render(context)
+    
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse(f'Gagal kompilasi PDF: <pre>{html}</pre>')
+        
+    return response
+
+# pdf rekap opd
+@login_required(login_url='auth:login')
+@role_required(allowed_roles=['ADMIN_BPKAD', 'SUPERADMIN'])
+def export_pdf_aset_opd(request):
+    opd_id = request.GET.get('opd_id')
+    
+    if opd_id:
+        opd_target = get_object_or_404(MasterOPD, id=opd_id, is_active=1)
+    else:
+        opd_target = MasterOPD.objects.filter(is_active=1).first()
+
+    if not opd_target:
+        return HttpResponse("Belum ada data OPD yang aktif di sistem.")
+
+    # A. QUERY DINAMIS: Cari akun pengguna yang terhubung ke opd_id ini
+    # Kita filter User melalui relasi profilnya (misal nama relation-nya 'profile')
+    user_opd = User.objects.filter(profile__opd=opd_target).select_related('profile').first()
+    
+    if user_opd:
+        # Ambil first_name dan last_name dari auth_user
+        nama_kepala = f"{user_opd.first_name} {user_opd.last_name}".strip()
+        # Ambil NIP dari tabel user_profile
+        nip_kepala = user_opd.profile.nip or "-"
+    else:
+        # Fallback aman jika belum ada user yang didelegasikan ke OPD tersebut
+        nama_kepala = getattr(opd_target, 'nama_kepala', "-") or "-"
+        nip_kepala = "-"
+
+    # B. Tarik seluruh aset tervalidasi milik OPD terpilih
+    aset_list = AsetTanah.objects.filter(opd=opd_target, status_verifikasi='VALID').prefetch_related('data_sertifikat')
+
+    # C. Fungsi Pembantu Format Ribuan Indonesia
+    def format_ke_indonesia(angka, dengan_rp=False):
+        if not angka or angka == 0:
+            return "Rp 0" if dengan_rp else "-"
+        formatted = f"{int(angka):,}".replace(",", ".")
+        return f"Rp {formatted}" if dengan_rp else formatted
+    
+    # Memotong string raksasa tanpa spasi agar otomatis wrap down ke bawah
+    def potong_string_beruntun(teks, batas=11):
+        if not teks or teks == "-":
+            return "-"
+        teks = str(teks)
+        return " ".join(teks[i:i+batas] for i in range(0, len(teks), batas))
+    
+    # D. Olah Kompilasi Data Baris
+    daftar_aset_final = []
+    for aset in aset_list:
+        sertif = aset.data_sertifikat.first()
+        kl = aset.keterangan_sertifikasi_lainnya or ''
+        
+        status_dokumen = "-"
+        status_5_pilar = "Lainnya"
+        
+        if aset.status_sertifikasi == 'BERSERTIFIKAT':
+            ket_fisik = sertif.keterangan if sertif else ''
+            if 'ASLI' in kl or 'ASLI' in ket_fisik:
+                status_dokumen = "Asli"
+            elif 'FOTOKOPI' in kl or 'FC' in kl or (ket_fisik and 'FOTO' in ket_fisik):
+                status_dokumen = "FC"
+            else:
+                status_dokumen = "Asli" if (sertif and sertif.keterangan == 'ASLI') else "FC"
+
+            if 'PEMKOT' in kl or (sertif and 'Pemerintah Kota Palu' in sertif.nama_pemegang_hak):
+                status_5_pilar = "Sertifikat Asli Pemkot" if status_dokumen == "Asli" else "Sertifikat FC Pemkot"
+            else:
+                status_5_pilar = "Sertifikat Asli Non-Pemkot" if status_dokumen == "Asli" else "Sertifikat FC Non-Pemkot"
+
+        lokasi_gabung = f"{aset.alamat_lokasi or ''}, Kec. {aset.kecamatan_nama or '-'}, Kel. {aset.kelurahan_nama or '-'}"
+        
+        daftar_aset_final.append({
+            # Bungkus teks-teks berpotensi raksasa ke dalam engine pemotong string
+            'kode_barang': potong_string_beruntun(aset.kode_barang),
+            'nama_barang': aset.nama_barang or "-",
+            'nibar': potong_string_beruntun(aset.nibar, batas=13),
+            'nomor_register': potong_string_beruntun(aset.nomor_register, batas=5),
+            'spesifikasi_nama_barang': aset.spesifikasi_nama_barang or "-",
+            'spesifikasi_lainnya': aset.spesifikasi_lainnya or "-",
+            'luas': format_ke_indonesia(aset.luas_m2),
+            'lokasi': lokasi_gabung,
+            'koordinat': potong_string_beruntun(f"{aset.latitude or '-'}, {aset.longitude or '-'}", batas=10),
+            
+            # Sub-Kolom Bukti Registrasi Dokumen
+            'sertif_nama': sertif.nama_pemegang_hak if sertif else (aset.nama_pemegang_hak if aset.nama_pemegang_hak else "-"),
+            'sertif_nomor': potong_string_beruntun(sertif.nomor_sertifikat if sertif else (aset.nomor_sertifikat if aset.nomor_sertifikat else "-"), batas=11),
+            'sertif_tanggal': sertif.tanggal_pembuatan.strftime("%d-%m-%Y") if (sertif and sertif.tanggal_pembuatan) else "-",
+            'status_dokumen': status_dokumen,
+            'status_5_pilar': status_5_pilar,
+            
+            # Ekor Baris
+            'cara_perolehan': aset.cara_perolehan or "-",
+            'status_penggunaan': aset.status_penggunaan or "-",
+            'keterangan': aset.keterangan or "-",
+            'nilai': format_ke_indonesia(aset.nilai_aset, dengan_rp=True)
+        })
+
+    url_verifikasi = request.build_absolute_uri(reverse('tanah:halaman_export_pdf'))
+    logo_path = os.path.join(settings.BASE_DIR, 'frontend', 'static', 'images', 'logo.png')
+    template_path = 'aset_tanah/reports/pdf_aset_opd.html'
+
+    context = {
+        'opd': opd_target,
+        'daftar_aset': daftar_aset_final,
+        'logo_path': logo_path,
+        'url_verifikasi': url_verifikasi,
+        'nama_kepala': nama_kepala,
+        'nip_kepala': nip_kepala,
+        'user': request.user
+    }
+
+    # 1. Bersihkan nama OPD dari spasi dan karakter ilegal untuk nama file browser
+    nama_opd_clean = opd_target.nama_opd.replace(" ", "_").replace("/", "-").replace("&", "Dan")
+
+    # 2. Setel ke Content-Disposition
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Buku_Inventaris_Tanah_{nama_opd_clean}.pdf"'
+    
+    template = get_template(template_path)
+    html = template.render(context)
+    
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse(f'Gagal kompilasi PDF Instansi: <pre>{html}</pre>')
         
     return response

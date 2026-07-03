@@ -147,11 +147,11 @@
                                 <a href="{% url 'tanah:halaman_import' %}" class="menu-item {% if 'import' in request.resolver_match.url_name %}active{% endif %}">
                                     <i class="bi bi-cloud-upload-fill text-primary"></i> Import Data Excel
                                 </a>
-                                <a href="{% url 'tanah:halaman_export' %}" class="menu-item {% if 'export' in request.resolver_match.url_name %}active{% endif %}">
+                                <a href="{% url 'tanah:halaman_export_excel' %}" class="menu-item {% if request.resolver_match.url_name == 'halaman_export_excel' %}active{% endif %}">
                                     <i class="bi bi-file-earmark-excel-fill text-success"></i> Export Excel
                                 </a>
-                                <a href="#" class="menu-item">
-                                    <i class="bi bi-file-earmark-pdf-fill text-danger"></i> Export PDF <span class="badge bg-secondary ms-auto" style="font-size: 0.6rem;">Segera</span>
+                                <a href="{% url 'tanah:halaman_export_pdf' %}" class="menu-item {% if request.resolver_match.url_name == 'halaman_export_pdf' %}active{% endif %}">
+                                    <i class="bi bi-file-earmark-pdf-fill text-danger"></i> Export PDF
                                 </a>
                         {% endif %}
                         
@@ -340,11 +340,11 @@
                     <a href="{% url 'tanah:halaman_import' %}" class="menu-item {% if 'import' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="bi bi-cloud-upload-fill text-primary"></i> Import Data Excel
                     </a>
-                    <a href="{% url 'tanah:halaman_export' %}" class="menu-item {% if 'export' in request.resolver_match.url_name %}active{% endif %}">
+                    <a href="{% url 'tanah:halaman_export_excel' %}" class="menu-item {% if 'export_excel' in request.resolver_match.url_name %}active{% endif %}">
                         <i class="bi bi-file-earmark-excel-fill text-success"></i> Export Excel
                     </a>
-                    <a href="#" class="menu-item">
-                        <i class="bi bi-file-earmark-pdf-fill text-danger"></i> Export PDF <span class="badge bg-secondary ms-auto" style="font-size: 0.6rem;">Segera</span>
+                    <a href="{% url 'tanah:halaman_export_pdf' %}" class="menu-item {% if 'export_pdf' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-file-earmark-pdf-fill text-danger"></i> Export PDF
                     </a>
                 
             {% endif %}
