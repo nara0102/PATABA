@@ -289,7 +289,7 @@ def register_view(request):
             send_mail(
                 'Konfirmasi Pendaftaran',
                 'Akun Anda menunggu persetujuan Admin Pusat.',
-                'Salam,\nTim TRANSPARA',
+                'Salam,\nTim PATABA',
                 [email],
                 fail_silently=True,
             )

@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %} {# 🔥 Tambahan Baru: Untuk memfungsikan format ribuan titik #}
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,7 +9,6 @@
         @page {
             /* MENGGUNAKAN UKURAN KERTAS F4 (FOLIO) */
             size: 21.5cm 33cm portrait; 
-            margin: 3.5cm 2cm 2.5cm 2cm; 
             
             /* Area Identitas Dokumen (Header Kanan Atas) */
             @frame header_frame {
@@ -16,10 +16,15 @@
                 left: 2cm; right: 2cm; top: 1.2cm; height: 2cm;
             }
             
-            /* Area Nomor Halaman (Footer) */
+            /* 🔥 PERBAIKAN CRITICAL 1: Definisikan Area Konten Utama secara Eksplisit */
+            @frame content_frame {
+                left: 2cm; right: 2cm; top: 3.5cm; height: 25.5cm;
+            }
+            
+            /* 🔥 PERBAIKAN CRITICAL 2: Naikkan koordinat top dan perlebar height footer agar tidak terpotong */
             @frame footer_frame {
                 -pdf-frame-content: footer_content;
-                left: 2cm; right: 2cm; bottom: 0.5cm; height: 1.3cm;
+                left: 2cm; right: 2cm; top: 29.5cm; height: 2.5cm;
             }
         }
         
@@ -56,9 +61,7 @@
 </head>
 <body>
     
-    <!-- ==============================================================
-         STATIC FRAMES (HEADER & FOOTER DI LETAKKAN DI ATAS BODY)
-         ============================================================== -->
+    <!-- STATIC FRAMES (HEADER & FOOTER) -->
     <div id="header_content">
         <table style="width: 100%; border: none; margin: 0; padding: 0;">
             <tr>
@@ -73,7 +76,7 @@
         </table>
     </div>
 
-    <!-- Footer -->
+    <!-- 🔥 FONT DAN MARGIN FOOTER DISESUAIKAN AGAR SINKRON DAN MUNCUL UTUH -->
     <div id="footer_content" style="border-top: 1px solid #ddd; padding-top: 5px;">
         <table style="width: 100%; border: none; margin: 0; padding: 0;">
             <tr>
@@ -84,17 +87,10 @@
                     Halaman <pdf:pagenumber> dari <pdf:pagecount>
                 </td>
             </tr>
-            <tr>
-                <td colspan="2" style="text-align: center; font-size: 7.5px; color: #999; border: none; padding-top: 3px;">
-                    Dokumen elektronik ini diterbitkan secara sah oleh Sistem Portal Aset Daerah (PATABA) BPKAD Kota Palu.
-                </td>
-            </tr>
         </table>
     </div>
 
-    <!-- ==============================================================
-         KONTEN UTAMA LAPORAN
-         ============================================================== -->
+    <!-- KONTEN UTAMA LAPORAN -->
     <h1>PROFIL LENGKAP ASET TANAH</h1>
     <h2>Pemerintah Daerah Kota Palu</h2>
     <hr style="border: 0.5px solid #002D5E; margin-bottom: 15px;">
@@ -110,8 +106,9 @@
 
     <div class="section-title">B. DATA FISIK & LOKASI</div>
     <table>
-        <tr><td class="label">Luas Tanah (m2)</td><td class="value">{{ aset.luas_m2|default:"0" }} m²</td></tr>
-        <tr><td class="label">Nilai Aset Terkini</td><td class="value">Rp. {{ aset.nilai_aset|default:"0" }}</td></tr>
+        <!-- 🔥 PEMBARUAN: Ditambahkan intcomma untuk pemisah ribuan -->
+        <tr><td class="label">Luas Tanah (m2)</td><td class="value">{{ luas_terformat }} m²</td></tr>
+        <tr><td class="label">Nilai Aset Terkini</td><td class="value">Rp {{ nilai_terformat }}</td></tr>
         <tr><td class="label">Cara & Tanggal Perolehan</td><td class="value">{{ aset.cara_perolehan|default:"-" }} / {{ aset.tanggal_perolehan|date:"d F Y"|default:"-" }}</td></tr>
         <tr><td class="label">Alamat Lengkap</td><td class="value">{{ aset.alamat_lokasi|default:"-" }}</td></tr>
         <tr><td class="label">Kecamatan / Kelurahan</td><td class="value">{{ aset.kecamatan_nama|default:"-" }} / {{ aset.kelurahan_nama|default:"-" }}</td></tr>
@@ -184,13 +181,10 @@
         </p>
     {% endif %}
 
-    <!-- ==============================================================
-         TTD & QR CODE OTENTIKASI
-         ============================================================== -->
+    <!-- SIGNATURE BOX -->
     <div class="signature-box">
         <table style="width: 100%; border: none; margin-top: 20px; page-break-inside: avoid;">
             <tr>
-                <!-- Narasi QR Code Baru Lebih Keren & Resmi -->
                 <td style="width: 45%; text-align: left; border: none; padding-top: 10px; line-height: 1.4;">
                     <img src="{{ qr_code_base64 }}" width="85" height="85" alt="QR Otentikasi"><br>
                     <span style="font-size: 7.5px; color: #555; font-style: italic; display: block; margin-top: 5px;">
@@ -206,7 +200,7 @@
                         Dicetak Oleh,
                     </p>
                     <p style="margin-bottom: 0;">
-                        <strong><u>{{ user.first_name|default:"Administrator BPKAD" }} {{ user.last_name }}</u></strong><br>
+                        <strong><u>{{ user.first_name|default:"Bug Hunter" }} {{ user.last_name }}</u></strong><br>
                         NIP. {{ user.profile.nip|default:"-" }}
                     </p>
                 </td>

@@ -2,21 +2,36 @@
 
 document.addEventListener("DOMContentLoaded", function() {
 
-    // 1. FORMAT RUPIAH OTOMATIS
+    // 🔥 1. FORMAT RUPIAH OTOMATIS (MENDUKUNG HOVER MOUSE)
     document.querySelectorAll('.tampil-rupiah').forEach(function(el) {
-        // Gunakan data-raw jika ada, jika tidak ada baru gunakan innerText
-        let val = el.getAttribute('data-raw') || el.innerText.replace(/[^0-9]/g, '');
-        if (val) {
-            el.innerText = 'Rp ' + parseInt(val, 10).toLocaleString('id-ID');
+        let val = el.getAttribute('data-raw') || el.innerText;
+        // Gunakan regex baru yang mempertahankan titik desimal (.) jika ada
+        let cleanVal = val.replace(/[^0-9.]/g, ''); 
+        if (cleanVal) {
+            let num = parseFloat(cleanVal);
+            let hasilFormat = 'Rp ' + Math.floor(num).toLocaleString('id-ID');
+            
+            el.innerText = hasilFormat;
+            
+            // KUNCI HOVER: Jika elemen memiliki atribut title (tooltip), ikut format!
+            if (el.hasAttribute('title')) {
+                el.setAttribute('title', hasilFormat);
+            }
         }
     });
 
-    // 2. FORMAT LUAS METER OTOMATIS
+    // 🔥 2. FORMAT LUAS METER OTOMATIS (ANTI-LOMPAT DESIMAL)
     document.querySelectorAll('.tampil-luas').forEach(function(el) {
-        // Gunakan data-raw jika ada, agar tidak mengolah angka yang sudah terformat
-        let val = el.getAttribute('data-raw') || el.innerText.replace(/[^0-9]/g, '');
-        if (val) {
-            el.innerText = parseInt(val, 10).toLocaleString('id-ID') + ' m²';
+        let val = el.getAttribute('data-raw') || el.innerText;
+        let cleanVal = val.replace(/[^0-9.]/g, ''); 
+        if (cleanVal) {
+            let num = parseFloat(cleanVal);
+            // Kunci id-ID: Maksimal 2 angka di belakang koma untuk gaya Indonesia
+            el.innerText = num.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' m²';
+            
+            if (el.hasAttribute('title')) {
+                el.setAttribute('title', num.toLocaleString('id-ID') + ' m²');
+            }
         }
     });
 

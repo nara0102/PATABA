@@ -270,19 +270,32 @@ def data_aset_publik_view(request):
     # Ambil semua aset yang sudah diverifikasi VALID oleh BPKAD
     aset_list = AsetTanah.objects.filter(status_verifikasi='VALID').order_by('nama_barang')
     
-    # Ambil parameter pencarian kata kunci jika ada
-    query_cari = request.GET.get('q', '')
-    if query_cari:
-        aset_list = aset_list.filter(nama_barang__icontains=query_cari)
+    # qr
+    q = request.GET.get('q', '')
+    id_dari_qr = request.GET.get('id', '')
+    
+    if id_dari_qr:
+        # Jika QR Code di-scan, langsung kunci secara mutlak ke ID tersebut!
+        aset_list = aset_list.filter(id=id_dari_qr)
+    elif q:
+        # Jika pengguna mengetik manual di kolom pencarian biasa
+        aset_list = aset_list.filter(
+            Q(nama_barang__icontains=q) | 
+            Q(nibar__icontains=q) | 
+            Q(alamat_lokasi__icontains=q)
+        )
         
     # --- PROSES PAGINATOR DJANGO ---
     # Batasi muatan maksimal 10 baris per halaman sesuai request kamu
     paginator = Paginator(aset_list, 10) 
     page_number = request.GET.get('page')
     semua_aset_paginated = paginator.get_page(page_number)
-    
+        
     context = {
         'semua_aset': semua_aset_paginated,
-        'query_cari': query_cari,
+        
+        'aset_list': aset_list,
+        'q': q,
+        'id_terpilih': id_dari_qr
     }
     return render(request, 'portal_publik/data_aset.html', context)

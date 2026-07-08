@@ -132,67 +132,133 @@
         </button>
     </div>
 
-    <!-- TABEL UTAMA -->
-    <div class="glass-card p-0" id="table-master">
-        <div class="table-responsive table-master-container mb-0">
-            <table class="table align-middle table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th class="ps-4 py-3">NO. SERTIFIKAT / HAK</th>
-                        <th class="py-3">ASET TERKAIT & OPD</th>
-                        <th class="py-3">LUAS (M²)</th>
-                        <th class="py-3">NILAI ASET (Rp)</th>
-                        <th class="py-3">PEMEGANG HAK</th>
-                        <th class="py-3">BUKTI FISIK</th>
-                        <th class="text-center pe-4 py-3" style="width: 140px;">AKSI</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white">
-                    {% for sertifikat in semua_sertifikat %}
-                    <tr>
-                        <td class="ps-4">
-                            <div class="fw-bold text-success font-monospace">{{ sertifikat.nomor_sertifikat }}</div>
-                            <div class="badge bg-light text-secondary border mt-1">{{ sertifikat.get_status_hak_display|default:"-" }}</div>
-                        </td>
-                        <td>
-                            <div class="fw-bold text-dark">{{ sertifikat.aset_tanah.nama_barang|default:"-" }}</div>
-                            <div class="small text-muted"><i class="bi bi-building me-1"></i>{{ sertifikat.aset_tanah.opd.nama_opd|default:"-" }}</div>
-                        </td>
-                        <td class="fw-semibold tampil-luas">{{ sertifikat.luas|default:"0" }}</td>
-                        <td class="fw-semibold text-success tampil-rupiah">{{ sertifikat.nilai|default:"0" }}</td>
-                        <td>
-                            <div class="fw-bold text-primary" style="font-size: 0.85rem;">{{ sertifikat.nama_pemegang_hak|default:"-" }}</div>
-                        </td>
-                        <td>
-                            {% if sertifikat.keterangan == 'ASLI' %}
-                                <span class="badge badge-om-success"><i class="bi bi-check-circle-fill me-1"></i> Asli</span>
-                            {% elif sertifikat.keterangan == 'FOTO_KOPI' %}
-                                <span class="badge badge-om-warning"><i class="bi bi-files me-1"></i> Fotokopi</span>
-                            {% else %}
-                                <span class="badge badge-om-secondary">-</span>
+    <div class="card border-0 shadow-sm bg-white rounded-4 overflow-hidden">
+    
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr class="align-middle" style="background-color: #f8f9fa;">
+                    <th class="text-center ps-4" style="width: 50px;">No</th>
+                    <th>No. Sertifikat / Hak</th>
+                    <th>Nama Barang / Instansi</th>
+                    <th class="text-end">Luas</th>
+                    <th class="text-end">Nilai Aset</th>
+                    <th>Pemegang Hak</th>
+                    <th class="text-center">Bukti Fisik</th>
+                    <th class="text-center" style="width: 120px;">Aksi</th>
+                </tr>
+            </head>
+            <tbody>
+                {% for sertifikat in semua_sertifikat %}
+                <tr>
+                    <td class="text-center align-middle text-muted small">{{ semua_sertifikat.start_index|add:forloop.counter0 }}</td>
+                    <td class="align-middle">
+                        <div class="fw-bold text-success font-monospace">{{ sertifikat.nomor_sertifikat }}</div>
+                        <div class="badge bg-light text-secondary border mt-1">{{ sertifikat.get_status_hak_display|default:"-" }}</div>
+                    </td>
+                    <td class="align-middle">
+                        <div class="fw-bold text-dark">{{ sertifikat.aset_tanah.nama_barang|default:"-" }}</div>
+                        <div class="small text-muted"><i class="bi bi-building me-1"></i>{{ sertifikat.aset_tanah.opd.nama_opd|default:"-" }}</div>
+                    </td>
+                    <td class="align-middle text-end fw-semibold tampil-luas">{{ sertifikat.luas|default:"0" }}</td>
+                    <td class="align-middle text-end fw-semibold text-success tampil-rupiah">{{ sertifikat.nilai|default:"0" }}</td>
+                    <td class="align-middle">
+                        <div class="fw-bold text-primary" style="font-size: 0.85rem;">{{ sertifikat.nama_pemegang_hak|default:"-" }}</div>
+                    </td>
+                    <td class="align-middle text-center">
+                        {% if sertifikat.keterangan == 'ASLI' %}
+                            <span class="badge badge-om-success"><i class="bi bi-check-circle-fill me-1"></i> Asli</span>
+                        {% elif sertifikat.keterangan == 'FOTO_KOPI' %}
+                            <span class="badge badge-om-warning"><i class="bi bi-files me-1"></i> Fotokopi</span>
+                        {% else %}
+                            <span class="badge badge-om-secondary">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center align-middle">
+                        <div class="d-flex align-items-center justify-content-center gap-1">
+                            <a href="{% url 'tanah:detail_sertifikat' sertifikat.id %}" 
+                               class="btn btn-sm btn-bpkad-info shadow-sm d-flex align-items-center justify-content-center" 
+                               style="width: 32px; height: 32px;" title="Lihat Detail">
+                                <i class="bi bi-eye"></i>
+                            </a>
+
+                            {% if not request.user.is_superuser %}
+                            <a href="{% url 'tanah:edit_sertifikat' sertifikat.id %}" 
+                               class="btn btn-sm btn-bpkad-warning shadow-sm d-flex align-items-center justify-content-center" 
+                               style="width: 32px; height: 32px;" title="Edit Dokumen">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'tanah:delete_sertifikat' sertifikat.id %}" 
+                               class="btn btn-sm btn-bpkad-danger shadow-sm d-flex align-items-center justify-content-center" 
+                               style="width: 32px; height: 32px; border-radius: 6px;" title="Hapus Data" 
+                               onclick="return confirm('Yakin hapus sertifikat ini?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
                             {% endif %}
-                        </td>
-                        <td class="text-center pe-4">
-                            <div class="d-grid gap-1 mx-auto" style="grid-template-columns: repeat(2, 1fr); max-width: 70px;">
-                                <a href="{% url 'tanah:detail_sertifikat' sertifikat.id %}" class="btn btn-sm btn-bpkad-info shadow-sm" title="Lihat Detail"><i class="bi bi-eye"></i></a>
-                                <a href="{% url 'tanah:edit_sertifikat' sertifikat.id %}" class="btn btn-sm btn-bpkad-warning shadow-sm" title="Edit Dokumen"><i class="bi bi-pencil"></i></a>
-                                <a href="{% url 'tanah:delete_sertifikat' sertifikat.id %}" class="btn btn-sm btn-bpkad-danger rounded-circle shadow-sm d-flex align-items-center justify-content-center" title="Hapus Data" onclick="return confirm('Yakin hapus sertifikat ini?')"><i class="bi bi-trash"></i></a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="7" class="text-center py-5 text-secondary">
-                            <i class="bi bi-journal-x fs-1 d-block mb-3 opacity-50"></i>
-                            <h6 class="fw-bold">Belum ada dokumen sertifikat terdaftar.</h6>
-                            <p class="small">Data akan muncul setelah Anda menginput status Sudah Bersertifikat di Menu Aset Tanah.</p>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center py-5 text-secondary">
+                        <i class="bi bi-journal-x fs-1 d-block mb-3 opacity-50"></i>
+                        <h6 class="fw-bold">Belum ada dokumen sertifikat terdaftar.</h6>
+                        <p class="small mb-0">Data akan muncul setelah Anda menginput status Sudah Bersertifikat di Menu Aset Tanah.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div> {% if semua_sertifikat.has_other_pages %}
+    <div class="card-footer d-flex justify-content-between align-items-center bg-white border-0 px-4 pt-3 pb-3">
+        <div class="text-muted small">
+            Menampilkan data ke-<b>{{ semua_sertifikat.start_index }}</b> sampai <b>{{ semua_sertifikat.end_index }}</b> dari <b>{{ semua_sertifikat.paginator.count }}</b> total sertifikat.
         </div>
+        <nav aria-label="Navigasi Halaman Sertifikat">
+            <ul class="pagination pagination-sm mb-0 gap-1">
+                
+                {% if semua_sertifikat.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link border-0 rounded shadow-sm text-dark bg-light" href="?page={{ semua_sertifikat.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.keterangan %}&keterangan={{ request.GET.keterangan }}{% endif %}{% if request.GET.pemegang_hak %}&pemegang_hak={{ request.GET.pemegang_hak }}{% endif %}{% if request.GET.status_hak %}&status_hak={{ request.GET.status_hak }}{% endif %}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link border-0 rounded bg-light text-muted"><i class="bi bi-chevron-left"></i></span>
+                    </li>
+                {% endif %}
+
+                {% for num in semua_sertifikat.paginator.page_range %}
+                    {% if semua_sertifikat.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link border-0 rounded shadow-sm bg-primary text-white fw-bold px-2">{{ num }}</span>
+                        </li>
+                    {% elif num > semua_sertifikat.number|add:'-3' and num < semua_sertifikat.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link border-0 rounded shadow-sm text-dark bg-white" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.keterangan %}&keterangan={{ request.GET.keterangan }}{% endif %}{% if request.GET.pemegang_hak %}&pemegang_hak={{ request.GET.pemegang_hak }}{% endif %}{% if request.GET.status_hak %}&status_hak={{ request.GET.status_hak }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if semua_sertifikat.has_next %}
+                    <li class="page-item">
+                        <a class="page-link border-0 rounded shadow-sm text-dark bg-light" href="?page={{ semua_sertifikat.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.keterangan %}&keterangan={{ request.GET.keterangan }}{% endif %}{% if request.GET.pemegang_hak %}&pemegang_hak={{ request.GET.pemegang_hak }}{% endif %}{% if request.GET.status_hak %}&status_hak={{ request.GET.status_hak }}{% endif %}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link border-0 rounded bg-light text-muted"><i class="bi bi-chevron-right"></i></span>
+                    </li>
+                {% endif %}
+
+            </ul>
+        </nav>
     </div>
+    {% endif %}
+
+</div>
 </div>
 
 <!-- filter -->

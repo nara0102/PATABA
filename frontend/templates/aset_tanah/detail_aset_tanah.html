@@ -1,5 +1,5 @@
-{% extends 'base/base_admin_BPKAD.html' %}
-{% block title %}Detail Aset: {{ aset.kode_barang }} - TRANSPARA{% endblock %}
+{% extends base_template %} {% load static %}
+{% block title %}Detail Aset: {{ aset.kode_barang }} - PATABA{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -47,7 +47,7 @@
         <div class="d-flex flex-wrap gap-2 justify-content-start justify-content-md-end">
             <a href="javascript:history.back()" class="btn btn-bpkad-outline rounded-pill px-4 fw-bold shadow-sm"><i class="bi bi-arrow-left me-1"></i> Kembali</a>
             
-            {% if request.user.profile.role == 'ADMIN_BPKAD' or request.user.is_superuser %}
+            {% if not request.user.is_superuser %}
                 <a href="{% url 'tanah:edit_aset_tanah' aset.id %}" class="btn btn-bpkad-gold rounded-pill px-4 fw-bold shadow-sm"><i class="bi bi-pencil-square me-1"></i> Edit Data</a>
                 <a href="{% url 'tanah:tambah_sertifikat' aset.id %}" class="btn btn-bpkad-primary rounded-pill px-4 fw-bold shadow-sm"><i class="bi bi-file-earmark-plus me-1"></i> Tambah Sertifikat</a>
             {% else %}

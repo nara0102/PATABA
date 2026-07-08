@@ -2,14 +2,14 @@
 from django.urls import path
 from . import views
 
-app_name = 'tanah' # nama namespace aplikasi
+app_name = 'tanah' #  namespace aplikasi
 
 urlpatterns = [
+    
     # Master Data & Transaksi Aset
     path('aset/tanah/daftar/', views.list_aset_tanah, name='list_aset_tanah'),
     path('aset/kendaraan/daftar/', views.list_aset_kendaraan, name='list_aset_kendaraan'),
     path('aset/tanah/tambah/', views.input_aset_tanah, name='input_aset_tanah'),
-    path('aset/input/tanah/', views.input_aset_tanah, name='input_aset_tanah_alt'), # Cadangan rute lama
     path('aset/tanah/detail/<int:pk>/', views.detail_aset_tanah, name='detail_aset_tanah'),
     path('aset/tanah/edit/<int:pk>/', views.edit_aset_tanah, name='edit_aset_tanah'),
     path('aset/tanah/hapus/<int:pk>/', views.delete_aset_tanah, name='delete_aset_tanah'),
@@ -31,7 +31,10 @@ urlpatterns = [
     # Excel
     path('export/konfigurasi/', views.halaman_export_excel, name='halaman_export_excel'),
     path('export/proses-excel/', views.proses_export_excel, name='proses_export_excel'),
+    
     path('aset/tanah/import/', views.halaman_import_view, name='halaman_import'),
+    path('laporan/import-excel/proses/', views.proses_import_excel, name='proses_import_excel'),
+    
     path('aset/tanah/template-import/', views.unduh_template_import, name='unduh_template_import'),
     
     # PDF

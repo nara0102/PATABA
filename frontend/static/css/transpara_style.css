@@ -267,11 +267,16 @@ label.small { margin-bottom: 6px !important; display: block; color: var(--text-m
 .form-control::placeholder, .form-select::placeholder { color: #94A3B8 !important; font-weight: 400; }
 .input-group-text { background-color: var(--card-light); border: 1px solid var(--border-soft); color: var(--text-muted); font-weight: 700; font-size: 0.85rem; }
 
-.table-master-container { max-height: 550px; overflow-y: auto; border-radius: 12px; border: 1px solid var(--border-soft); }
+.table-master-container { min-height: 550px; overflow-y: auto; border-radius: 12px; border: 1px solid var(--border-soft); }
 .table thead th {
     background-color: var(--bg-input) !important; border-bottom: 2px solid var(--border-soft) !important;
     text-transform: uppercase; font-size: 0.75rem; color: var(--text-muted); letter-spacing: 0.5px;
     position: sticky; top: 0; z-index: 10;
+}
+.table tbody tr td {
+    padding-top: 14px !important;    /* Mempertebal ruang atas cell agar tabel terlihat premium */
+    padding-bottom: 14px;  /* Mempertebal ruang bawah cell */
+    vertical-align: middle; /* Memastikan teks selalu tegak lurus di tengah baris */
 }
 
 .modal-backdrop.show, .offcanvas-backdrop.show { backdrop-filter: blur(2px) !important; background-color: rgba(15, 23, 42, 0.8) !important; }

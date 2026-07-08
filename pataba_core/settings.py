@@ -94,7 +94,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-USE_THOUSAND_SEPARATOR = False
+USE_THOUSAND_SEPARATOR = True
 LANGUAGE_CODE = 'id' # Bahasa Indonesia
 TIME_ZONE = 'Asia/Makassar' # Zona Waktu WITA (Palu)
 USE_I18N = True

@@ -1,4 +1,4 @@
-# TRANSPARA - DOKTRIN LOGIKA SERTIFIKASI (SKILL_SERTIFIKAT.MD)
+# PATABA - DOKTRIN LOGIKA SERTIFIKASI (SKILL_SERTIFIKAT.MD)
 **Fokus:** Relasi Master Aset Tanah & Detail Sertifikat Tanah
 
 ## 1. Arsitektur Dua Tabel (The Twin-Table Architecture)
@@ -10,6 +10,8 @@ Data sertifikat dipecah menjadi dua bagian untuk menjaga performa filter Dasbor 
 Setiap kali `SertifikatTanah` DIBUAT atau DIEDIT, ia WAJIB melemparkan dua data kembali ke `AsetTanah`:
 1. `nomor_sertifikat`
 2. `nama_pemegang_hak`
+3. `nomor_hak`
+4. `status_hak_sementara`
 
 ## 3. Logika 5 Kategori Bukti Fisik (The 5-Pillars of Evidence)
 Aturan baku Dinas BPKAD yang membagi bukti sertifikat menjadi 5 kondisi absolut:
@@ -32,12 +34,12 @@ Disimpan di kolom `keterangan_sertifikasi_lainnya` pada Master Aset.
    - Kepemilikan: LAINNYA
    - *Tindakan Sistem:* Simpan teks nama yang diketik manual oleh user.
 
-**B. KELOMPOK BELUM BERSERTIFIKAT (Sertifikat Dalam Proses/Kosong)**
+**B. KELOMPOK BELUM BERSERTIFIKAT (Sertifikat Dalam Proses/Kosong)** | ini wajib di isi jika status yg dipilih adalah belum bersertifikat karena itu akan menggunakan nomor hah dan status hak(wajib dari dinas)
 5. **Belum Bersertifikat / Dalam Proses**
    - Wajib mendefinisikan `status_hak_sementara` (HAK_PAKAI / HAK_MILIK).
    - Wajib mengisi `nomor_hak` sementara.
-   - Kolom `keterangan_sertifikasi_lainnya` diisi keterangan proses.
-   - *Tindakan Sistem:* Kosongkan absolut `nama_pemegang_hak`.
+   - Kolom `keterangan_sertifikasi_lainnya` diisi keterangan proses (ini untuk Asli/FC sesuai dengan aturan).
+   - *Tindakan Sistem:* Kosongkan absolut `nama_pemegang_hak` atau isi sesuai inputan user.
 
 ## 4. Pengaman Ganda Lapis Backend (Double Safety Net)
 Karena JavaScript terkadang gagal mengirimkan data dari form HTML yang tersembunyi (`display: none`), fungsi `views.py` WAJIB mengintervensi dengan membaca *string* 'PEMKOT'. Jika terdeteksi, Python yang akan mengisi paksa string "Pemerintah Kota Palu" ke database.

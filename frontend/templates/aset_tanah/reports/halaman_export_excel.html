@@ -1,5 +1,5 @@
 {% extends 'base/base_admin_BPKAD.html' %}
-{% block title %}Konfigurasi Export Laporan - TRANSPARA{% endblock %}
+{% block title %}Konfigurasi Export Laporan - PATABA{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4 mb-5">
@@ -84,14 +84,14 @@
                         <button type="button" id="btn-select-all" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 shadow-sm">Pilih Semua</button>
                     </div>
 
-                    <div class="row g-4 mt-2">
+                    <div class="row g-4">
                         
                         <!-- KOLOM 1: IDENTITAS, NILAI, LOKASI & KEADAAN (TURUN KE BAWAH) -->
                         <div class="col-md-4">
                             <h6 class="small fw-bold text-muted mb-3"><i class="bi bi-box-seam me-1"></i> Identitas, Nilai & Lokasi</h6>
                             <div class="form-check mb-2">
                                 <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="opd" checked>
-                                <label class="form-check-label small">Instansi (OPD)</label>
+                                <label class="form-check-label small">Nama Instansi</label>
                             </div>
                             <div class="form-check mb-2">
                                 <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="kode_barang" checked>
@@ -141,6 +141,14 @@
                                     <label class="form-check-label small">Cara Perolehan</label>
                                 </div>
                                 <div class="form-check mb-2">
+                                    <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="tgl_perolehan">
+                                    <label class="form-check-label small">Tanggal Perolehan</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="status_guna">
+                                    <label class="form-check-label small">Status Penggunaan</label>
+                                </div>
+                                <div class="form-check mb-2">
                                     <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="kondisi">
                                     <label class="form-check-label small">Kondisi Pemanfaatan</label>
                                 </div>
@@ -163,7 +171,7 @@
                                 <label class="form-check-label small fw-bold text-dark">Nomor Hak</label>
                             </div>
                             <div class="form-check mb-2">
-                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="kondisi_physic" checked>
+                                <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="kondisi_fisik" checked>
                                 <label class="form-check-label small text-primary">Kondisi Fisik Dokumen (Asli/FC)</label>
                             </div>
                         </div>
@@ -181,11 +189,11 @@
                             </div>
                             <div class="form-check mb-2">
                                 <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="sertif_luas">
-                                <label class="form-check-label small">Luas</label>
+                                <label class="form-check-label small">Luas (m2) Tertulis</label>
                             </div>
                             <div class="form-check mb-2">
                                 <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="sertif_nilai">
-                                <label class="form-check-label small text-success">Nilai (Rp)</label>
+                                <label class="form-check-label small text-success">Nilai (Rp) Tertulis</label>
                             </div>
                             <div class="form-check mb-2">
                                 <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="sertif_tgl_buat">
@@ -205,7 +213,7 @@
                             </div>
                             <div class="form-check mb-2">
                                 <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="sertif_peruntukan">
-                                <label class="form-check-label small text-muted">Peruntukan Tanah</label>
+                                <label class="form-check-label small text-muted">Peruntukan Wilayah</label>
                             </div>
                             <div class="form-check mb-2">
                                 <input class="form-check-input col-checkbox" type="checkbox" name="kolom_export" value="sertif_catatan">

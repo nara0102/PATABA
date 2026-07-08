@@ -1,43 +1,139 @@
 PATABA_PROJECT/
 │
-├── venv/                       # (Environment lokal)
-├── .env                        # (Kredensial Supabase & Secret Key Django)
-├── .gitignore                  # (Daftar file yang diabaikan Git)
-├── requirements.txt            # (Daftar library sistem)
-├── manage.py                   # (Entry point Django)
-│
-├── pataba_core/                # ⚙️ ROOT CONFIG
-│   ├── __init__.py
-│   ├── asgi.py
-│   ├── wsgi.py
-│   ├── settings.py             # (Pusat pengaturan aplikasi & database)
-│   └── urls.py                 # (Pusat routing utama)
-│
+├── .vscode
+│   └── settings.json
 ├── apps/                       # 📦 KUMPULAN MODUL APLIKASI (Modular & Scalable)
 │   ├── __init__.py
-│   ├── manajemen_pengguna/     # (Autentikasi, Profil BPKAD/OPD, Role Control)
 │   ├── aset_tanah/             # (Logika khusus tanah & sertifikat)
-│   ├── aset_kendaraan/         # (Modul Baru: Logika khusus BPKB & kendaraan)
+│   │   ├── migrations/
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── urls.py
+│   │   └── views.py
+│   │
+│   ├── manajemen_pengguna/     # (Autentikasi, Profil BPKAD/OPD, Role Control)
+│   │   ├── migrations/
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── context_processors.py
+│   │   ├── models.py
+│   │   ├── urls.py
+│   │   ├── utils.py
+│   │   └── views.py
+│   │
 │   └── portal_publik/          # (Sistem informasi & peta GIS masyarakat)
+│       ├── migrations/
+│       ├── __init__.py
+│       ├── admin.py
+│       ├── apps.py
+│       ├── forms.py
+│       ├── models.py
+│       ├── urls.py
+│       └── views.py
+│   
+│
+├── dataset/
+│   ├── daftar_opd.xlsx
+│   └── dummy_aset.xlsx
 │
 ├── frontend/                   # 🎨 FRONTEND ASSETS (Pemisahan UI/UX yang rapi)
 │   ├── static/
 │   │   ├── css/
+│   │   │   ├── index.css               # index, sendiri
+│   │   │   ├── transpara_buttons.css   # tombol-tombol
+│   │   │   ├── transpara_publik.css    # semua css di halaman depan publik (header footer publik)
 │   │   │   └── transpara_style.css  # (Custom Glassmorphism & Apple UI)
-│   │   ├── js/
-│   │   │   ├── main.js
-│   │   │   └── map_handler.js       # (Skrip Leaflet terpisah agar bersih)
-│   │   ├── images/
-│   │   └── vendors/                 # (Library eksternal: Bootstrap, ApexCharts)
-│   │
+│   │   ├── images/                     # punya index
+│   │   │   ├── konten/                 # isi kalo gambar di index bagian berita dan pengumuman dari database kosong
+│   │   │   │   ├── berita1.png
+│   │   │   │   ├── berita2.png
+│   │   │   │   ├── galeri-png.
+│   │   │   │   └── galeri-utama.png 
+│   │   │   ├── bg_index.png
+│   │   │   ├── gedung.png
+│   │   │   ├── kendaraan.png
+│   │   │   ├── logo.png
+│   │   │   ├── p-favicon.png
+│   │   │   ├── rapat_index.png
+│   │   │   └── tanah.png
+│   │   └── js/
+│   │       ├── main.js              # format ribuan, rupiah, luas, titik koma, urutan A-Z, form
+│   │       └── pataba_theme.js       # (Skrip dark/light theme)
+│   │   
 │   └── templates/                   # (Kumpulan HTML global & views)
-│       ├── base/
-│       │   ├── base_admin_BPKAD.html
-│       │   ├── base_publik.html
-│       │   └── components/          # (Reusable UI: Navbar, Sidebar, Footer)
 │       ├── aset_tanah/
-│       ├── aset_kendaraan/
+│       │   ├── reports/
+│       │   │   ├── halaman_export_excel.html
+│       │   │   ├── halaman_export pdf.HTML
+│       │   │   ├── halama import.html 
+│       │   │   ├── pdf aset opd.html 
+│       │   │   ├── pdf profil aset.html 
+│       │   │   └── pdf rekap sertiff.html 
+│       │   ├── detail aset tanah.html 
+│       │   ├── detail sertifikat.html 
+│       │   ├── input aset tanah.html 
+│       │   ├── input sertifikat.html 
+│       │   ├── list aset tanah.html 
+│       │   ├── list sertifikat.html
+│       │   └── pembebasan lahan.html 
+│       ├── base/
+│       │   ├── base_admin_BPKAD.html   # base admin
+│       │   ├── base_superadmin.html    # base super admin (pengturan pengguna)
+│       │   └── base.html               # base halaman-halaman dari navbar
+│       ├── includes/
+│       │   ├── _tabel publikasi.html   # tabel konten publik
+│       │   └── _toast messages.html    # alret messages
+│       ├── manajemen_pengguna/
+│       │   ├── daftar opd.html
+│       │   ├── daftar pengguna.html
+│       │   ├── dashboard bpkad.html
+│       │   ├── dashboard opd.html
+│       │   ├── dashboard superadmin.html
+│       │   ├── detail opd.html
+│       │   ├── detail pengguna.html
+│       │   ├── edit pengguna.html
+│       │   ├── input opd publik.html
+│       │   ├── input opd sadmin.html
+│       │   ├── pengaturan profil.html
+│       │   └── login.html
 │       └── portal_publik/
+│           ├── bantuan.html
+│           ├── berita.html
+│           ├── cooming soon.html
+│           ├── data aset.html
+│           ├── index.html
+│           ├── input publikasi.html
+│           ├── kontak.html
+│           ├── list publikasi.html
+│           └── peta gis.html
+│       
+├── locale/en/LC_MESSAGES       # bahasa (baru halaman index)
+│   ├── django.mo
+│   └── django.po 
 │
-└── media/                      # 📁 UPLOADS (Akan di-bypass ke Supabase)
-    └── publikasi_images/
+├── media/
+│
+├── pataba_core/                # ⚙️ ROOT CONFIG
+│   ├── __init__.py
+│   ├── asgi.py
+│   ├── constanst.py            # role dan status verifikasi
+│   ├── settings.py
+│   ├── storages.py             # (Pusat pengaturan storages)
+│   ├── urls.py                 # (Pusat routing utama)
+│   ├── utils.py                # 1. format luas dan rupiah
+│   └── wsgi.py                
+│
+├── venv/                       # (Environment lokal)
+├── .env                        # (Kredensial Supabase & Secret Key Django)
+├── .gitignore                  # (Daftar file yang diabaikan Git)
+├── bueprint pataba.txt
+├── manage.py                   # (Entry point Django)
+├── readme.md.py                # (Entry point Django)
+├── requirements.txt            # (Daftar library sistem)
+├── skill export.md 
+├── skill format luas dan angka.md
+├── skill storage.md
+└── skill.md                    # publik
