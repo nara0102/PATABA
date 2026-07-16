@@ -220,10 +220,10 @@
                                 <div class="col-6"><div class="detail-label">Luas Tanah</div><div class="detail-value tampil-luas">{{ aset.luas_m2|default:"0" }}</div></div>
                                 <div class="col-6"><div class="detail-label">Navigasi Peta</div>
                                     <div class="detail-value">
-                                        {% if aset.latitude and aset.longitude %}
-                                            <a href="http://googleusercontent.com/maps.google.com/4{{ aset.latitude }},{{ aset.longitude }}" target="_blank" class="text-decoration-none text-primary"><i class="bi bi-geo-alt-fill me-1"></i>Buka Peta</a>
+                                        {% if aset.latitude and aset.longitude and aset.latitude != 0 and aset.longitude != 0 %}
+                                            <a href="https://www.google.com/maps?q={{ aset.latitude }},{{ aset.longitude }}" target="_blank" class="text-decoration-none text-primary"><i class="bi bi-geo-alt-fill me-1"></i>Buka Peta</a>
                                         {% else %}
-                                            <a href="{% url 'publik:peta_gis' %}?q={{ aset.nama_barang|urlencode }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold shadow-sm">
+                                            <a href="{% url 'publik:peta_gis' %}?q={{ aset.alamat_lokasi|urlencode }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold shadow-sm">
                                                 <i class="bi bi-map-fill me-1"></i> Lihat di Peta GIS
                                             </a>
                                         {% endif %}
@@ -266,7 +266,7 @@
         document.querySelectorAll('.tampil-rupiah').forEach(function(el) {
             let rawText = el.innerText.split(',')[0]; 
             let val = parseFloat(rawText.replace(/\./g, "").replace(/[^0-9.-]+/g,""));
-            if(!isNaN(val)) { el.innerText = 'Rp ' + val.toLocaleString('id-ID') + ',00'; }
+            if(!isNaN(val)) { el.innerText = 'Rp ' + val.toLocaleString('id-ID'); }
         });
         document.querySelectorAll('.tampil-luas').forEach(function(el) {
             let val = parseFloat(el.innerText.replace(/[^0-9.-]+/g,""));

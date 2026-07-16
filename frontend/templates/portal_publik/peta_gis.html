@@ -245,7 +245,7 @@
             let cleanStr = angka.toString().split(',')[0].replace(/\./g, "");
             let val = parseInt(cleanStr);
             if(isNaN(val)) return 'Rp 0,00';
-            return 'Rp ' + val.toLocaleString('id-ID') + ',00';
+            return 'Rp ' + val.toLocaleString('id-ID');
         }
 
         // FUNGSI UTAMA SHOW DETAIL YANG SUDAH KEBAL CRASH

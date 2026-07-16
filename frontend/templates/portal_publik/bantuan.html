@@ -3,64 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pusat Bantuan - Transpara</title>
+    <title>Pusat Bantuan - PATABA KOTA PALU</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        body { background-color: #F5F7FA; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        .glass-card { 
-            background: #FFFFFF; border-radius: 24px; padding: 40px; 
-            border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+        :root {
+            --bg-main: #F4F6F9;
+            --text-main: #2C3E50;
+            --accent-blue: #002D5E; /* Warna kebanggaan BPKAD Kota Palu */
+            --glass-white: #FFFFFF;
         }
-        .accordion-button:not(.collapsed) { background-color: #EBF5FF; color: #0056B3; font-weight: 600; }
-        .btn-back { color: #86868B; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
-        .btn-back:hover { color: #0056B3; }
+        body { 
+            background-color: var(--bg-main); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text-main);
+        }
+        .glass-card { 
+            background: var(--glass-white); 
+            border-radius: 20px; 
+            border: 1px solid rgba(0,0,0,0.05); 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        }
+        /* Style Premium untuk Navigasi Menu Kiri */
+        .nav-pills .nav-link {
+            color: var(--text-main);
+            font-weight: 500;
+            border-radius: 12px;
+            padding: 14px 20px;
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
+            text-align: left;
+        }
+        .nav-pills .nav-link:hover {
+            background-color: rgba(0, 45, 94, 0.05);
+            color: var(--accent-blue);
+        }
+        .nav-pills .nav-link.active {
+            background-color: var(--accent-blue) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 4px 15px rgba(0, 45, 94, 0.2);
+        }
+        .accordion-button:not(.collapsed) { 
+            background-color: rgba(0, 45, 94, 0.06); 
+            color: var(--accent-blue); 
+            font-weight: 600; 
+        }
+        .btn-back { color: #86868B; text-decoration: none; font-size: 0.95rem; font-weight: 500; transition: color 0.2s; }
+        .btn-back:hover { color: var(--accent-blue); }
+        .font-monospace-code { font-family: var(--bs-font-monospace); font-size: 0.85rem; background: #F8F9FA; padding: 2px 6px; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-7">
-            <div class="mb-4">
-                <a href="javascript:history.back()" class="btn-back"><i class="bi bi-arrow-left me-1"></i> Kembali</a>
-            </div>
+<!-- KUNCI 1: DIUBAH MENJADI CONTAINER-FLUID AGAR FULL 1 LAYAR PENUH -->
+<div class="container-fluid px-md-5 py-4 mb-5">
+    
+    <!-- Header Akses Kembali -->
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <a href="javascript:history.back()" class="btn-back">
+            <i class="bi bi-arrow-left-circle me-1"></i> Kembali ke Dashboard
+        </a>
+        <span class="badge bg-secondary rounded-pill px-3 py-2 font-monospace">v1.4 Production</span>
+    </div>
 
-            <div class="glass-card">
-                <h2 class="fw-bold mb-4">Pusat Bantuan Transpara <i class="bi bi-emoji-smile"></i> </h2>
-                <p class="text-muted mb-4">Panduan singkat untuk memulai penggunaan sistem.</p>
+    <!-- Judul Besar Halaman -->
+    <div class="mb-5">
+        <h3 class="fw-bold mb-1" style="color: var(--accent-blue);"><i class="bi bi-info-circle-fill me-2"></i>Pusat Bantuan Platform PATABA</h3>
+        <p class="text-muted small mb-0">Panduan rujukan teknis operasional regulasi inventarisasi aset pertanahan Pemerintah Kota Palu.</p>
+    </div>
 
-                <div class="accordion accordion-flush" id="accordionBantuan">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header"><button class="accordion-button" data-bs-toggle="collapse" data-bs-target="#c1">1. Cara Login</button></h2>
-                        <div id="c1" class="accordion-collapse collapse show"><div class="accordion-body text-muted small">
-                            Masukkan username dan password yang sudah terdaftarkan. Jika belum memiliki akun, silakan daftarkan akun dan isi data sesuai dengan yang tertera.
-                            Pastikan instansi/OPD Anda sudah terdaftarkan.<br> Jika belum memiliki OPD, daftarkan OPD melalui menu Peran (Role) dan daftarkan instansi/OPD
-                            di menu instansi/OPD lalu daftarkan OPD Anda.</div></div>
-                    </div>
-
-                    <div class="accordion-item">
-                        <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c2">2. Pendaftaran OPD Baru</button></h2>
-                        <div id="c2" class="accordion-collapse collapse"><div class="accordion-body text-muted small">
-                            Silakan isi formulir pendaftaran OPD. Pastikan menggunakan akun email yang aktif agar mendapatkan notifikasi ketika Admin telah menyutujuinya.</div></div>
-                    </div>
-
-                    <div class="accordion-item">
-                        <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c3">3. Cara Input Aset</button></h2>
-                        <div id="c3" class="accordion-collapse collapse"><div class="accordion-body text-muted small">Masuk ke menu <b>Kelola Aset > Aset Tanah > Usulkan Aset Baru</b>. Isi data fisik, lokasi, dan koordinat. Status aset akan menjadi <i>Belum Diverifikasi</i> hingga diperiksa oleh Admin BPKAD.</div></div>
-                    </div>
-
-                    <div class="accordion-item">
-                        <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#c4">4. Input Data Sertifikat</button></h2>
-                        <div id="c4" class="accordion-collapse collapse"><div class="accordion-body text-muted small">Setelah aset diusulkan, buka detail aset tersebut. Di sana terdapat opsi untuk menginput data sertifikat atau memproses sertifikasi (jika sedang dalam pengurusan).</div></div>
-                    </div>
+    <!-- GRID LAYOUT UTAMA (Dinamis: Kolom Kiri Menu, Kolom Kanan Konten Isi) -->
+    <div class="row g-4">
+        
+        <!-- ==================================================================== -->
+        <!-- MENU PILIHAN KIRI (Otomatis Menjadi Barisan Atas Jika di Layar Mobile) -->
+        <!-- ==================================================================== -->
+        <div class="col-lg-3">
+            <div class="glass-card p-3 sticky-top" style="top: 24px; z-index: 100;">
+                <div class="nav flex-column nav-pills gap-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    
+                    <button class="nav-link active" id="pill-dokumentasi-tab" data-bs-toggle="pill" data-bs-target="#pill-dokumentasi" type="button" role="tab">
+                        <i class="bi bi-book me-2"></i> 1. Dokumentasi Sistem
+                    </button>
+                    
+                    <button class="nav-link" id="pill-operator-tab" data-bs-toggle="pill" data-bs-target="#pill-operator" type="button" role="tab">
+                        <i class="bi bi-person-workspace me-2"></i> 2. Panduan Operator OPD
+                    </button>
+                    
+                    <button class="nav-link" id="pill-laporan-tab" data-bs-toggle="pill" data-bs-target="#pill-laporan" type="button" role="tab">
+                        <i class="bi bi-file-earmark-bar-graph me-2"></i> 3. Manajemen & Laporan
+                    </button>
+                    
                 </div>
-
-                <div class="mt-5 p-3 rounded-4 bg-light text-center">
-                    <p class="small text-muted mb-0">Butuh bantuan teknis lebih lanjut? Hubungi: <b></b></p>
+                <div class="mt-4 pt-3 border-top text-center d-none d-lg-block">
+                    <p class="small text-muted mb-1">Dukungan Teknis BPKAD:</p>
+                    <span class="fw-bold small text-dark font-monospace"><i class="bi bi-envelope me-1"></i>it.bpkad@palukota.go.id</span>
                 </div>
             </div>
         </div>
+
+        <!-- ==================================================================== -->
+        <!-- KONTEN ISI KANAN (Berubah Secara Interaktif Tanpa Reload Halaman) -->
+        <!-- ==================================================================== -->
+        <div class="col-lg-9">
+            <div class="glass-card p-4 p-md-5">
+                <div class="tab-content" id="v-pills-tabContent">
+                    
+                    <!-- 📘 KATEGORI 1: DOKUMENTASI SISTEM -->
+                    <div class="tab-pane fade show active" id="pill-dokumentasi" role="tabpanel">
+                        <h4 class="fw-bold mb-2" style="color: var(--accent-blue);">📘 Dokumentasi & Arsitektur Sistem</h4>
+                        <p class="text-muted small mb-4">Penjelasan menyeluruh mengenai ruang lingkup, pembatasan data, dan matriks hak akses platform[cite: 5].</p>
+                        
+                        <div class="accordion accordion-flush" id="accDokumentasi">
+                            
+                            <div class="accordion-item border-bottom py-2">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#d1">
+                                        1.1. Dashboard Eksekutif & Statistik Makro[cite: 5]
+                                    </button>
+                                </h2>
+                                <div id="d1" class="accordion-collapse collapse" data-bs-parent="#accDokumentasi">
+                                    <div class="accordion-body text-muted small lh-lg">
+                                        Dashboard utama menyajikan visualisasi data agregasi real-time yang bersumber dari entitas aset berstatus <span class="badge bg-success">VALID</span>[cite: 5]. Komponen visual mencakup kalkulator akumulasi total bidang tanah, penjumlahan volume luas meter persegi ($m^2$), estimasi nilai aset daerah dalam satuan Rupiah, serta persentase rasio bidang yang sudah bersertifikat versus yang belum[cite: 5].
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item border-bottom py-2">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#d2">
+                                        1.2. Matriks Otoritas Pengguna (RBAC System)[cite: 5]
+                                    </button>
+                                </h2>
+                                <div id="d2" class="accordion-collapse collapse" data-bs-parent="#accDokumentasi">
+                                    <div class="accordion-body text-muted small lh-lg">
+                                        Sistem PATABA membagi wewenang kedalam 3 tingkat peran mutlak[cite: 5]:
+                                        <ul>
+                                            <li><b>Superadmin:</b> Otoritas pengawas tertinggi dengan hak akses <span class="font-monospace-code">Read-Only</span> (Hanya Baca) terhadap seluruh aset daerah serta kendali penuh manajemen akun[cite: 4, 5].</li>
+                                            <li><b>Admin BPKAD:</b> Bertindak sebagai Verifikator utama pusat yang berhak menyetujui, menolak usulan, menerbitkan buku sertifikat anak, dan melakukan penghapusan data master.</li>
+                                            <li><b>Operator OPD:</b> Bertindak sebagai pengusul data yang ruang lingkup pandangannya dikunci ketat hanya boleh melihat dan memodifikasi data milik instansi kedinasannya sendiri[cite: 2, 5].</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item border-bottom py-2">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#d3">
+                                        1.3. Aturan Data Masking Portal Publik[cite: 5]
+                                    </button>
+                                </h2>
+                                <div id="d3" class="accordion-collapse collapse" data-bs-parent="#accDokumentasi">
+                                    <div class="accordion-body text-muted small lh-lg">
+                                        Demi menegakkan keamanan informasi kedaerahan, sistem menerapkan lapisan penyaringan data (*Data Masking Layer*) untuk pengunjung publik luar[cite: 5]. Informasi sensitif seperti nomor sertifikat BPN, rincian dokumen hukum internal, dan catatan revisi BPKAD otomatis disensor dan hanya menampilkan informasi umum seperti nama barang, luas, dan nama instansi pengguna[cite: 2, 5].
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- 🛠️ KATEGORI 2: PANDUAN OPERATOR OPD -->
+                    <div class="tab-pane fade" id="pill-operator" role="tabpanel">
+                        <h4 class="fw-bold mb-2" style="color: var(--accent-blue);">🛠️ Panduan Operasional Instansi (OPD)</h4>
+                        <p class="text-muted small mb-4">Tata cara penginputan, pemutakhiran data, dan manajemen berkas visual di tingkat operator[cite: 2, 5].</p>
+                        
+                        <div class="accordion accordion-flush" id="accOperator">
+                            
+                            <div class="accordion-item border-bottom py-2">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#o1">
+                                        2.1. Autentikasi Login & Prosedur Lupa Password
+                                    </button>
+                                </h2>
+                                <div id="o1" class="accordion-collapse collapse" data-bs-parent="#accOperator">
+                                    <div class="accordion-body text-muted small lh-lg">
+                                        Masukkan kredensial username dan kata sandi resmi yang telah didelegasikan oleh BPKAD. Jika Anda mengalami kendala lupa password, sistem melarang pembuatan akun baru secara mandiri. Operator diwajibkan mengirimkan surat permohonan reset sandi resmi bertanda tangan Kepala OPD ke Admin BPKAD untuk diterbitkan token sandi sementara yang baru[cite: 5].
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item border-bottom py-2">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#o2">
+                                        2.2. Cara Mengusulkan Aset Tanah Baru & Unggah Multi-Foto[cite: 2]
+                                    </button>
+                                </h2>
+                                <div id="o2" class="accordion-collapse collapse" data-bs-parent="#accOperator">
+                                    <div class="accordion-body text-muted small lh-lg">
+                                        Masuk ke menu <span class="font-monospace-code">Kelola Aset > Aset Tanah > Tambah Aset</span>[cite: 1, 2]. Isi formulir secara teliti. Gunakan kolom unggahan berkas gambar berganda (*multiple image uploader*) pada bagian bawah form untuk melampirkan foto batas fisik patok lahan asli di lapangan secara serentak[cite: 2]. Seluruh angka nominal rupiah wajib diinput berupa angka murni tanpa tanda titik ribuan[cite: 2].
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item border-bottom py-2">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#o3">
+                                        2.3. Siklus Verifikasi Bertingkat (SOP Perlu Review)[cite: 2]
+                                    </button>
+                                </h2>
+                                <div id="o3" class="accordion-collapse collapse" data-bs-parent="#accOperator">
+                                    <div class="accordion-body text-muted small lh-lg">
+                                        Aset yang baru diinput berstatus awal <span class="badge bg-warning">BELUM_DIVERIFIKASI</span>[cite: 2]. Jika Admin BPKAD menemukan ketidaksesuaian data, status akan diubah menjadi <span class="badge bg-danger">PERLU_REVIEW</span> lengkap dengan lampiran catatan revisi wajib[cite: 2]. Operator harus membuka tombol Edit pada data terkait, memperbaiki kekeliruan berdasarkan catatan tersebut, lalu mengirim ulang data usulan (*resubmit*) agar statusnya kembali naik ke antrean verifikasi BPKAD[cite: 2].
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- 🗂️ KATEGORI 3: MANAJEMEN & LAPORAN -->
+                    <div class="tab-pane fade" id="pill-laporan" role="tabpanel">
+                        <h4 class="fw-bold mb-2" style="color: var(--accent-blue);">🗂️ Panduan Penerbitan & Pusat Unduh Dokumen</h4>
+                        <p class="text-muted small mb-4">Tata cara pencatatan legalitas tingkat lanjut serta ekspor-impor laporan eksekutif[cite: 2, 5].</p>
+                        
+                        <div class="accordion accordion-flush" id="accLaporan">
+                            
+                            <div class="accordion-item border-bottom py-2">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#l1">
+                                        3.1. Penerbitan Buku Sertifikat BPN (Admin BPKAD Only)[cite: 2]
+                                    </button>
+                                </h2>
+                                <div id="l1" class="accordion-collapse collapse" data-bs-parent="#accLaporan">
+                                    <div class="accordion-body text-muted small lh-lg">
+                                        Untuk data aset berstatus <span class="badge bg-success">VALID</span> yang telah memiliki buku legalitas fisik resmi, Admin BPKAD dapat membuka detail aset lalu mengeklik tombol <b>Terbitkan/Tambah Sertifikat</b>[cite: 2]. Penginputan data di modul ini otomatis akan menyinkronkan status master aset pertanahan menjadi <span class="font-monospace-code">BERSERTIFIKAT</span> serta mengunci klasifikasi fisik dokumen hukumnya secara otomatis di database[cite: 2].
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item border-bottom py-2">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#l2">
+                                        3.2. Ekspor Spreadsheet Kustom (Multi-Fitur Centang)[cite: 2]
+                                    </button>
+                                </h2>
+                                <div id="l2" class="accordion-collapse collapse" data-bs-parent="#accLaporan">
+                                    <div class="accordion-body text-muted small lh-lg">
+                                        Buka menu <span class="font-monospace-code">Administrasi & Laporan > Import/Export Data Excel</span>[cite: 1, 2]. Pada panel kanan, Anda dibekali kebebasan penuh untuk memilih kolom informasi apa saja yang ingin disertakan dalam file unduhan dengan mencentang kotak pilihan (Contoh: hanya mencentang OPD, Luas, dan Kondisi Fisik Dokumen)[cite: 2, 6]. Mesin secara pintar akan menyusun tata letak kolom spreadsheet secara otomatis[cite: 2].
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item border-bottom py-2">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#l3">
+                                        3.3. Mengunduh Dokumen Laporan Varian PDF (3 Jenis Berkas)[cite: 1, 2]
+                                    </button>
+                                </h2>
+                                <div id="l3" class="accordion-collapse collapse" data-bs-parent="#accLaporan">
+                                    <div class="accordion-body text-muted small lh-lg">
+                                        Sistem PATABA memfasilitasi 3 model unduhan cetak laporan berbasis format dokumen PDF resmi[cite: 1, 2]:
+                                        <ul>
+                                            <li><b>PDF Profil Tunggal Aset:</b> Cetakan satu lembar ringkasan detail fisik satu aset pertanahan yang dilengkapi matriks gambar QR-Code dinamis untuk verifikasi otentikasi lapangan[cite: 2].</li>
+                                            <li><b>PDF Buku Inventaris Per-OPD:</b> Rekapitulasi seluruh koleksi data pertanahan yang sah milik satu instansi dinas tertentu, lengkap dengan kolom tanda tangan resmi Kepala OPD terkait[cite: 2].</li>
+                                            <li><b>PDF Rekapitulasi Wilayah Sektor:</b> Tabel rangkuman makro performa progres sertifikasi mencakup total luasan sertifikat dan nilai aset keseluruhan dari total 40 OPD Kota Palu[cite: 5, 2].</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
