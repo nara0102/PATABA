@@ -5,7 +5,7 @@
     <title>Buku Inventaris Aset Tanah OPD</title>
     <style>
         @page {
-            size: 33cm 21.5cm landscape; /* TOTAL LOCK KE LANDSCAPE BALANCED */
+            size: 33cm 21.5cm landscape;
             margin: 2.2cm 1.2cm 2.2cm 1.2cm;
             
             @frame footer_frame {
@@ -81,25 +81,25 @@
         <thead>
             <tr>
                 <th rowspan="2" style="width: 2.5%;">NO</th>
-                <th rowspan="2" style="width: 8%;">Kode Barang</th>
+                <th rowspan="2" style="width: 9%;">Kode Barang</th>
                 <th rowspan="2" style="width: 8%;">Nama Barang</th>
                 <th rowspan="2" style="width: 7%;">NIBAR</th>
                 <th rowspan="2" style="width: 4%;">No.<br>Reg</th>
                 <th rowspan="2" style="width: 8%;">Spesifikasi<br>Nama Barang</th>
-                <th rowspan="2" style="width: 7%;">Spesifikasi<br>Lainnya</th>
-                <th rowspan="2" style="width: 4%;">Luas<br>(m²)</th>
+                <th rowspan="2" style="width: 6.5%;">Spesifikasi<br>Lainnya</th>
+                <th rowspan="2" style="width: 3.5%;">Luas<br>(m²)</th>
                 <th rowspan="2" style="width: 11%;">Lokasi Alamat</th>
-                <th rowspan="2" style="width: 5%;">Koordinat</th>
+                <th rowspan="2" style="width: 6%;">Koordinat</th>
                 <th colspan="5" style="width: 23%;">Bukti Kepemilikan Dokumen</th>
                 <th rowspan="2" style="width: 5%;">Asal Usul</th>
-                <th rowspan="2" style="width: 8.5%;">Nilai (Rp)</th>
+                <th rowspan="2" style="width: 7.5%;">Nilai (Rp)</th>
             </tr>
             <tr>
                 <th style="width: 5%;">Nama Pemegang Hak</th>
                 <th style="width: 6%;">Nomor Buku</th>
                 <th style="width: 5%;">Tanggal</th>
                 <th style="width: 3%;">Fisik</th>
-                <th style="width: 4%;">Status Pilar</th>
+                <th style="width: 4%;">Status</th>
             </tr>
         </thead>
         <tbody>
@@ -112,7 +112,7 @@
                 <td class="font-mono text-center"><div class="cell-wrap">{{ a.nomor_register }}</div></td>
                 <td><div class="cell-wrap">{{ a.spesifikasi_nama_barang }}</div></td>
                 <td><div class="cell-wrap">{{ a.spesifikasi_lainnya }}</div></td>
-                <td class="text-right" style="font-weight: bold;"><div class="cell-wrap">{{ a.luas }}</div></td>
+                <td class="text-right"><div class="cell-wrap">{{ a.luas }}</div></td>
                 <td><div class="cell-wrap">{{ a.lokasi }}</div></td>
                 <td class="font-mono text-center"><div class="cell-wrap">{{ a.koordinat }}</div></td>
                 
@@ -155,10 +155,10 @@
         <table style="width: 100%; border: none; margin: 0; padding: 0;">
             <tr>
                 <td style="width: 60%; text-align: left; font-size: 7.5px; color: #002D5E; border: none; padding: 0; font-family: monospace;">
-                    Sistem Otentikasi Laporan: <span>{{ url_verifikasi }}</span>
+                    <i>diakses <span>{{ url_verifikasi }}</span></i>
                 </td>
                 <td style="width: 40%; text-align: right; font-size: 7.5px; color: #94a3b8; border: none; padding: 0;">
-                    PATABA BPKAD — Halaman <pdf:pagenumber> dari <pdf:pagecount>
+                    Portal Eksekutif PATABA BPKAD Kota Palu — Halaman <pdf:pagenumber> dari <pdf:pagecount>
                 </td>
             </tr>
         </table>

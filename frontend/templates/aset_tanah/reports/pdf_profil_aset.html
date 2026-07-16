@@ -7,21 +7,19 @@
     <title>Profil Aset {{ aset.kode_barang }}</title>
     <style>
         @page {
-            /* MENGGUNAKAN UKURAN KERTAS F4 (FOLIO) */
+            /* KERTAS F4 (FOLIO) */
             size: 21.5cm 33cm portrait; 
             
-            /* Area Identitas Dokumen (Header Kanan Atas) */
+            /* (Header Kanan Atas) */
             @frame header_frame {
                 -pdf-frame-content: header_content;
                 left: 2cm; right: 2cm; top: 1.2cm; height: 2cm;
             }
             
-            /* 🔥 PERBAIKAN CRITICAL 1: Definisikan Area Konten Utama secara Eksplisit */
             @frame content_frame {
                 left: 2cm; right: 2cm; top: 3.5cm; height: 25.5cm;
             }
-            
-            /* 🔥 PERBAIKAN CRITICAL 2: Naikkan koordinat top dan perlebar height footer agar tidak terpotong */
+    
             @frame footer_frame {
                 -pdf-frame-content: footer_content;
                 left: 2cm; right: 2cm; top: 29.5cm; height: 2.5cm;
@@ -69,7 +67,7 @@
                     <img src="{{ logo_path }}" width="65" alt="Logo Pataba">
                 </td>
                 <td style="width: 50%; text-align: right; font-size: 9px; color: #777; line-height: 1.3; border: none; padding: 0; vertical-align: top;">
-                    <strong>DOKUMEN REGISTER:</strong> PATABA-ASET-{{ aset.id }}-{% now "Y" %}<br>
+                    <strong>DOKUMEN REGISTER:</strong> PATABA-ASET No.{{ aset.id }}/{% now "Y" %}<br>
                     Diunduh pada: {% now "d/m/Y H:i" %} WITA
                 </td>
             </tr>
@@ -81,7 +79,7 @@
         <table style="width: 100%; border: none; margin: 0; padding: 0;">
             <tr>
                 <td style="width: 65%; text-align: left; font-size: 8px; color: #002D5E; border: none; padding: 0;">
-                    <i>Sistem Validasi Konten:</i> <span style="font-family: monospace;">{{ url_verifikasi }}</span>
+                    <i>diakses <span style="font-family: monospace;">{{ url_verifikasi }}</span></i>
                 </td>
                 <td style="width: 35%; text-align: right; font-size: 9px; color: #999; border: none; padding: 0;">
                     Halaman <pdf:pagenumber> dari <pdf:pagecount>
@@ -108,7 +106,7 @@
     <table>
         <!-- 🔥 PEMBARUAN: Ditambahkan intcomma untuk pemisah ribuan -->
         <tr><td class="label">Luas Tanah (m2)</td><td class="value">{{ luas_terformat }} m²</td></tr>
-        <tr><td class="label">Nilai Aset Terkini</td><td class="value">Rp {{ nilai_terformat }}</td></tr>
+        <tr><td class="label">Nilai Aset</td><td class="value">Rp {{ nilai_terformat }}</td></tr>
         <tr><td class="label">Cara & Tanggal Perolehan</td><td class="value">{{ aset.cara_perolehan|default:"-" }} / {{ aset.tanggal_perolehan|date:"d F Y"|default:"-" }}</td></tr>
         <tr><td class="label">Alamat Lengkap</td><td class="value">{{ aset.alamat_lokasi|default:"-" }}</td></tr>
         <tr><td class="label">Kecamatan / Kelurahan</td><td class="value">{{ aset.kecamatan_nama|default:"-" }} / {{ aset.kelurahan_nama|default:"-" }}</td></tr>
@@ -137,15 +135,15 @@
                 {% if sertifikat.keterangan == 'ASLI' %}Dokumen Asli{% else %}Salinan / Fotokopi{% endif %}
             </td></tr>
             <tr><td class="label">Atas Nama Kepemilikan</td><td class="value">{{ sertifikat.nama_pemegang_hak|default:"-" }}</td></tr>
+
         {% elif aset.status_sertifikasi == 'BELUM_BERSERTIFIKAT' %}
-            <tr><td class="label">Status Hak (Proses)</td><td class="value">
+            <tr><td class="label">Status Hak</td><td class="value">
                 {% if aset.status_hak_sementara == 'HAK_PAKAI' %}Hak Pakai
                 {% elif aset.status_hak_sementara == 'HAK_MILIK' %}Hak Milik
                 {% else %}{{ aset.status_hak_sementara|default:"-" }}{% endif %}
             </td></tr>
             <tr><td class="label">Nomor Hak</td><td class="value">{{ aset.nomor_hak|default:"-" }}</td></tr>
-        {% elif aset.status_sertifikasi == 'LAINNYA' %}
-            <tr><td class="label">Keterangan Sertifikasi</td><td class="value">{{ aset.keterangan_sertifikasi_lainnya|default:"-" }}</td></tr>
+            
         {% endif %}
     </table>
 
@@ -188,7 +186,7 @@
                 <td style="width: 45%; text-align: left; border: none; padding-top: 10px; line-height: 1.4;">
                     <img src="{{ qr_code_base64 }}" width="85" height="85" alt="QR Otentikasi"><br>
                     <span style="font-size: 7.5px; color: #555; font-style: italic; display: block; margin-top: 5px;">
-                        <strong>SISTEM OTENTIKASI DIGITAL:</strong> Dokumen cetak ini diterbitkan otomatis oleh <i>Core Engine</i> PATABA BPKAD Kota Palu. Pindai kode QR untuk memvalidasi integritas data fisik langsung dari server master.
+                        <strong>SISTEM OTENTIKASI DIGITAL:</strong> Dokumen cetak ini diterbitkan otomatis oleh <i>Core Engine</i> PATABA BPKAD Kota Palu.
                     </span>
                 </td> 
                 

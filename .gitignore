@@ -15,9 +15,17 @@ db.sqlite3
 z.notes.doc
 SKILL.md
 SKILL_SEERTIFIKAT.md
-SKILL_STORAGE.MD
+SKILL_STORAGE.md
+SKILL_EXPORT.md
+SKILL_LPangka.md
 new
 
 # Folder Upload Media (Aset Publikasi)
 media/
 dataset/
+
+#python
+import_opd.py
+importaset.py
+
+dummy2.xlsx

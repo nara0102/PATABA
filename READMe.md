@@ -33,7 +33,7 @@ Proyek ini memisahkan logika bisnis ke dalam tiga aplikasi utama (*Separation of
 2. **Alur Kerja Usulan Aset:** Sistem tiket "Ping-Pong" dengan kewajiban mengisi **Catatan Revisi** jika usulan aset ditolak/dikembalikan ke OPD.
 3. **Manajemen Sertifikat Berjenjang:** Pendataan detail sertifikat (Hak Pakai/Hak Milik) dengan sinkronisasi otomatis ke status master aset.
 4. **Integrasi Cloud Storage:** Pemisahan *bucket* Supabase S3 secara logis untuk `Publikasi` (Publik) dan `User Profiles` (Privat).
-5. **Export Laporan:** Pembuatan laporan Excel dinamis yang menyesuaikan dengan parameter filter (OPD, Kecamatan, Status Sertifikasi).
+5. **Export Laporan:** Pembuatan laporan Excel maupun PDF dinamis yang menyesuaikan dengan parameter filter.
 
 ---
 
@@ -76,8 +76,5 @@ Setiap tag `<form>` yang memiliki fitur upload file/foto WAJIB memiliki atribut 
 File dilarang disimpan di lokal untuk versi Production. Selalu gunakan file `pataba_core/storages.py` untuk mengarahkan pengunggahan gambar ke bucket Supabase yang terpisah (contoh: `PublikasiStorage()` dan `ProfileStorage()`).
 
 ---
-_Dikembangkan dengan penuh dedikasi untuk transparansi aset daerah Kota Palu. ✨_
 
-Salam, Tim Dveleoper
-
-Lukii
+🫶🏻🐈‍⬛

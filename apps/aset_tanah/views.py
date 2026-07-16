@@ -1559,7 +1559,7 @@ def export_pdf_aset_opd(request):
         
         daftar_aset_final.append({
             # Bungkus teks-teks berpotensi raksasa ke dalam engine pemotong string
-            'kode_barang': potong_string_beruntun(aset.kode_barang),
+            'kode_barang': aset.kode_barang,
             'nama_barang': aset.nama_barang or "-",
             'nibar': potong_string_beruntun(aset.nibar, batas=13),
             'nomor_register': potong_string_beruntun(aset.nomor_register, batas=5),
@@ -1567,7 +1567,7 @@ def export_pdf_aset_opd(request):
             'spesifikasi_lainnya': aset.spesifikasi_lainnya or "-",
             'luas': format_ke_indonesia(aset.luas_m2),
             'lokasi': lokasi_gabung,
-            'koordinat': potong_string_beruntun(f"{aset.latitude or '-'}, {aset.longitude or '-'}", batas=10),
+            'koordinat': potong_string_beruntun(f"{aset.latitude or '-'}, {aset.longitude or '-'}"),
             
             # Sub-Kolom Bukti Registrasi Dokumen
             'sertif_nama': sertif.nama_pemegang_hak if sertif else (aset.nama_pemegang_hak if aset.nama_pemegang_hak else "-"),
